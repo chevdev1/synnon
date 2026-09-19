@@ -1,5 +1,7 @@
 "use client";
 
+import { toFunctionSelector } from "viem";
+
 // Browser side of wallet sign-in. Talks to injected providers directly
 // (EIP-1193 for EVM wallets such as MetaMask, Phantom's API for Solana), so
 // there is no wallet SDK to ship. The wallet only ever signs a login message.
@@ -77,6 +79,92 @@ export async function walletSignIn(chain: Chain): Promise<{ ok: true } | { ok: f
     const signature = await sign(String(ch.data.message));
     const v = await post("/api/auth/wallet/verify", { nonce: ch.data.nonce, signature });
     return v.ok ? { ok: true } : { ok: false, error: String(v.data.error ?? "sign-in failed") };
+  } catch (e) {
+    return { ok: false, error: friendly(e) };
+  }
+}
+
+// ---- Robinhood Chain + test-token helpers (EVM wallets only) ----
+
+export interface ChainInfo {
+  id: number;
+  name: string;
+  rpc: string;
+  explorer: string;
+  currency: { name: string; symbol: string; decimals: number };
+}
+export interface TokenInfo {
+  address: string;
+  symbol: string;
+  decimals: number;
+}
+
+const hexId = (id: number) => "0x" + id.toString(16);
+type Result = { ok: true } | { ok: false; error: string };
+
+export async function switchToChain(chain: ChainInfo): Promise<Result> {
+  const eth = window.ethereum;
+  if (!eth) return { ok: false, error: "No EVM wallet found." };
+  try {
+    await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: hexId(chain.id) }] });
+    return { ok: true };
+  } catch (e) {
+    const code = (e as { code?: number }).code;
+    if (code !== 4902 && code !== -32603) return { ok: false, error: friendly(e) };
+  }
+  try {
+    // 4902 = the wallet doesn't know this chain yet: add it (this also switches).
+    await eth.request({
+      method: "wallet_addEthereumChain",
+      params: [
+        {
+          chainId: hexId(chain.id),
+          chainName: chain.name,
+          nativeCurrency: chain.currency,
+          rpcUrls: [chain.rpc],
+          blockExplorerUrls: [chain.explorer],
+        },
+      ],
+    });
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: friendly(e) };
+  }
+}
+
+export async function addTokenToWallet(token: TokenInfo): Promise<Result> {
+  const eth = window.ethereum;
+  if (!eth) return { ok: false, error: "No EVM wallet found." };
+  try {
+    await eth.request({
+      method: "wallet_watchAsset",
+      params: [{ type: "ERC20", options: { address: token.address, symbol: token.symbol, decimals: token.decimals } }] as unknown[],
+    });
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: friendly(e) };
+  }
+}
+
+// Calls faucet() on the test token, then waits for the transaction to be mined.
+export async function requestTestTokens(chain: ChainInfo, token: TokenInfo, onSent?: () => void): Promise<Result> {
+  const eth = window.ethereum;
+  if (!eth) return { ok: false, error: "No EVM wallet found." };
+  const switched = await switchToChain(chain);
+  if (!switched.ok) return switched;
+  try {
+    const [from] = (await eth.request({ method: "eth_requestAccounts" })) as string[];
+    const hash = (await eth.request({
+      method: "eth_sendTransaction",
+      params: [{ from, to: token.address, data: toFunctionSelector("faucet()") }],
+    })) as string;
+    onSent?.();
+    for (let i = 0; i < 60; i++) {
+      const receipt = (await eth.request({ method: "eth_getTransactionReceipt", params: [hash] })) as { status?: string } | null;
+      if (receipt) return receipt.status === "0x1" ? { ok: true } : { ok: false, error: "The faucet transaction failed (the faucet allows one claim per 24 hours per wallet)." };
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+    return { ok: false, error: "Still waiting for the network. Check your wallet, then reopen this window." };
   } catch (e) {
     return { ok: false, error: friendly(e) };
   }
