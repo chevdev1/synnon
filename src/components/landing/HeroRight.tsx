@@ -5,6 +5,7 @@ import { PixelCity, PixelWorld } from "@/components/ui/PixelArt";
 import Typewriter from "@/components/ui/Typewriter";
 import { CURRENT_NODE, MANIFESTO_LINES } from "@/lib/mock/data";
 import { useLive } from "@/lib/live/context";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { openClaim } from "./ClaimDialog";
 
@@ -36,12 +37,12 @@ export default function HeroRight() {
           </p>
           <PixelWorld scale={2} className="shrink-0 rounded-[2px] border-2 border-[var(--border)] transition-transform duration-300 group-hover:scale-[1.04]" />
         </div>
-        <a
-          href="#mind"
+        <Link
+          href="/docs#what"
           className="font-head mt-2 inline-block w-fit shrink-0 text-[8px] uppercase text-[var(--link)] transition-colors hover:text-[var(--lime)]"
         >
           Read more →
-        </a>
+        </Link>
       </Card>
 
       <Card help="node" className="shrink-0">

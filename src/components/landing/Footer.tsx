@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="relative z-10 flex shrink-0 flex-col gap-2 border-t border-[var(--divider)] px-5 py-2.5 font-head text-[8px] uppercase text-[var(--muted)] sm:flex-row sm:items-center sm:justify-between">
@@ -12,6 +14,9 @@ export default function Footer() {
         <a href="#mind" className="hover:text-[var(--text-2)]">
           The mind
         </a>
+        <Link href="/docs" className="text-[var(--lime)] hover:text-[var(--text)]">
+          Docs
+        </Link>
       </div>
     </footer>
   );

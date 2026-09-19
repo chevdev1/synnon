@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Press_Start_2P, VT323 } from "next/font/google";
 import "./globals.css";
+import CursorFx from "@/components/ui/CursorFx";
 
 // 8-bit look: Press Start 2P for headings/labels, VT323 (a crisp 1px-grid
 // terminal face, readable at small sizes) for running text.
@@ -25,7 +26,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${pixelHead.variable} ${pixelBody.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <CursorFx />
+      </body>
     </html>
   );
 }

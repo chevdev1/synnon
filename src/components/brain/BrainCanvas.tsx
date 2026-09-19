@@ -364,12 +364,13 @@ export default function BrainCanvas({
         onPointerLeave={handlePointerLeave}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
+        // Over a cell the global pixel cursor switches from the reticle to the lock (see globals.css).
+        className={hoveredId != null ? "cursor-cell" : undefined}
         style={{
           width: "100%",
           height: "100%",
           objectFit: "contain",
           imageRendering: "pixelated",
-          cursor: hoveredId != null ? "pointer" : "default",
           outline: "none",
         }}
       />

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { HexIcon } from "@/components/ui/PixelIcon";
 import { StatusDot } from "@/components/ui/Card";
 import { CLAIMABLE_COUNT } from "@/lib/mock/data";
@@ -30,6 +31,9 @@ export default function Header() {
         <a href="#mind" className={navLink}>
           About
         </a>
+        <Link href="/docs" className={navLink}>
+          Docs
+        </Link>
       </nav>
 
       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
