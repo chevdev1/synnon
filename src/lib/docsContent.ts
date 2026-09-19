@@ -272,8 +272,8 @@ export const DOCS: DocSection[] = [
       {
         kind: "p",
         text: t(
-          "Like in a game, a pop-up slides in when you earn something, and the trophy in the header opens the full list with your progress. There are four rarities: bronze, silver, gold and legendary. The rarer the achievement, the longer and louder the pop-up, and gold and legendary ones shed pixel sparks. A few are hidden until you find them.",
-          "Как в играх: когда ты что-то получаешь, выезжает окно, а кубок в шапке открывает полный список с прогрессом. Редкостей четыре: бронза, серебро, золото и легенда. Чем реже достижение, тем дольше и громче окно, а золотые и легендарные сыплют пиксельными искрами. Несколько достижений скрыты, пока их не найдёшь.",
+          "Like in a game, a pop-up slides in when you earn something, and the trophy in the header opens your achievements page (/achievements) with everything in one place. There are four rarities: bronze, silver, gold and legendary. The rarer the achievement, the longer and louder the pop-up, and gold and legendary ones shed pixel sparks. A few are hidden until you find them.",
+          "Как в играх: когда ты что-то получаешь, выезжает окно, а кубок в шапке открывает твою страницу достижений (/achievements), где всё собрано в одном месте. Редкостей четыре: бронза, серебро, золото и легенда. Чем реже достижение, тем дольше и громче окно, а золотые и легендарные сыплют пиксельными искрами. Несколько достижений скрыты, пока их не найдёшь.",
         ),
       },
       {
@@ -284,6 +284,8 @@ export const DOCS: DocSection[] = [
       {
         kind: "list",
         items: [
+          t("The page shows your Mind Score (bronze +5, silver +10, gold +25, legendary +100) and a level from Static up to Mind, a strip of what you unlocked most recently, and filters by status and rarity.", "Страница показывает твои очки разума (бронза +5, серебро +10, золото +25, легенда +100) и уровень от «Помех» до «Разума», ленту недавно полученного и фильтры по статусу и редкости."),
+          t("Each data-driven achievement shows how rare it is: the share of claimed cells (or people) that hold it, like “3.2% of players” on Steam. Your rarest one is highlighted.", "У каждого достижения из данных видно, насколько оно редкое: доля занятых клеток (или людей), у которых оно есть, как «3,2% игроков» в Steam. Твоё самое редкое подсвечено."),
           t("Some are computed from real data (linking a wallet, claiming a cell, your voices, thoughts and share of the mind). They cannot be faked and come back on any browser.", "Часть считается по настоящим данным (привязка кошелька, занятая клетка, твои голоса, мысли и доля в разуме). Их нельзя подделать, и они возвращаются в любом браузере."),
           t("The rest are things you do (search, a timelapse, all four times of day). Those are remembered in this browser.", "Остальные это то, что ты делаешь (поиск, таймлапс, все четыре времени суток). Они запоминаются в этом браузере."),
           t("Every cell shows the achievements it has earned on its profile, so anyone can see them.", "Профиль каждой клетки показывает заработанные ей достижения, их видят все."),

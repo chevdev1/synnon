@@ -59,6 +59,37 @@ export const ACHIEVEMENTS: Ach[] = [
 
 export const ACH_BY_ID = new Map(ACHIEVEMENTS.map((x) => [x.id, x]));
 
+// Sections on the achievements page.
+export type Cat = "start" | "voice" | "explore";
+export const CATS: { id: Cat; name: T }[] = [
+  { id: "start", name: { en: "Getting started", ru: "Начало пути" } },
+  { id: "voice", name: { en: "Your voice", ru: "Твой голос" } },
+  { id: "explore", name: { en: "Explorer", ru: "Исследователь" } },
+];
+const CAT_OF: Record<string, Cat> = {
+  "first-light": "start", "asked-directions": "start", "anonymous-signal": "start", uplink: "start", "first-cell": "start",
+  "first-words": "voice", chatter: "voice", storyteller: "voice", chorus: "voice", "thought-seed": "voice", "mind-weaver": "voice", "long-memory": "voice", "share-of-mind": "voice",
+};
+export const catOf = (a: Ach): Cat => CAT_OF[a.id] ?? "explore";
+
+// "Mind Score": rarer achievements are worth more; the level is how far the score goes.
+export const POINTS: Record<Tier, number> = { bronze: 5, silver: 10, gold: 25, legend: 100 };
+export const LEVELS: { at: number; name: T }[] = [
+  { at: 0, name: { en: "Static", ru: "Помехи" } },
+  { at: 20, name: { en: "Signal", ru: "Сигнал" } },
+  { at: 60, name: { en: "Spark", ru: "Искра" } },
+  { at: 120, name: { en: "Voice", ru: "Голос" } },
+  { at: 220, name: { en: "Weaver", ru: "Ткач" } },
+  { at: 335, name: { en: "Mind", ru: "Разум" } },
+];
+export function levelOf(score: number) {
+  let i = 0;
+  LEVELS.forEach((l, k) => score >= l.at && (i = k));
+  const next = LEVELS[i + 1];
+  return { index: i, level: LEVELS[i], next, pct: next ? (score - LEVELS[i].at) / (next.at - LEVELS[i].at) : 1 };
+}
+export const MAX_SCORE = ACHIEVEMENTS.reduce((s, x) => s + POINTS[x.tier], 0);
+
 export interface DeriveInput {
   me: { name: string; wallet?: string | null; nodeId: number | null } | null;
   profile: NodeProfile | null;

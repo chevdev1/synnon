@@ -6,7 +6,7 @@ import MotionToggle from "./MotionToggle";
 import DemoToggle from "./DemoToggle";
 import MusicToggle from "./MusicToggle";
 import TodChip from "./TodChip";
-import { AchButton } from "@/components/achievements/AchievementsPanel";
+import AchButton from "@/components/achievements/AchButton";
 import AuthButton from "./AuthButton";
 import HelpButton from "./HelpButton";
 
