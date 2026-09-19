@@ -75,7 +75,7 @@ export const helpActions = {
 };
 
 // Order of the guided tour (also the reading order of the page).
-export const TOUR = ["intro", "brain", "face", "pet", "timelapse", "search", "mind", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod", "achievements"];
+export const TOUR = ["intro", "brain", "face", "pet", "console", "timelapse", "search", "mind", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod", "achievements"];
 
 export const HELP: Record<string, { title: T; body: T }> = {
   intro: {
@@ -102,8 +102,15 @@ export const HELP: Record<string, { title: T; body: T }> = {
   pet: {
     title: { en: "Companion", ru: "Спутник" },
     body: {
-      en: "A tiny pixel creature that keeps your cell company: it orbits the cell, hops when your cell speaks and falls asleep with the mind. Pick one here. Three are free, three are earned through achievements. It shows up next to your own cell, so claim one first.",
-      ru: "Крошечное пиксельное существо, которое составляет компанию твоей клетке: кружит вокруг неё, подпрыгивает, когда клетка говорит, и засыпает вместе с разумом. Выбери здесь. Три бесплатные, три можно получить достижениями. Он появляется возле твоей клетки, поэтому сначала займи её.",
+      en: "A tiny pixel creature that keeps your cell company: it orbits the cell, hops when your cell speaks and falls asleep with the mind. Each one has its own perk (Firefly glows at night, Moth flies to whoever speaks, Blob bounces as you type, Ghost haunts other cells, Comet gives 8x timelapse, Eyebit shows who owns a cell). Three are free, three are earned through achievements. It shows up next to your own cell, so claim one first.",
+      ru: "Крошечное пиксельное существо, которое составляет компанию твоей клетке: кружит вокруг неё, подпрыгивает, когда клетка говорит, и засыпает вместе с разумом. У каждого свой перк (Светлячок светит ночью, Мотылёк летит к тому, кто заговорил, Комок прыгает, пока ты печатаешь, Призрак наведывается к чужим клеткам, Комета даёт таймлапс 8x, Глазок показывает владельца клетки). Три бесплатные, три можно получить достижениями. Он появляется возле твоей клетки, поэтому сначала займи её.",
+    },
+  },
+  console: {
+    title: { en: "Brain console", ru: "Консоль мозга" },
+    body: {
+      en: "The >_ button (or the ` key) opens a small console. Type /help or tap a command chip and watch how the brain reacts: /dream puts the mind to sleep, /thought sends sparks between cells, /claim sets off a shockwave, /tod changes the time of day, /mood changes the eye, /meteor makes a star shower. Everything happens only on your screen and changes no real data. A few commands are secret.",
+      ru: "Кнопка >_ (или клавиша `) открывает маленькую консоль. Набери /help или нажми на команду и смотри, как реагирует мозг: /dream усыпляет разум, /thought пускает искры между клетками, /claim запускает ударную волну, /tod меняет время суток, /mood меняет глаз, /meteor устраивает звездопад. Всё происходит только на твоём экране и не меняет настоящих данных. Несколько команд секретные.",
     },
   },
   timelapse: {

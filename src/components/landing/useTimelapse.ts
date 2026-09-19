@@ -25,7 +25,7 @@ const IDLE: TlView = { phase: "idle", progress: 0, clock: 0, span: 0, counts: { 
 // between the cells behind each thought. The brain's status layers only change
 // on claims (rebuilding them is the expensive step); speaking is shown with the
 // cheap glow overlay, which cools in seconds here instead of hours.
-export function useTimelapse() {
+export function useTimelapse(warp = false) {
   const { mode, nodes } = useLive();
   const [view, setView] = useState<TlView>(IDLE);
   const [tlNodes, setTlNodes] = useState<BrainNode[] | null>(null);
@@ -131,9 +131,10 @@ export function useTimelapse() {
 
   const cycleSpeed = useCallback(() => {
     const r = run.current;
-    r.speed = r.speed === 1 ? 2 : r.speed === 2 ? 4 : 1;
+    // 1x -> 2x -> 4x, and 8x too when the Comet companion is along ("Warp")
+    r.speed = r.speed === 1 ? 2 : r.speed === 2 ? 4 : r.speed === 4 && warp ? 8 : 1;
     setView((v) => ({ ...v, speed: r.speed }));
-  }, []);
+  }, [warp]);
 
   return { view, tlNodes, tlPulse, start, stop, togglePause, cycleSpeed, active: view.phase !== "idle" };
 }

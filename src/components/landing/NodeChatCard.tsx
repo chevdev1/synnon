@@ -8,6 +8,7 @@ import { useLive } from "@/lib/live/context";
 import { openClaim } from "./ClaimDialog";
 import GlitchText from "@/components/ui/GlitchText";
 import { mindActions } from "@/lib/mind";
+import { skyActions } from "@/lib/sky";
 
 interface Msg {
   role: "user" | "synnod" | "system";
@@ -121,7 +122,10 @@ export default function NodeChatCard() {
       >
         <input
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => {
+            setDraft(e.target.value);
+            skyActions.poke(); // keystroke: the Blob companion bounces
+          }}
           disabled={!hasNode}
           maxLength={1200}
           placeholder={hasNode ? "Type something..." : "Claim a node to speak"}

@@ -59,6 +59,7 @@ export interface LiveContextValue {
   setSelectedId: (id: number | null) => void;
   pulseEvent: PulseEvent | null;
   triggerPulse: (nodeId: number) => void;
+  injectPulse: (e: PulseEvent) => void; // local-only visual event (the console's /thought, /claim...); never sent anywhere
   stats: Stats;
   activitySeries: number[];
   now: number;

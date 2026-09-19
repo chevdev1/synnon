@@ -1,0 +1,202 @@
+import { petPalette } from "@/lib/pets";
+
+// The companion's movement and drawing, kept out of the brain canvas. Each pet has one
+// perk (see PETS in pets.ts). Everything here is cosmetic: no perk changes real data.
+export interface CellPx {
+  id: number;
+  x: number; // canvas px
+  y: number;
+  R: number; // canvas px
+}
+
+export interface PetEnv {
+  mine: CellPx | null;
+  cells: CellPx[]; // every claimable cell
+  isTaken: (id: number) => boolean;
+  dreaming: boolean;
+  reduced: boolean;
+  pointer: { x: number; y: number } | null; // canvas px
+  poke: number; // counter that ticks on every keystroke in the chat
+  font: string;
+  width: number;
+  height: number;
+}
+
+interface Target {
+  x: number;
+  y: number;
+  r: number; // orbit radius around it
+  until: number; // -1 = stamp on the next frame
+  ms: number;
+  label?: string;
+}
+
+const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+
+export class PetSim {
+  x = 0;
+  y = 0;
+  placed = false;
+  trail: [number, number][] = [];
+  hopAt = -1e9;
+  target: Target | null = null;
+  lastPoke = -1;
+  nextEvent = 6000; // ghost visits / comet whooshes
+  pal: Record<string, string>;
+
+  constructor(
+    public id: string,
+    public rows: string[],
+    public color: string
+  ) {
+    this.pal = petPalette(color);
+  }
+
+  hop(t: number) {
+    this.hopAt = t;
+  }
+
+  // Someone else's cell spoke: the moth flies over to have a look.
+  notePulse(cell: CellPx, own: boolean) {
+    if (own) {
+      this.hopAt = -1;
+      return;
+    }
+    if (this.id === "moth") this.target = { x: cell.x, y: cell.y, r: cell.R * 1.7, until: -1, ms: 3200 };
+  }
+
+  draw(ctx: CanvasRenderingContext2D, t: number, env: PetEnv) {
+    const { mine } = env;
+    if (!mine) return;
+    if (this.hopAt === -1) this.hopAt = t;
+    if (!this.placed) {
+      this.x = mine.x + mine.R * 2.5;
+      this.y = mine.y;
+      this.placed = true;
+    }
+    const asleep = env.dreaming;
+
+    // ---- keystrokes: the blob bounces on every letter you type ----
+    if (this.lastPoke < 0) this.lastPoke = env.poke;
+    if (env.poke !== this.lastPoke) {
+      this.lastPoke = env.poke;
+      if (this.id === "blob") this.hopAt = t;
+    }
+
+    // ---- scheduled events ----
+    if (this.target && this.target.until === -1) this.target.until = t + this.target.ms;
+    if (this.target && t > this.target.until) this.target = null;
+    if (!asleep && !env.reduced && t > this.nextEvent) {
+      if (this.id === "ghost") {
+        const pool = env.cells.filter((c) => c.id !== mine.id && env.isTaken(c.id));
+        if (pool.length) {
+          const c = pool[Math.floor(Math.random() * pool.length)];
+          this.target = { x: c.x, y: c.y - c.R * 1.4, r: 2, until: t + 3200, ms: 3200, label: `NODE ${String(c.id).padStart(2, "0")}` };
+        }
+        this.nextEvent = t + 16000 + Math.random() * 8000;
+      } else if (this.id === "comet") {
+        const c = env.cells[Math.floor(Math.random() * env.cells.length)];
+        if (c) this.target = { x: c.x, y: c.y, r: c.R * 2, until: t + 1100, ms: 1100 };
+        this.nextEvent = t + 12000 + Math.random() * 6000;
+      } else this.nextEvent = Infinity;
+    }
+
+    // ---- where it wants to be ----
+    const hopAge = this.hopAt >= 0 ? (t - this.hopAt) / 700 : 2;
+    const hop = hopAge < 1 ? Math.sin(Math.PI * hopAge) : 0;
+    const anchor = this.target && !asleep ? this.target : { x: mine.x, y: mine.y, r: mine.R * (asleep ? 1.9 : 2.5 + hop * 1.4 + Math.sin(t / 700) * 0.25) };
+    const a = asleep || env.reduced ? 0.9 : t / (this.id === "comet" ? 700 : 1500);
+    const wantX = anchor.x + Math.cos(a) * anchor.r;
+    const wantY = anchor.y + Math.sin(a) * anchor.r * 0.7 - hop * 5 + (asleep ? Math.sin(t / 900) * 0.8 : Math.sin(t / 240) * 1.2);
+    const ease = env.reduced ? 1 : this.id === "comet" ? 0.3 : this.id === "moth" ? 0.07 : 0.14;
+    this.x += (wantX - this.x) * ease;
+    this.y += (wantY - this.y) * ease;
+
+    // ---- perk visuals under the sprite ----
+    if (this.id === "firefly") {
+      // a warm night-light around your cell, brightest while the mind sleeps
+      const k = asleep ? 0.3 : 0.13 + 0.05 * Math.sin(t / 900);
+      ctx.globalCompositeOperation = "lighter";
+      const g = ctx.createRadialGradient(mine.x, mine.y, 0, mine.x, mine.y, mine.R * 3.4);
+      g.addColorStop(0, `rgba(196,242,96,${k})`);
+      g.addColorStop(1, "rgba(196,242,96,0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(mine.x - mine.R * 4, mine.y - mine.R * 4, mine.R * 8, mine.R * 8);
+      ctx.globalCompositeOperation = "source-over";
+    }
+
+    // ---- trail ----
+    const trailLen = this.id === "comet" ? 12 : 5;
+    this.trail.push([this.x, this.y]);
+    if (this.trail.length > trailLen + 1) this.trail.shift();
+    if (!asleep && !env.reduced) {
+      this.trail.forEach(([tx, ty], i) => {
+        ctx.globalAlpha = (0.5 * i) / trailLen;
+        ctx.fillStyle = this.color;
+        const s = this.id === "comet" ? 3 : 2;
+        ctx.fillRect(Math.round(tx) - 1, Math.round(ty) - 1, s, s);
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    // ---- glow + sprite ----
+    const px = Math.round(this.x);
+    const py = Math.round(this.y);
+    ctx.globalCompositeOperation = "lighter";
+    const glow = ctx.createRadialGradient(px, py, 0, px, py, 12 + hop * 6 + (this.id === "comet" ? 4 : 0));
+    glow.addColorStop(0, `${this.color}55`);
+    glow.addColorStop(1, `${this.color}00`);
+    ctx.fillStyle = glow;
+    ctx.fillRect(px - 22, py - 22, 44, 44);
+    ctx.globalCompositeOperation = "source-over";
+
+    // the eyebit's pupil looks at the mouse
+    let ex = 0;
+    let ey = 0;
+    if (this.id === "eyebit" && env.pointer && !asleep) {
+      const dx = env.pointer.x - this.x;
+      const dy = env.pointer.y - this.y;
+      ex = clamp(Math.round(dx / 24), -1, 1);
+      ey = clamp(Math.round(dy / 24), -1, 1);
+    }
+    const blink = !asleep && Math.floor(t / 2600) % 3 === 0 && t % 2600 < 140;
+    if (this.id === "ghost") ctx.globalAlpha = 0.85;
+    this.rows.forEach((row, ry) =>
+      [...row].forEach((ch, rx) => {
+        if (ch === ".") return;
+        let c = this.pal[ch];
+        if (ch === "x" && this.id === "eyebit") c = this.pal["o"]; // pupil is drawn shifted below
+        if (blink && ch === "x") c = this.pal["#"];
+        ctx.fillStyle = c;
+        ctx.fillRect(px + (rx - 3) * 2, py + (ry - 3) * 2, 2, 2);
+      })
+    );
+    ctx.globalAlpha = 1;
+    if (this.id === "eyebit") {
+      ctx.fillStyle = blink ? this.pal["#"] : this.pal["x"];
+      for (const rx of [2, 3, 4]) ctx.fillRect(px + (rx + ex - 3) * 2, py + (3 + ey - 3) * 2, 2, 2);
+    }
+
+    // ghost label: whose voice it is haunting
+    if (this.target?.label && !asleep) {
+      ctx.font = `7px ${env.font}`;
+      ctx.textBaseline = "bottom";
+      ctx.fillStyle = "rgba(8,10,32,0.85)";
+      const w = ctx.measureText(this.target.label).width + 6;
+      ctx.fillRect(px - w / 2, py - 15, w, 10);
+      ctx.fillStyle = this.color;
+      ctx.fillText(this.target.label, px - w / 2 + 3, py - 6);
+    }
+
+    if (asleep) {
+      ctx.fillStyle = "#b9a6f5";
+      const z = (t / 900) % 1;
+      const zy = py - 10 - z * 6;
+      ctx.globalAlpha = 1 - z;
+      ctx.fillRect(px + 6, Math.round(zy), 3, 1);
+      ctx.fillRect(px + 8, Math.round(zy) + 1, 1, 1);
+      ctx.fillRect(px + 6, Math.round(zy) + 2, 3, 1);
+      ctx.globalAlpha = 1;
+    }
+  }
+}

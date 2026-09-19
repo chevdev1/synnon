@@ -30,7 +30,18 @@ export const mindActions = {
     speakTimer = window.setTimeout(emit, ms + 30);
     emit();
   },
+  // The console's /dream, /wake and /mood: a local override that expires by itself.
+  force(patch: { state?: MindState | null; mood?: string | null }, ms = 60_000) {
+    if (patch.state !== undefined) forcedState = patch.state;
+    if (patch.mood !== undefined) forcedMood = patch.mood;
+    window.clearTimeout(forceTimer);
+    if (forcedState || forcedMood) forceTimer = window.setTimeout(() => ((forcedState = null), (forcedMood = null), emit()), ms);
+    emit();
+  },
 };
+let forcedState: MindState | null = null;
+let forcedMood: string | null = null;
+let forceTimer: number | undefined;
 
 function subscribe(cb: () => void) {
   listeners.add(cb);
@@ -42,7 +53,7 @@ function subscribe(cb: () => void) {
 }
 
 // `snapshot` is a string so React can compare it by value.
-const snapshot = () => `${thinking ? 1 : 0}${Date.now() < speakingUntil ? 1 : 0}${demoMood}`;
+const snapshot = () => `${thinking ? 1 : 0}${Date.now() < speakingUntil ? 1 : 0}${demoMood}|${forcedState ?? ""}|${forcedMood ?? ""}`;
 
 const noop = () => () => {};
 const urlForce = () => {
@@ -55,7 +66,8 @@ const urlForce = () => {
 
 export function useMind(): { state: MindState; mood: string; dreaming: boolean } {
   const { mode, character, lastMemoryTs, now } = useLive();
-  const s = useSyncExternalStore(subscribe, snapshot, () => "000");
+  const raw = useSyncExternalStore(subscribe, snapshot, () => "000||");
+  const [s, fState, fMood] = raw.split("|");
   const forced = useSyncExternalStore(noop, urlForce, () => null); // ?mind=sleep|think|speak|awake for screenshots
 
   const idle = lastMemoryTs == null ? Number.POSITIVE_INFINITY : now - lastMemoryTs;
@@ -63,11 +75,12 @@ export function useMind(): { state: MindState; mood: string; dreaming: boolean }
   if (s[0] === "1") state = "thinking";
   else if (s[1] === "1") state = "speaking";
   else if (idle > SLEEP_AFTER_MS) state = "sleeping";
+  if (fState) state = fState as MindState; // console override
   if (forced === "sleep") state = "sleeping";
   else if (forced === "think") state = "thinking";
   else if (forced === "speak") state = "speaking";
   else if (forced === "awake") state = "awake";
 
-  const mood = mode === "demo" ? MOODS[Number(s.slice(2)) % MOODS.length] : (character?.mood ?? "curious");
+  const mood = fMood || (mode === "demo" ? MOODS[Number(s.slice(2)) % MOODS.length] : (character?.mood ?? "curious"));
   return { state, mood, dreaming: state === "sleeping" };
 }

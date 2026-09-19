@@ -46,8 +46,11 @@ export default function CosmosBg() {
     };
     window.addEventListener("pointermove", onMove, { passive: true });
 
-    let meteor: { x: number; y: number; vx: number; vy: number; life: number } | null = null;
+    type Meteor = { x: number; y: number; vx: number; vy: number; life: number };
+    const meteors: Meteor[] = [];
+    const spawn = () => meteors.push({ x: W * (0.35 + Math.random() * 0.65), y: Math.random() * H * 0.35, vx: -2.6 - Math.random(), vy: 1.2 + Math.random() * 0.6, life: 1 });
     let nextMeteor = 3500;
+    let nextBurst = 0;
     let raf = 0;
     let last = -1000;
 
@@ -60,13 +63,19 @@ export default function CosmosBg() {
       const boost = animated ? Math.max(0, sky.swell * (1 - (performance.now() - sky.swellAt) / 1400)) : 0;
       drawCosmos(ctx, W, H, t, { phase: ph, dreaming: dz, animated, cx, cy, boost });
 
-      // the occasional shooting star
-      if (animated && !dz) {
-        if (!meteor && t > nextMeteor) {
-          meteor = { x: W * (0.35 + Math.random() * 0.65), y: Math.random() * H * 0.35, vx: -2.6 - Math.random(), vy: 1.2 + Math.random() * 0.6, life: 1 };
+      // the occasional shooting star, plus bursts asked for by the console (/meteor)
+      if (animated) {
+        if (!dz && meteors.length === 0 && t > nextMeteor) {
+          spawn();
           nextMeteor = t + 6000 + Math.random() * 9000;
         }
-        if (meteor) {
+        if (sky.meteors > 0 && t > nextBurst) {
+          spawn();
+          sky.meteors -= 1;
+          nextBurst = t + 140;
+        }
+        for (let m = meteors.length - 1; m >= 0; m--) {
+          const meteor = meteors[m];
           for (let i = 0; i < 12; i++) {
             ctx.globalAlpha = Math.max(0, meteor.life - i * 0.08);
             ctx.fillStyle = i < 2 ? "#ffffff" : COSMOS_PALETTE[ph].stars[1];
@@ -76,7 +85,7 @@ export default function CosmosBg() {
           meteor.x += meteor.vx;
           meteor.y += meteor.vy;
           meteor.life -= 0.022;
-          if (meteor.life <= 0 || meteor.x < -10 || meteor.y > H + 10) meteor = null;
+          if (meteor.life <= 0 || meteor.x < -10 || meteor.y > H + 10) meteors.splice(m, 1);
         }
       }
     };

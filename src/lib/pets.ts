@@ -14,15 +14,16 @@ export interface Pet {
   rows: string[]; // 7x7 bitmap: # main colour, o light, x dark (the eye)
   needs?: string; // achievement id that unlocks it
   hint?: T; // shown while locked
+  perk: { name: T; desc: T }; // every companion brings one small trick
 }
 
 export const PETS: Pet[] = [
-  { id: "firefly", name: { en: "Firefly", ru: "Светлячок" }, color: "#c4f260", rows: [".o...o.", "..o.o..", "...#...", "..###..", "..#x#..", "...#...", "...o..."] },
-  { id: "moth", name: { en: "Moth", ru: "Мотылёк" }, color: "#b9a6f5", rows: ["#.....#", "##...##", "#o#.#o#", ".##x##.", "..###..", "..#.#..", "......."] },
-  { id: "blob", name: { en: "Blob", ru: "Комок" }, color: "#6fd6ff", rows: [".......", "..###..", ".#ooo#.", "#oxoxo#", "#ooooo#", ".#####.", "......."] },
-  { id: "ghost", name: { en: "Ghost", ru: "Призрак" }, color: "#e8ecff", needs: "sleepwalker", hint: { en: "Watch the mind fall asleep", ru: "Увидь, как разум засыпает" }, rows: ["..###..", ".#ooo#.", "#oxoxo#", "#ooooo#", "#ooooo#", "#o#o#o#", ".#.#.#."] },
-  { id: "comet", name: { en: "Comet", ru: "Комета" }, color: "#ffd166", needs: "time-traveler", hint: { en: "Watch a whole timelapse", ru: "Досмотри таймлапс до конца" }, rows: ["#......", ".#.....", "..##...", "..#o#..", "...#o#.", "....##.", "......."] },
-  { id: "eyebit", name: { en: "Eyebit", ru: "Глазок" }, color: "#ff9be0", needs: "eye-contact", hint: { en: "A hidden achievement…", ru: "Скрытое достижение…" }, rows: [".......", "..###..", ".#ooo#.", "#oxxxo#", ".#ooo#.", "..###..", "......."] },
+  { id: "firefly", name: { en: "Firefly", ru: "Светлячок" }, color: "#c4f260", rows: [".o...o.", "..o.o..", "...#...", "..###..", "..#x#..", "...#...", "...o..."], perk: { name: { en: "Night Light", ru: "Ночник" }, desc: { en: "Wraps your cell in a warm glow, brightest while the mind sleeps, and steers dream flashes toward your neighbours.", ru: "Окутывает твою клетку тёплым светом, ярче всего когда разум спит, и направляет вспышки снов к твоим соседям." } } },
+  { id: "moth", name: { en: "Moth", ru: "Мотылёк" }, color: "#b9a6f5", rows: ["#.....#", "##...##", "#o#.#o#", ".##x##.", "..###..", "..#.#..", "......."], perk: { name: { en: "Drawn to Light", ru: "На свет" }, desc: { en: "Flies over to whichever other cell just spoke and circles it, so you can see where the action is.", ru: "Летит к той чужой клетке, что только что заговорила, и кружит вокруг, показывая, где сейчас движение." } } },
+  { id: "blob", name: { en: "Blob", ru: "Комок" }, color: "#6fd6ff", rows: [".......", "..###..", ".#ooo#.", "#oxoxo#", "#ooooo#", ".#####.", "......."], perk: { name: { en: "Bouncy", ru: "Попрыгун" }, desc: { en: "Bounces on every letter you type in the chat, and hops when your cell speaks.", ru: "Подпрыгивает на каждую букву, которую ты печатаешь в чате, и когда твоя клетка говорит." } } },
+  { id: "ghost", name: { en: "Ghost", ru: "Призрак" }, color: "#e8ecff", needs: "sleepwalker", hint: { en: "Watch the mind fall asleep", ru: "Увидь, как разум засыпает" }, rows: ["..###..", ".#ooo#.", "#oxoxo#", "#ooooo#", "#ooooo#", "#o#o#o#", ".#.#.#."], perk: { name: { en: "Haunting", ru: "Наведывается" }, desc: { en: "Every so often drifts over to someone else's cell and whispers its number, so you discover the other voices.", ru: "Время от времени подлетает к чужой клетке и шепчет её номер, так что ты находишь другие голоса." } } },
+  { id: "comet", name: { en: "Comet", ru: "Комета" }, color: "#ffd166", needs: "time-traveler", hint: { en: "Watch a whole timelapse", ru: "Досмотри таймлапс до конца" }, rows: ["#......", ".#.....", "..##...", "..#o#..", "...#o#.", "....##.", "......."], perk: { name: { en: "Warp", ru: "Варп" }, desc: { en: "Races around on a long trail, whooshes across the brain now and then, and unlocks 8x speed in the timelapse.", ru: "Носится с длинным хвостом, время от времени пролетает через весь мозг и открывает скорость 8x в таймлапсе." } } },
+  { id: "eyebit", name: { en: "Eyebit", ru: "Глазок" }, color: "#ff9be0", needs: "eye-contact", hint: { en: "A hidden achievement…", ru: "Скрытое достижение…" }, rows: [".......", "..###..", ".#ooo#.", "#oxxxo#", ".#ooo#.", "..###..", "......."], perk: { name: { en: "Inspector", ru: "Инспектор" }, desc: { en: "Its pupil follows your mouse, and the hover tooltip on the brain also shows who holds each cell.", ru: "Зрачок следит за мышью, а подсказка при наведении на мозг показывает ещё и владельца клетки." } } },
 ];
 export const PET_BY_ID = new Map(PETS.map((p) => [p.id, p]));
 

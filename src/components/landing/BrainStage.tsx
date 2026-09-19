@@ -15,6 +15,7 @@ import { skyActions } from "@/lib/sky";
 import { achActions, useAch } from "@/lib/achStore";
 import { PET_BY_ID, usePet } from "@/lib/pets";
 import PetPicker from "./PetPicker";
+import CommandConsole from "./CommandConsole";
 import { useMind } from "@/lib/mind";
 import { sfx } from "@/lib/sfx";
 import { useDemo } from "@/lib/demo";
@@ -33,11 +34,13 @@ export default function BrainStage() {
   const demo = useDemo();
   const { mode, offline, nodes, me, currentUserNodeId, selectedId, setSelectedId, pulseEvent, events, now } = useLive();
   const { state: mindState, mood, dreaming } = useMind();
-  const tl = useTimelapse();
   const { id: petId } = usePet();
   const { unlocked } = useAch();
-  const chosen = petId ? PET_BY_ID.get(petId) : undefined;
-  const petSprite = chosen && (!chosen.needs || unlocked[chosen.needs]) ? { rows: chosen.rows, color: chosen.color } : null;
+  const chosenPet = petId ? PET_BY_ID.get(petId) : undefined;
+  const warp = chosenPet?.id === "comet" && !!unlocked[chosenPet.needs ?? ""]; // the Comet's perk: 8x timelapse
+  const tl = useTimelapse(warp);
+  const chosen = chosenPet;
+  const petSprite = chosen && (!chosen.needs || unlocked[chosen.needs]) ? { id: chosen.id, rows: chosen.rows, color: chosen.color } : null;
 
   useEffect(() => {
     if (tl.view.phase === "done") achActions.unlock("time-traveler");
@@ -53,6 +56,20 @@ export default function BrainStage() {
     if (p) skyActions.pulse(p.type === "claim" ? 1 : p.type === "thought" ? 0.7 : 0.45);
   }, [pulseEvent, tl.active, tl.tlPulse]);
   const [ping, setPing] = useState<{ id: number; n: number } | null>(null);
+  const [consoleOpen, setConsoleOpen] = useState(false);
+
+  // The ` key opens the console from anywhere (not while typing in a field).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (e.key === "`" && !(el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA"))) {
+        e.preventDefault();
+        setConsoleOpen((o) => !o);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const activeId = selectedId ?? currentUserNodeId;
   const node = activeId == null ? undefined : nodes.find((n) => n.id === activeId);
   const justPulsed = activeId != null && pulseEvent?.nodeId === activeId;
@@ -121,6 +138,17 @@ export default function BrainStage() {
         pet={petSprite}
       />
       <PetPicker hasCell={currentUserNodeId != null} />
+      <button
+        type="button"
+        data-help-id="console"
+        data-console-btn
+        onClick={() => setConsoleOpen((o) => !o)}
+        aria-pressed={consoleOpen}
+        className={`pixel-btn font-head absolute left-4 top-[122px] flex h-7 items-center gap-1 border-2 px-2 text-[7px] uppercase ${consoleOpen ? "border-[var(--lime)] bg-[var(--lime)] text-[#06071a]" : "border-[var(--accent)] bg-[#080a20]/85 text-[var(--link)]"}`}
+      >
+        &gt;_
+      </button>
+      <CommandConsole open={consoleOpen && !tl.active} onClose={() => setConsoleOpen(false)} />
 
       <div className="pointer-events-none absolute right-3 top-3 z-10 flex select-none flex-col items-center gap-1" data-help-id="face">
         <div className="pointer-events-auto cursor-pointer" onClick={() => achActions.bump("eye-contact")} data-face-eye>
@@ -140,7 +168,7 @@ export default function BrainStage() {
       </button>
       {tl.active ? (
         <TimelapseBar view={tl.view} onToggle={tl.togglePause} onSpeed={tl.cycleSpeed} onClose={tl.stop} />
-      ) : (
+      ) : consoleOpen ? null : (
         <NodeSearch
           onFound={(id) => {
             setPing((p) => ({ id, n: (p?.n ?? 0) + 1 }));
@@ -166,11 +194,11 @@ export default function BrainStage() {
         viewBox="0 0 100 100"
         preserveAspectRatio="none"
       >
-        <line x1="18" y1="30" x2="34" y2="38" stroke="#3a4180" strokeWidth="0.15" />
+        <line x1="18" y1="50" x2="34" y2="54" stroke="#3a4180" strokeWidth="0.15" />
         <line x1="78" y1="38" x2="64" y2="44" stroke="#3a4180" strokeWidth="0.15" />
         <line x1="72" y1="78" x2="58" y2="68" stroke="#3a4180" strokeWidth="0.15" />
       </svg>
-      <div className="pointer-events-none absolute left-[8%] top-[26%] hidden text-[14px] text-[var(--muted)] lg:block">
+      <div className="pointer-events-none absolute left-[7%] top-[46%] hidden text-[14px] text-[var(--muted)] lg:block">
         memories grow here
       </div>
       <div className="pointer-events-none absolute right-[8%] top-[34%] hidden text-[14px] text-[var(--muted)] lg:block">
@@ -180,7 +208,7 @@ export default function BrainStage() {
         it breathes. it watches.
       </div>
 
-      {!tl.active && (
+      {!tl.active && !consoleOpen && (
         <ul className="pointer-events-none absolute bottom-3 left-4 space-y-1 text-[16px] text-[var(--muted)]">
           {events.map((e, i) => (
             <li key={e.id} className="fade-in-up flex items-center gap-1.5" style={{ opacity: 1 - i * 0.24 }}>

@@ -70,5 +70,17 @@ export function useTod() {
   return { mode, phase, cycle };
 }
 
+// Set a phase directly (the console's /tod command).
+export const todActions = {
+  set(mode: TodMode) {
+    try {
+      window.localStorage.setItem(KEY, mode);
+    } catch {
+      /* ignore */
+    }
+    emit();
+  },
+};
+
 // Re-evaluates "auto" as the hour rolls over.
 export const refreshTod = emit;

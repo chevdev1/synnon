@@ -265,6 +265,7 @@ export function ApiLiveProvider({ children }: { children: ReactNode }) {
       setSelectedId,
       pulseEvent,
       triggerPulse,
+      injectPulse: setPulseEvent,
       stats,
       activitySeries,
       now,

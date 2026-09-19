@@ -5,7 +5,8 @@ import { useMotion } from "@/lib/motion";
 import { generateBrain, NW, NH, R0, SPACING, type Cell } from "@/lib/brain/generate";
 import { buildBrainLayers, pointInHexFace, SCALE, tintLayers } from "@/lib/brain/layers";
 import { TOD_FILTER, useTod } from "@/lib/tod";
-import { petPalette } from "@/lib/pets";
+import { PetSim } from "@/lib/petSim";
+import { sky } from "@/lib/sky";
 import { FAM } from "@/lib/brain/palette";
 import type { BrainNode, PulseEvent } from "@/lib/brain/types";
 
@@ -19,7 +20,7 @@ export interface BrainCanvasProps {
   ping?: { id: number; n: number } | null; // search result: pulses a cell so it is easy to spot
   dreaming?: boolean; // the mind is asleep: slow breath, random memories flicker
   glowHalfLifeMin?: number; // how fast a spoken-through cell cools (timelapse plays it in seconds)
-  pet?: { rows: string[]; color: string } | null; // companion that keeps the visitor's own cell company
+  pet?: { id: string; rows: string[]; color: string } | null; // companion that keeps the visitor's own cell company
   className?: string;
 }
 
@@ -158,9 +159,11 @@ export default function BrainCanvas({
   const nodesRef = useRef(nodes);
   const dreamingRef = useRef(dreaming);
   const halfLifeRef = useRef(glowHalfLifeMin);
-  const petRef = useRef<{ rows: string[]; color: string; pal: Record<string, string> } | null>(null);
+  const petSimRef = useRef<PetSim | null>(null);
+  const petIdRef = useRef<string | null>(null);
   const mineRef = useRef<number | null>(currentUserNodeId);
-  const petHopRef = useRef(-2); // -2 idle, -1 armed (stamped on the next frame), >=0 start time
+  const pointerRef = useRef<{ x: number; y: number } | null>(null); // canvas px, for the eyebit
+  const fontRef = useRef("monospace");
   const { reduced: reducedMotion } = useMotion();
 
   useEffect(() => {
@@ -168,8 +171,18 @@ export default function BrainCanvas({
     dreamingRef.current = dreaming;
     halfLifeRef.current = glowHalfLifeMin;
     mineRef.current = currentUserNodeId;
-    petRef.current = pet ? { ...pet, pal: petPalette(pet.color) } : null;
-  }, [nodes, dreaming, glowHalfLifeMin, currentUserNodeId, pet]);
+  }, [nodes, dreaming, glowHalfLifeMin, currentUserNodeId]);
+
+  // A new companion (or none) gets a fresh simulation; the font is the site's pixel font.
+  const petId = pet?.id ?? null;
+  const petRows = pet?.rows;
+  const petColor = pet?.color;
+  useEffect(() => {
+    petIdRef.current = petId;
+    petSimRef.current = petId && petRows && petColor ? new PetSim(petId, petRows, petColor) : null;
+    const fam = getComputedStyle(document.documentElement).getPropertyValue("--font-pixel-head").trim();
+    if (fam) fontRef.current = fam;
+  }, [petId, petRows, petColor]);
 
   // Cached raster layers only depend on node statuses and the current
   // user's node, not on animation state, so they're built once per change
@@ -228,7 +241,10 @@ export default function BrainCanvas({
     // so a long main-thread stall (layers rebuilding after a status change) can't eat the animation.
     const t0 = -1;
     flashRef.current = { id: pulseEvent.nodeId, start: t0, rings: computeRings(target, claimable) };
-    if (pulseEvent.nodeId === mineRef.current && pulseEvent.type !== "claim") petHopRef.current = -1; // the companion hops when your cell speaks
+    if (pulseEvent.type !== "claim") {
+      // the companion hops when your cell speaks; the moth flies to other cells that speak
+      petSimRef.current?.notePulse({ id: target.claimId, x: target.x * SCALE, y: target.y * SCALE, R: target.R * SCALE }, pulseEvent.nodeId === mineRef.current);
+    }
 
     if (pulseEvent.type === "claim") {
       claimWaveRef.current = { x: target.x * SCALE, y: target.y * SCALE, start: t0 };
@@ -405,7 +421,13 @@ export default function BrainCanvas({
             const s = nodesRef.current.find((n) => n.id === c.claimId)?.status;
             return s && s !== "available";
           });
-          const from = pool.length > 0 ? pool : claimable;
+          let from = pool.length > 0 ? pool : claimable;
+          // Firefly's Night Light: most dream flashes fall on the neighbours of your cell
+          const me = petIdRef.current === "firefly" && mineRef.current != null ? claimable.find((c) => c.claimId === mineRef.current) : undefined;
+          if (me && Math.random() < 0.7) {
+            const near = claimable.filter((c) => c.claimId !== me.claimId && Math.hypot(c.x - me.x, c.y - me.y) < R0 * Math.sqrt(3) * SPACING * 3.2);
+            if (near.length) from = near;
+          }
           dreamRef.current.push({ id: from[Math.floor(Math.random() * from.length)].claimId, start: t });
         }
       }
@@ -570,56 +592,25 @@ export default function BrainCanvas({
         }
       }
 
-      // ---- companion: orbits your cell, hops when it speaks, sleeps with the mind ----
-      const pt = petRef.current;
-      const mine = mineRef.current != null ? claimable.find((c) => c.claimId === mineRef.current) : undefined;
-      if (pt && mine && !assembling) {
-        if (petHopRef.current === -1) petHopRef.current = t;
-        const hopAge = petHopRef.current >= 0 ? (t - petHopRef.current) / 700 : 2;
-        if (hopAge >= 1) petHopRef.current = -2;
-        const hop = hopAge < 1 ? Math.sin(Math.PI * hopAge) : 0;
-        const asleep = dreamingRef.current;
-        const posAt = (tt: number) => {
-          const a = asleep || reducedMotion ? 0.9 : tt / 1500;
-          const rad = mine.R * SCALE * (asleep ? 1.9 : 2.5 + hop * 1.4 + Math.sin(tt / 700) * 0.25);
-          return [mine.x * SCALE + Math.cos(a) * rad, mine.y * SCALE + Math.sin(a) * rad * 0.7 - hop * 5 + (asleep ? Math.sin(tt / 900) * 0.8 : Math.sin(tt / 240) * 1.2)] as const;
-        };
-        if (!asleep && !reducedMotion) {
-          // a short fading trail along where it just was
-          for (let k = 4; k >= 1; k--) {
-            const [tx, ty] = posAt(t - k * 70);
-            ctx.globalAlpha = 0.09 * (5 - k);
-            ctx.fillStyle = pt.color;
-            ctx.fillRect(Math.round(tx) - 1, Math.round(ty) - 1, 3, 3);
-          }
-          ctx.globalAlpha = 1;
-        }
-        const [px, py] = posAt(t);
-        // soft glow, then the sprite (7x7 sprite pixels, 2 canvas px each)
-        ctx.globalCompositeOperation = "lighter";
-        const glow = ctx.createRadialGradient(px, py, 0, px, py, 12 + hop * 6);
-        glow.addColorStop(0, `${pt.color}55`);
-        glow.addColorStop(1, `${pt.color}00`);
-        ctx.fillStyle = glow;
-        ctx.fillRect(px - 20, py - 20, 40, 40);
-        ctx.globalCompositeOperation = "source-over";
-        const blink = !asleep && Math.floor(t / 2600) % 3 === 0 && t % 2600 < 140;
-        pt.rows.forEach((row, ry) =>
-          [...row].forEach((ch, rx) => {
-            if (ch === ".") return;
-            ctx.fillStyle = blink && ch === "x" ? pt.pal["#"] : pt.pal[ch];
-            ctx.fillRect(Math.round(px) + (rx - 3) * 2, Math.round(py) + (ry - 3) * 2, 2, 2);
-          })
-        );
-        if (asleep) {
-          ctx.fillStyle = "#b9a6f5";
-          const zy = py - 10 - ((t / 900) % 1) * 6;
-          ctx.globalAlpha = 1 - ((t / 900) % 1);
-          ctx.fillRect(Math.round(px) + 6, Math.round(zy), 3, 1);
-          ctx.fillRect(Math.round(px) + 8, Math.round(zy) + 1, 1, 1);
-          ctx.fillRect(Math.round(px) + 6, Math.round(zy) + 2, 3, 1);
-          ctx.globalAlpha = 1;
-        }
+      // ---- companion: orbits your cell, hops when it speaks, sleeps with the mind; each pet has a perk (lib/petSim.ts) ----
+      const sim = petSimRef.current;
+      const mineCell = mineRef.current != null ? claimable.find((c) => c.claimId === mineRef.current) : undefined;
+      if (sim && mineCell && !assembling) {
+        sim.draw(ctx, t, {
+          mine: { id: mineCell.claimId, x: mineCell.x * SCALE, y: mineCell.y * SCALE, R: mineCell.R * SCALE },
+          cells: claimable.map((c) => ({ id: c.claimId, x: c.x * SCALE, y: c.y * SCALE, R: c.R * SCALE })),
+          isTaken: (id) => {
+            const st = nodesRef.current.find((n) => n.id === id)?.status;
+            return !!st && st !== "available";
+          },
+          dreaming: dreamingRef.current,
+          reduced: reducedMotion,
+          pointer: pointerRef.current,
+          poke: sky.poke,
+          font: fontRef.current,
+          width,
+          height,
+        });
       }
 
       const outlineId = hoveredId ?? focusedId;
@@ -687,11 +678,14 @@ export default function BrainCanvas({
   );
 
   function handlePointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
+    const cv = canvasRef.current?.getBoundingClientRect();
+    if (cv) pointerRef.current = { x: ((e.clientX - cv.left) / cv.width) * layers.width, y: ((e.clientY - cv.top) / cv.height) * layers.height };
     setHoveredId(pickCell(e.clientX, e.clientY));
     const wrap = wrapRef.current?.getBoundingClientRect();
     if (wrap) setHoverPos({ x: e.clientX - wrap.left, y: e.clientY - wrap.top });
   }
   function handlePointerLeave() {
+    pointerRef.current = null;
     setHoveredId(null);
     setHoverPos(null);
   }
@@ -806,6 +800,10 @@ export default function BrainCanvas({
           <span className={hoveredId === currentUserNodeId ? "text-[#c4f260]" : "text-[#b9a6f5]"}>
             {hoveredId === currentUserNodeId ? "your node" : (statusMap.get(hoveredId) ?? "available")}
           </span>
+          {/* the Inspector companion adds who holds the cell */}
+          {petId === "eyebit" && nodes.find((n) => n.id === hoveredId)?.ownerName ? (
+            <span className="text-[var(--text-2)]"> · {nodes.find((n) => n.id === hoveredId)?.ownerName}</span>
+          ) : null}
         </div>
       )}
       <ul style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>

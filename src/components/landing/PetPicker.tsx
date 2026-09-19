@@ -22,8 +22,10 @@ export default function PetPicker({ hasCell }: { hasCell: boolean }) {
   const { unlocked } = useAch();
   const { lang } = useHelp();
   const [open, setOpen] = useState(false);
+  const [focus, setFocus] = useState<string | null>(null);
   const T = (en: string, ru: string) => (lang === "ru" ? ru : en);
   const cur = PETS.find((p) => p.id === id && (!p.needs || unlocked[p.needs]));
+  const shown = PETS.find((p) => p.id === focus) ?? cur ?? PETS[0];
 
   useEffect(() => {
     if (!open) return;
@@ -59,14 +61,20 @@ export default function PetPicker({ hasCell }: { hasCell: boolean }) {
                   data-pet-id={p.id}
                   data-pet-state={locked ? "locked" : on ? "selected" : "free"}
                   title={locked ? `${T("Locked", "Закрыт")}: ${p.hint?.[lang] ?? ""} (${ACH_BY_ID.get(p.needs!)?.name[lang] ?? ""})` : p.name[lang]}
-                  disabled={locked}
+                  onMouseEnter={() => setFocus(p.id)}
+                  onFocus={() => setFocus(p.id)}
                   onClick={() => {
+                    if (locked) {
+                      setFocus(p.id); // a tap on a locked pet shows how to get it
+                      return;
+                    }
                     choose(p.id);
                     sfx.found();
                     achActions.unlock("adopted");
                     setOpen(false);
                   }}
-                  className="flex flex-col items-center gap-1 border-2 p-1.5 disabled:cursor-not-allowed"
+                  aria-disabled={locked}
+                  className={`flex flex-col items-center gap-1 border-2 p-1.5 ${locked ? "cursor-not-allowed" : ""}`}
                   style={{ borderColor: on ? p.color : "var(--border)", background: on ? `${p.color}22` : "#0b0a1f" }}
                 >
                   <Sprite pet={p} size={30} locked={locked} />
@@ -77,6 +85,17 @@ export default function PetPicker({ hasCell }: { hasCell: boolean }) {
                 </button>
               );
             })}
+          </div>
+          <div className="mt-2 border-2 border-[var(--border)] bg-[#0b0a1f] p-2" data-pet-perk>
+            <div className="font-head text-[7px] uppercase" style={{ color: shown.color }}>
+              {T("Perk", "Перк")}: {shown.perk.name[lang]}
+            </div>
+            <p className="mt-1 text-[15px] leading-snug text-[var(--text-2)]">{shown.perk.desc[lang]}</p>
+            {shown.needs && !unlocked[shown.needs] && (
+              <p className="mt-1 text-[14px] leading-snug text-[#ffd166]">
+                {T("Locked", "Закрыт")}: {shown.hint?.[lang]} ({ACH_BY_ID.get(shown.needs)?.name[lang]})
+              </p>
+            )}
           </div>
           <div className="mt-2 flex items-center justify-between gap-2">
             <p className="text-[14px] leading-snug text-[var(--muted)]">{T("Locked ones are earned through achievements.", "Закрытых можно добиться достижениями.")}</p>

@@ -35,7 +35,10 @@ let eventSeq = 0;
 export function DemoLiveProvider({ children }: { children: ReactNode }) {
   // Cells that have spoken start with a spread of "last active" times, so the glow-by-age shows.
   const [nodes, setNodes] = useState<BrainNode[]>(() =>
-    MOCK_NODES.map((n) => (n.status === "available" || n.status === "claimed" ? n : { ...n, lastActiveAt: Date.now() - ((n.id * 37) % 180) * 60_000 }))
+    MOCK_NODES.map((n) => {
+      const owner = n.status === "available" ? undefined : `voice_${String(n.id).padStart(3, "0")}`; // simulated holders, same names as their demo profiles
+      return n.status === "available" || n.status === "claimed" ? { ...n, ownerName: owner } : { ...n, ownerName: owner, lastActiveAt: Date.now() - ((n.id * 37) % 180) * 60_000 };
+    })
   );
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [pulseEvent, setPulseEvent] = useState<PulseEvent | null>(null);
@@ -75,7 +78,7 @@ export function DemoLiveProvider({ children }: { children: ReactNode }) {
         const label = String(pick.id).padStart(2, "0");
         if (pick.status === "available" && Math.random() < 0.45) {
           // a new voice takes a free cell: shockwave across the brain
-          setNodes((cur) => cur.map((n) => (n.id === pick.id ? { ...n, status: "claimed", lastActiveAt: Date.now() } : n)));
+          setNodes((cur) => cur.map((n) => (n.id === pick.id ? { ...n, status: "claimed", ownerName: `voice_${String(n.id).padStart(3, "0")}`, lastActiveAt: Date.now() } : n)));
           setPulseEvent({ nodeId: pick.id, type: "claim" });
           eventSeq += 1;
           const claimed: LiveEvent = { id: eventSeq, nodeId: pick.id, text: `node ${label} was claimed`, ts: Date.now() };
@@ -184,6 +187,7 @@ export function DemoLiveProvider({ children }: { children: ReactNode }) {
       setSelectedId,
       pulseEvent,
       triggerPulse,
+      injectPulse: setPulseEvent,
       stats,
       activitySeries,
       now,
