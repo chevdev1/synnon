@@ -12,7 +12,9 @@ import TimelapseBar from "./TimelapseBar";
 import { useTimelapse } from "./useTimelapse";
 import PixelFace from "@/components/ui/PixelFace";
 import { skyActions } from "@/lib/sky";
-import { achActions } from "@/lib/achStore";
+import { achActions, useAch } from "@/lib/achStore";
+import { PET_BY_ID, usePet } from "@/lib/pets";
+import PetPicker from "./PetPicker";
 import { useMind } from "@/lib/mind";
 import { sfx } from "@/lib/sfx";
 import { useDemo } from "@/lib/demo";
@@ -32,6 +34,10 @@ export default function BrainStage() {
   const { mode, offline, nodes, me, currentUserNodeId, selectedId, setSelectedId, pulseEvent, events, now } = useLive();
   const { state: mindState, mood, dreaming } = useMind();
   const tl = useTimelapse();
+  const { id: petId } = usePet();
+  const { unlocked } = useAch();
+  const chosen = petId ? PET_BY_ID.get(petId) : undefined;
+  const petSprite = chosen && (!chosen.needs || unlocked[chosen.needs]) ? { rows: chosen.rows, color: chosen.color } : null;
 
   useEffect(() => {
     if (tl.view.phase === "done") achActions.unlock("time-traveler");
@@ -112,7 +118,9 @@ export default function BrainStage() {
         ping={ping}
         dreaming={dreaming && !tl.active}
         glowHalfLifeMin={tl.active ? 0.06 : undefined}
+        pet={petSprite}
       />
+      <PetPicker hasCell={currentUserNodeId != null} />
 
       <div className="pointer-events-none absolute right-3 top-3 z-10 flex select-none flex-col items-center gap-1" data-help-id="face">
         <div className="pointer-events-auto cursor-pointer" onClick={() => achActions.bump("eye-contact")} data-face-eye>

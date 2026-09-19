@@ -5,6 +5,7 @@ import { useMotion } from "@/lib/motion";
 import { generateBrain, NW, NH, R0, SPACING, type Cell } from "@/lib/brain/generate";
 import { buildBrainLayers, pointInHexFace, SCALE, tintLayers } from "@/lib/brain/layers";
 import { TOD_FILTER, useTod } from "@/lib/tod";
+import { petPalette } from "@/lib/pets";
 import { FAM } from "@/lib/brain/palette";
 import type { BrainNode, PulseEvent } from "@/lib/brain/types";
 
@@ -18,6 +19,7 @@ export interface BrainCanvasProps {
   ping?: { id: number; n: number } | null; // search result: pulses a cell so it is easy to spot
   dreaming?: boolean; // the mind is asleep: slow breath, random memories flicker
   glowHalfLifeMin?: number; // how fast a spoken-through cell cools (timelapse plays it in seconds)
+  pet?: { rows: string[]; color: string } | null; // companion that keeps the visitor's own cell company
   className?: string;
 }
 
@@ -113,6 +115,7 @@ export default function BrainCanvas({
   ping = null,
   dreaming = false,
   glowHalfLifeMin = GLOW_HALF_LIFE_MIN,
+  pet = null,
   className,
 }: BrainCanvasProps) {
   const model = useMemo(() => generateBrain(), []);
@@ -155,13 +158,18 @@ export default function BrainCanvas({
   const nodesRef = useRef(nodes);
   const dreamingRef = useRef(dreaming);
   const halfLifeRef = useRef(glowHalfLifeMin);
+  const petRef = useRef<{ rows: string[]; color: string; pal: Record<string, string> } | null>(null);
+  const mineRef = useRef<number | null>(currentUserNodeId);
+  const petHopRef = useRef(-2); // -2 idle, -1 armed (stamped on the next frame), >=0 start time
   const { reduced: reducedMotion } = useMotion();
 
   useEffect(() => {
     nodesRef.current = nodes;
     dreamingRef.current = dreaming;
     halfLifeRef.current = glowHalfLifeMin;
-  }, [nodes, dreaming, glowHalfLifeMin]);
+    mineRef.current = currentUserNodeId;
+    petRef.current = pet ? { ...pet, pal: petPalette(pet.color) } : null;
+  }, [nodes, dreaming, glowHalfLifeMin, currentUserNodeId, pet]);
 
   // Cached raster layers only depend on node statuses and the current
   // user's node, not on animation state, so they're built once per change
@@ -220,6 +228,7 @@ export default function BrainCanvas({
     // so a long main-thread stall (layers rebuilding after a status change) can't eat the animation.
     const t0 = -1;
     flashRef.current = { id: pulseEvent.nodeId, start: t0, rings: computeRings(target, claimable) };
+    if (pulseEvent.nodeId === mineRef.current && pulseEvent.type !== "claim") petHopRef.current = -1; // the companion hops when your cell speaks
 
     if (pulseEvent.type === "claim") {
       claimWaveRef.current = { x: target.x * SCALE, y: target.y * SCALE, start: t0 };
@@ -558,6 +567,58 @@ export default function BrainCanvas({
           ctx.lineWidth = 2;
           drawHexPath(ctx, c.x * SCALE, c.y * SCALE, (c.R + 1.5) * SCALE);
           ctx.stroke();
+        }
+      }
+
+      // ---- companion: orbits your cell, hops when it speaks, sleeps with the mind ----
+      const pt = petRef.current;
+      const mine = mineRef.current != null ? claimable.find((c) => c.claimId === mineRef.current) : undefined;
+      if (pt && mine && !assembling) {
+        if (petHopRef.current === -1) petHopRef.current = t;
+        const hopAge = petHopRef.current >= 0 ? (t - petHopRef.current) / 700 : 2;
+        if (hopAge >= 1) petHopRef.current = -2;
+        const hop = hopAge < 1 ? Math.sin(Math.PI * hopAge) : 0;
+        const asleep = dreamingRef.current;
+        const posAt = (tt: number) => {
+          const a = asleep || reducedMotion ? 0.9 : tt / 1500;
+          const rad = mine.R * SCALE * (asleep ? 1.9 : 2.5 + hop * 1.4 + Math.sin(tt / 700) * 0.25);
+          return [mine.x * SCALE + Math.cos(a) * rad, mine.y * SCALE + Math.sin(a) * rad * 0.7 - hop * 5 + (asleep ? Math.sin(tt / 900) * 0.8 : Math.sin(tt / 240) * 1.2)] as const;
+        };
+        if (!asleep && !reducedMotion) {
+          // a short fading trail along where it just was
+          for (let k = 4; k >= 1; k--) {
+            const [tx, ty] = posAt(t - k * 70);
+            ctx.globalAlpha = 0.09 * (5 - k);
+            ctx.fillStyle = pt.color;
+            ctx.fillRect(Math.round(tx) - 1, Math.round(ty) - 1, 3, 3);
+          }
+          ctx.globalAlpha = 1;
+        }
+        const [px, py] = posAt(t);
+        // soft glow, then the sprite (7x7 sprite pixels, 2 canvas px each)
+        ctx.globalCompositeOperation = "lighter";
+        const glow = ctx.createRadialGradient(px, py, 0, px, py, 12 + hop * 6);
+        glow.addColorStop(0, `${pt.color}55`);
+        glow.addColorStop(1, `${pt.color}00`);
+        ctx.fillStyle = glow;
+        ctx.fillRect(px - 20, py - 20, 40, 40);
+        ctx.globalCompositeOperation = "source-over";
+        const blink = !asleep && Math.floor(t / 2600) % 3 === 0 && t % 2600 < 140;
+        pt.rows.forEach((row, ry) =>
+          [...row].forEach((ch, rx) => {
+            if (ch === ".") return;
+            ctx.fillStyle = blink && ch === "x" ? pt.pal["#"] : pt.pal[ch];
+            ctx.fillRect(Math.round(px) + (rx - 3) * 2, Math.round(py) + (ry - 3) * 2, 2, 2);
+          })
+        );
+        if (asleep) {
+          ctx.fillStyle = "#b9a6f5";
+          const zy = py - 10 - ((t / 900) % 1) * 6;
+          ctx.globalAlpha = 1 - ((t / 900) % 1);
+          ctx.fillRect(Math.round(px) + 6, Math.round(zy), 3, 1);
+          ctx.fillRect(Math.round(px) + 8, Math.round(zy) + 1, 1, 1);
+          ctx.fillRect(Math.round(px) + 6, Math.round(zy) + 2, 3, 1);
+          ctx.globalAlpha = 1;
         }
       }
 

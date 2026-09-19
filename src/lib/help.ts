@@ -75,7 +75,7 @@ export const helpActions = {
 };
 
 // Order of the guided tour (also the reading order of the page).
-export const TOUR = ["intro", "brain", "face", "timelapse", "search", "mind", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod", "achievements"];
+export const TOUR = ["intro", "brain", "face", "pet", "timelapse", "search", "mind", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod", "achievements"];
 
 export const HELP: Record<string, { title: T; body: T }> = {
   intro: {
@@ -97,6 +97,13 @@ export const HELP: Record<string, { title: T; body: T }> = {
     body: {
       en: "One pixel eye that shows what the mind is doing. It blinks and looks around when awake, spins while it thinks about your message, “speaks” while the reply is typed, and falls asleep (with a Z) when nobody has spoken for a few minutes. The iris colour is its mood.",
       ru: "Один пиксельный глаз показывает, что делает разум. Пока бодрствует — моргает и оглядывается, крутит зрачком, когда думает над твоим сообщением, «говорит», пока печатается ответ, и засыпает (появляется Z), если несколько минут никто не говорил. Цвет радужки — настроение.",
+    },
+  },
+  pet: {
+    title: { en: "Companion", ru: "Спутник" },
+    body: {
+      en: "A tiny pixel creature that keeps your cell company: it orbits the cell, hops when your cell speaks and falls asleep with the mind. Pick one here. Three are free, three are earned through achievements. It shows up next to your own cell, so claim one first.",
+      ru: "Крошечное пиксельное существо, которое составляет компанию твоей клетке: кружит вокруг неё, подпрыгивает, когда клетка говорит, и засыпает вместе с разумом. Выбери здесь. Три бесплатные, три можно получить достижениями. Он появляется возле твоей клетки, поэтому сначала займи её.",
     },
   },
   timelapse: {

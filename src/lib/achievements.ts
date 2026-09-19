@@ -34,6 +34,7 @@ export const ACHIEVEMENTS: Ach[] = [
   a("asked-directions", "bronze", "compass", { en: "Asking for Directions", ru: "Спросил дорогу" }, { en: "You opened the help mode.", ru: "Ты открыл режим помощи." }),
   a("anonymous-signal", "bronze", "ghost", { en: "Anonymous Signal", ru: "Аноним в эфире" }, { en: "You came in with just a nickname. The mind noticed a ghost.", ru: "Ты зашёл под одним ником. Разум заметил призрака." }, { derived: true }),
   a("cartographer", "bronze", "compass", { en: "Cartographer", ru: "Картограф" }, { en: "You found a cell by its number or name.", ru: "Ты нашёл клетку по номеру или имени." }),
+  a("adopted", "bronze", "ghost", { en: "Not Alone", ru: "Не один" }, { en: "You adopted a companion for your cell.", ru: "Ты завёл спутника для своей клетки." }),
   a("night-owl", "bronze", "moon", { en: "Night Owl", ru: "Сова" }, { en: "You visited between 2 and 5 a.m.", ru: "Ты заглянул между 2 и 5 утра." }),
   a("diarist", "bronze", "book", { en: "Between the Lines", ru: "Между строк" }, { en: "You read a page of the mind's diary.", ru: "Ты прочитал страницу дневника разума." }),
   a("first-words", "bronze", "book", { en: "First Words", ru: "Первые слова" }, { en: "Your cell spoke and the mind answered.", ru: "Твоя клетка заговорила, и разум ответил." }, { derived: true }),

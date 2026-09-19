@@ -155,6 +155,13 @@ export const DOCS: DocSection[] = [
             ),
           ],
           [
+            t("Companions", "Спутники"),
+            t(
+              "The “Pet” button on the brain lets you pick a tiny pixel creature that keeps your own cell company: it orbits the cell with a short trail, hops when your cell speaks and falls asleep with the mind. Firefly, Moth and Blob are free; Ghost, Comet and Eyebit are earned through achievements (watching the mind fall asleep, finishing a timelapse, and a hidden one). Your choice is kept in this browser.",
+              "Кнопка «Pet» на мозге позволяет выбрать крошечное пиксельное существо, которое составляет компанию твоей клетке: кружит вокруг неё с коротким хвостом, подпрыгивает, когда клетка говорит, и засыпает вместе с разумом. Светлячок, Мотылёк и Комок бесплатные; Призрака, Комету и Глазок нужно заработать достижениями (увидеть, как разум засыпает, досмотреть таймлапс и одно скрытое). Выбор хранится в этом браузере.",
+            ),
+          ],
+          [
             t("Find a node", "Поиск клетки"),
             t(
               "The search box on the brain takes a number (#48) or part of a nickname. The cell pulses pink and its card opens.",

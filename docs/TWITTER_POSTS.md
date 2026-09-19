@@ -437,7 +437,7 @@ Others are about how you explore:
 - see a cell get claimed live
 - visit between 2 and 5 a.m.
 
-22 in total.
+23 in total.
 ```
 
 **4/7**
@@ -491,7 +491,7 @@ Open the trophy in the header to see them all with your progress. Which one do y
 - увидеть захват клетки вживую
 - зайти между 2 и 5 утра
 
-Всего 22.
+Всего 23.
 ```
 
 **4/7**
@@ -519,6 +519,26 @@ Open the trophy in the header to see them all with your progress. Which one do y
 
 128 голосов. Один разум.
 {LINK}
+```
+
+## Companions (English + русский)
+
+**EN**
+```
+Your cell can have a companion now.
+
+Pick a tiny pixel creature: Firefly, Moth or Blob for free. It orbits your cell, hops when your cell speaks, and falls asleep when the mind does.
+
+Three more (Ghost, Comet, Eyebit) are earned through achievements.
+```
+
+**RU**
+```
+У твоей клетки теперь может быть спутник.
+
+Выбери крошечное пиксельное существо: Светлячок, Мотылёк или Комок бесплатно. Оно кружит вокруг клетки, подпрыгивает, когда клетка говорит, и засыпает вместе с разумом.
+
+Ещё трое (Призрак, Комета, Глазок) даются за достижения.
 ```
 
 ## Single posts (2)
