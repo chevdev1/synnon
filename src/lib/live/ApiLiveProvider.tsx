@@ -219,7 +219,20 @@ export function ApiLiveProvider({ children }: { children: ReactNode }) {
         const out = r.data.output as { text: string } | null;
         return out ? { ok: true, reply: out.text } : { ok: false, error: "no reply" };
       }
-      if (r.status === 202) return { ok: false, quiet: true, error: "Saved. The mind is quiet right now, so it can't answer yet." };
+      if (r.status === 202) {
+        // Your message is always saved; only the reply is missing.
+        if (r.data.reason === "error") {
+          return { ok: false, quiet: true, error: "Saved. The AI service didn't answer just now (rate limit or a short outage). Try again in a minute." };
+        }
+        const dev = process.env.NODE_ENV !== "production";
+        return {
+          ok: false,
+          quiet: true,
+          error: dev
+            ? "Saved. No AI is connected yet: add LLM_API_KEY to .env.local (a free key from aistudio.google.com/apikey works), then send again."
+            : "Saved. The mind is quiet right now, so it can't answer yet.",
+        };
+      }
       return { ok: false, error: String(r.data.error ?? "something went wrong") };
     },
     [me]

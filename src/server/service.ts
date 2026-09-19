@@ -48,7 +48,14 @@ export async function claimNode(userId: number, nodeId: number) {
 
 type SubmitResult =
   | { ok: false; code: number; error: string }
-  | { ok: true; scenarioId: number; llm: "ok" | "unavailable"; output: { id: number; text: string } | null };
+  | {
+      ok: true;
+      scenarioId: number;
+      llm: "ok" | "unavailable";
+      // why the mind stayed quiet: no key configured vs. the provider failed (rate limit, outage, bad model)
+      reason?: "not_configured" | "error";
+      output: { id: number; text: string } | null;
+    };
 
 export async function submitScenario(userId: number, nodeId: number, rawText: unknown): Promise<SubmitResult> {
   const db = await getDb();
@@ -73,7 +80,7 @@ export async function submitScenario(userId: number, nodeId: number, rawText: un
 
   const llm = getLlm();
   // Honest degraded mode: keep the scenario, publish nothing invented.
-  if (!llm.available) return { ok: true, scenarioId: scenario.id, llm: "unavailable", output: null };
+  if (!llm.available) return { ok: true, scenarioId: scenario.id, llm: "unavailable", reason: "not_configured", output: null };
 
   try {
     const verdict = await llm.generate({
@@ -131,8 +138,8 @@ export async function submitScenario(userId: number, nodeId: number, rawText: un
     void maybeRefreshSummary().catch((e) => console.error("[summary]", e));
     return { ok: true, scenarioId: scenario.id, llm: "ok", output: { id: out.id, text: out.text } };
   } catch (e) {
-    console.error("[scenario]", e);
-    return { ok: true, scenarioId: scenario.id, llm: "unavailable", output: null };
+    console.error(`[scenario] LLM call failed (${llm.label}):`, e);
+    return { ok: true, scenarioId: scenario.id, llm: "unavailable", reason: "error", output: null };
   }
 }
 

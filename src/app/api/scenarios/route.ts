@@ -16,5 +16,5 @@ export async function POST(req: Request) {
   const r = await submitScenario(user.id, nodeId, body?.text);
   if (!r.ok) return fail(r.code, r.error);
   // 202 when we kept the scenario but the mind couldn't answer (no LLM).
-  return json({ scenarioId: r.scenarioId, llm: r.llm, output: r.output }, r.llm === "ok" ? 201 : 202);
+  return json({ scenarioId: r.scenarioId, llm: r.llm, reason: r.reason ?? null, output: r.output }, r.llm === "ok" ? 201 : 202);
 }
