@@ -313,6 +313,23 @@ html[data-help="on"] [data-help-active] {
 .help-badge {
   animation: synnod-help-pulse 1.8s steps(3) infinite;
 }
+/* Phones: extra scroll room so even the last block can be scrolled up above the tip sheet. */
+@media (max-width: 639px) {
+  html[data-help="on"] main {
+    padding-bottom: 440px;
+  }
+}
+/* The four dimming panels slide so the "hole" glides from block to block. */
+.help-dim {
+  transition: left 0.28s ease, top 0.28s ease, width 0.28s ease, height 0.28s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="full"]) {
+    .help-dim {
+      transition: none;
+    }
+  }
+}
 @keyframes synnod-help-pulse {
   0%,
   100% {

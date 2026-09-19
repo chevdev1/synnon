@@ -52,7 +52,8 @@ export default function HelpLayer() {
     const el = document.querySelector<HTMLElement>(`[data-help-id="${h.active}"]`);
     if (!el) return;
     el.setAttribute("data-help-active", "1");
-    el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    // Phones: bring the block to the top so the tip (a bottom sheet) sits below it.
+    el.scrollIntoView({ block: window.innerWidth < 640 ? "start" : "nearest", behavior: "smooth" });
     return () => el.removeAttribute("data-help-active");
   }, [h.on, h.active]);
 
@@ -82,22 +83,42 @@ export default function HelpLayer() {
     // Keep clear of the help bar, which wraps to two lines on narrow screens.
     const reserve = vp.w < 640 ? 104 : 64;
     const maxTop = Math.max(8, vp.h - popH - reserve);
-    const clamp = (t: number) => Math.min(Math.max(8, t), maxTop);
-    if (!ar) pop = { left: (vp.w - w) / 2, top: maxTop, width: w };
+    const clampTop = (t: number) => Math.min(Math.max(8, t), maxTop);
+    const clampLeft = (l: number) => Math.min(Math.max(8, l), vp.w - w - 8);
+    if (!ar || vp.w < 640) pop = { left: clampLeft((vp.w - w) / 2), top: maxTop, width: w }; // phones: bottom sheet
     else {
-      const big = ar.bottom - ar.top > vp.h * 0.5;
-      const left = Math.min(Math.max(8, big ? ar.left + 16 : ar.left), vp.w - w - 8);
-      let top: number;
-      if (big) top = ar.top + 56;
-      else if (ar.bottom + popH + 10 <= vp.h - reserve) top = ar.bottom + 10;
-      else if (ar.top - popH - 10 >= 8) top = ar.top - popH - 10;
-      else top = maxTop; // no room next to the block: overlap it but stay on screen
-      pop = { left, top: clamp(top), width: w };
+      // Put the tip NEXT to the lit block (over the blurred rest of the page),
+      // never on top of it, so the block being explained stays fully visible.
+      const gap = 18;
+      const fits = (c: { left: number; top: number }) => c.left >= 8 && c.left + w <= vp.w - 8 && c.top >= 8 && c.top + popH <= vp.h - reserve;
+      const right = { left: ar.right + gap, top: clampTop(ar.top) };
+      const left = { left: ar.left - w - gap, top: clampTop(ar.top) };
+      const below = { left: clampLeft(ar.left), top: ar.bottom + gap };
+      const above = { left: clampLeft(ar.left), top: ar.top - popH - gap };
+      const order = ar.top < 80 ? [below, right, left, above] : ar.top > vp.h * 0.55 ? [above, right, left, below] : [right, left, below, above];
+      const spot = order.find(fits);
+      pop = spot
+        ? { left: spot.left, top: spot.top, width: w }
+        : { left: clampLeft(ar.left + 16), top: clampTop(ar.top + 56), width: w }; // no free side (small screens): overlap, stay on screen
     }
   }
 
+  // Spotlight: dim + blur everything except the block being explained.
+  const PAD = 6;
+  const hole = ar && h.active ? { x1: Math.max(0, ar.left - PAD), y1: Math.max(0, ar.top - PAD), x2: Math.min(vp.w, ar.right + PAD), y2: Math.min(vp.h, ar.bottom + PAD) } : null;
+  const dimCls = "help-dim fixed z-[64] cursor-pointer bg-[#04051a]/60 backdrop-blur-[3px]";
+
   return (
     <>
+      {hole && (
+        <>
+          <div aria-hidden className={dimCls} onClick={() => helpActions.setActive(null)} style={{ left: 0, top: 0, width: vp.w, height: hole.y1 }} />
+          <div aria-hidden className={dimCls} onClick={() => helpActions.setActive(null)} style={{ left: 0, top: hole.y2, width: vp.w, height: Math.max(0, vp.h - hole.y2) }} />
+          <div aria-hidden className={dimCls} onClick={() => helpActions.setActive(null)} style={{ left: 0, top: hole.y1, width: hole.x1, height: Math.max(0, hole.y2 - hole.y1) }} />
+          <div aria-hidden className={dimCls} onClick={() => helpActions.setActive(null)} style={{ left: hole.x2, top: hole.y1, width: Math.max(0, vp.w - hole.x2), height: Math.max(0, hole.y2 - hole.y1) }} />
+        </>
+      )}
+
       {Object.entries(rects).map(([id, r]) => {
         if (!HELP[id]) return null;
         const small = r.bottom - r.top < 48;
@@ -112,7 +133,7 @@ export default function HelpLayer() {
             className={`help-badge font-head fixed z-[65] flex h-5 w-5 items-center justify-center border-2 text-[9px] ${
               active ? "border-[#06071a] bg-[var(--lime)] text-[#06071a]" : "border-[var(--lime)] bg-[#06071a] text-[var(--lime)]"
             }`}
-            style={style}
+            style={{ ...style, opacity: h.active && !active ? 0.4 : 1 }}
           >
             ?
           </button>
