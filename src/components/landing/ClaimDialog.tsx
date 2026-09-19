@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLive } from "@/lib/live/context";
 import { walletAvailable, type Chain } from "@/lib/wallet";
+import { useDemo } from "@/lib/demo";
 
 const EVENT = "synnod:open-claim";
 export const openClaim = () => window.dispatchEvent(new Event(EVENT));
@@ -39,6 +40,7 @@ function WalletButton({ chain, name, sub, busy, onPick }: { chain: Chain; name: 
 }
 
 export default function ClaimDialog() {
+  const demoSwitch = useDemo();
   const { mode, offline, me, nodes, selectedId, signIn, signInWithWallet, claim, logout } = useLive();
   const [open, setOpen] = useState(false);
   const [nick, setNick] = useState("");
@@ -117,10 +119,23 @@ export default function ClaimDialog() {
         )}
 
         {mode === "demo" ? (
-          <p className="mt-4 text-[17px] leading-snug text-[var(--text-2)]">
-            You are looking at the simulated demo. Switch the header toggle to <span className="text-[var(--lime)]">Live data</span> to connect a wallet and claim a real node.
-          </p>
-        ) : offline ? (
+          <div className="mt-4 space-y-3">
+            <p className="text-[17px] leading-snug text-[var(--text-2)]">
+              You are in the simulated demo, where everything moves by itself and nothing is saved. Wallet sign-in and claiming a cell work in{" "}
+              <span className="text-[var(--lime)]">Live data</span> mode.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                demoSwitch.toggle();
+                // switching remounts the live provider (and this dialog); reopen once it is back
+                window.setTimeout(openClaim, 250);
+              }}
+              className={btnCls}
+            >
+              Switch to Live data →
+            </button>
+          </div>        ) : offline ? (
           <p className="mt-4 text-[17px] leading-snug text-[var(--text-2)]">
             The live backend isn&apos;t connected on this deployment (no database yet), so sign-in and claiming are unavailable here. Use the <span className="text-[#ffd166]">Demo data</span> toggle in the header to explore, or run the project locally.
           </p>
