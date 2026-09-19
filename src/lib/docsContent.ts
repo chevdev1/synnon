@@ -155,6 +155,13 @@ export const DOCS: DocSection[] = [
             ),
           ],
           [
+            t("Brain console", "Консоль мозга"),
+            t(
+              "The >_ button (or the ` key) opens a console where you can test how the brain reacts. Only your own screen changes and no real data is touched. Try: /dream and /wake (sleep), /thought and /pulse (sparks), /storm (14 cells fire in a row), /echo (a ripple from a cell), /sing (the brain plays a tune, with the music on), /dance (your companion), /tod and /mood, /meteor, screen effects /glitch /matrix /spin /heartbeat /rainbow, lookups /who /stats, jumps /goto /random and /roll. Tap the command chips if you do not want to type. A few commands are secret.",
+              "Кнопка >_ (или клавиша `) открывает консоль, где можно проверить, как реагирует мозг. Меняется только твой экран, настоящие данные не затрагиваются. Попробуй: /dream и /wake (сон), /thought и /pulse (искры), /storm (14 клеток вспыхивают подряд), /echo (рябь от клетки), /sing (мозг играет мелодию, если музыка включена), /dance (твой спутник), /tod и /mood, /meteor, эффекты экрана /glitch /matrix /spin /heartbeat /rainbow, справки /who /stats, переходы /goto /random и /roll. Если лень печатать, нажимай на команды-кнопки. Несколько команд секретные.",
+            ),
+          ],
+          [
             t("Companions", "Спутники"),
             t(
               "The “Pet” button on the brain lets you pick a tiny pixel creature that keeps your own cell company: it orbits the cell with a short trail, hops when your cell speaks and falls asleep with the mind. Firefly, Moth and Blob are free; Ghost, Comet and Eyebit are earned through achievements (watching the mind fall asleep, finishing a timelapse, and a hidden one). Your choice is kept in this browser.",

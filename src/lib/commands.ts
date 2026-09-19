@@ -4,6 +4,10 @@ import { MOODS, mindActions } from "@/lib/mind";
 import { PETS } from "@/lib/pets";
 import { skyActions } from "@/lib/sky";
 import { todActions, type TodMode } from "@/lib/tod";
+import { generateBrain } from "@/lib/brain/generate";
+import { fxActions, type Fx } from "@/lib/fx";
+import { soundWanted } from "@/lib/lofi";
+import { sfx } from "@/lib/sfx";
 
 // The brain console: local commands that poke the interface so you can see how the
 // brain reacts. Effects are visual and only on YOUR screen; nothing is sent to the
@@ -21,6 +25,9 @@ export interface CmdEnv {
   say: (text: string, tone?: Tone) => void;
   clear: () => void;
   setPet: (id: string | null) => void;
+  goto: (id: number) => void; // ping a cell on the brain and open its card
+  reduced: boolean; // motion is switched off: skip the moving effects
+  hasPet: boolean;
 }
 
 export interface Cmd {
@@ -155,6 +162,133 @@ export const COMMANDS: Cmd[] = [
       env.say(L(env, "Look at the sky.", "Смотри на небо."), "ok");
     },
   },
+  {
+    name: "storm",
+    help: { en: "a neural storm: 14 cells fire in a row", ru: "нейронная буря: 14 клеток вспыхивают подряд" },
+    run: (_a, env) => {
+      const pool = taken(env);
+      if (pool.length < 2) return env.say(L(env, "A storm needs at least two taken cells.", "Для бури нужны минимум две занятые клетки."), "err");
+      for (let i = 0; i < 14; i++) window.setTimeout(() => env.inject({ nodeId: pick(pool).id, type: "output" }), i * 300);
+      skyActions.pulse(0.8);
+      env.say(L(env, "A neural storm: 14 cells fire one after another.", "Нейронная буря: 14 клеток вспыхивают одна за другой."), "ok");
+    },
+  },
+  {
+    name: "echo",
+    usage: "[cell]",
+    help: { en: "a ripple that spreads out from a cell", ru: "рябь, расходящаяся от клетки" },
+    run: (a, env) => {
+      const c = cellArg(env, a[0]);
+      if (Number.isNaN(c)) return env.say(L(env, "No such cell. Use a number from 1 to 128.", "Нет такой клетки. Укажи число от 1 до 128."), "err");
+      const origin = c ?? env.myNode ?? pick(env.nodes)?.id;
+      const cells = generateBrain().cells.filter((x) => x.claimId != null);
+      const o = cells.find((x) => x.claimId === origin);
+      if (!o || origin == null) return env.say("...", "err");
+      const byDist = cells.filter((x) => x.claimId !== origin).sort((x, y) => Math.hypot(x.x - o.x, x.y - o.y) - Math.hypot(y.x - o.x, y.y - o.y));
+      const rings = [[origin], byDist.slice(0, 6).map((x) => x.claimId!), byDist.slice(6, 14).map((x) => x.claimId!), byDist.slice(14, 24).map((x) => x.claimId!)];
+      rings.forEach((ids, i) => ids.forEach((id) => window.setTimeout(() => env.inject({ nodeId: id, type: "output" }), i * 320)));
+      env.say(L(env, `An echo spreads out from cell ${origin}.`, `Эхо расходится от клетки ${origin}.`), "ok");
+    },
+  },
+  {
+    name: "sing",
+    help: { en: "the brain plays a little tune", ru: "мозг играет мелодию" },
+    run: (_a, env) => {
+      const notes = [523, 587, 659, 784, 880, 784, 659, 523];
+      const pool = env.nodes.length ? env.nodes : [];
+      notes.forEach((f, i) =>
+        window.setTimeout(() => {
+          sfx.note(f);
+          if (pool.length) env.inject({ nodeId: pick(pool).id, type: "output" });
+        }, i * 280)
+      );
+      env.say(soundWanted() ? L(env, "The brain sings.", "Мозг поёт.") : L(env, "The brain sings (sound is off: lights only, turn the music on to hear it).", "Мозг поёт (звук выключен: только огни, включи музыку, чтобы услышать)."), "ok");
+    },
+  },
+  {
+    name: "dance",
+    help: { en: "your companion dances", ru: "твой спутник танцует" },
+    run: (_a, env) => {
+      if (!env.hasPet || env.myNode == null) return env.say(L(env, "Pick a companion and claim a cell first (/pet firefly).", "Сначала выбери спутника и займи клетку (/pet firefly)."), "err");
+      skyActions.dance(6000);
+      env.say(L(env, "Your companion is dancing.", "Твой спутник танцует."), "ok");
+    },
+  },
+  ...(["glitch", "matrix", "spin", "heartbeat", "rainbow"] as Exclude<Fx, "void">[]).map<Cmd>((fx) => ({
+    name: fx,
+    help: {
+      glitch: { en: "the brain glitches for a moment", ru: "мозг на секунду глючит" },
+      matrix: { en: "everything turns green", ru: "всё становится зелёным" },
+      spin: { en: "the brain does a full turn", ru: "мозг делает полный оборот" },
+      heartbeat: { en: "the brain beats like a heart", ru: "мозг бьётся, как сердце" },
+      rainbow: { en: "the colours cycle", ru: "цвета переливаются" },
+    }[fx],
+    run: (_a, env) => {
+      if (env.reduced) return env.say(L(env, "Motion is off, so this effect is skipped. Turn Motion on in the header.", "Движение выключено, поэтому эффект пропущен. Включи Motion в шапке."), "err");
+      fxActions.run(fx, { glitch: 1400, matrix: 6000, spin: 1900, heartbeat: 5200, rainbow: 7000 }[fx]);
+      env.say(L(env, `Effect: ${fx}.`, `Эффект: ${fx}.`), "ok");
+    },
+  })),
+  {
+    name: "who",
+    usage: "<cell>",
+    help: { en: "what is known about a cell", ru: "что известно о клетке" },
+    run: (a, env) => {
+      const c = cellArg(env, a[0]) ?? env.myNode;
+      if (c == null || Number.isNaN(c)) return env.say(L(env, "Usage: /who <cell number>", "Использование: /who <номер клетки>"), "err");
+      const n = env.nodes.find((x) => x.id === c);
+      if (!n) return env.say(L(env, "No such cell.", "Нет такой клетки."), "err");
+      if (n.status === "available") return env.say(L(env, `Cell ${c}: free, nobody's voice yet.`, `Клетка ${c}: свободна, голоса ещё нет.`), "info");
+      const ago = n.lastActiveAt ? Math.max(0, Math.round((Date.now() - n.lastActiveAt) / 60000)) : null;
+      env.say(L(env, `Cell ${c}: ${n.status}${n.ownerName ? ", held by " + n.ownerName : ""}${ago != null ? `, last spoke ${ago} min ago` : ""}.`, `Клетка ${c}: ${n.status}${n.ownerName ? ", владелец " + n.ownerName : ""}${ago != null ? `, последний раз говорила ${ago} мин назад` : ""}.`), "info");
+    },
+  },
+  {
+    name: "stats",
+    help: { en: "count the cells by status", ru: "посчитать клетки по статусам" },
+    run: (_a, env) => {
+      const c = (s: string) => env.nodes.filter((n) => n.status === s).length;
+      env.say(L(env, `${env.nodes.length} cells: ${c("active") + c("featured")} active, ${c("memory")} memory, ${c("claimed")} claimed, ${c("available")} free.`, `${env.nodes.length} клеток: ${c("active") + c("featured")} активных, ${c("memory")} с памятью, ${c("claimed")} занятых, ${c("available")} свободных.`), "info");
+    },
+  },
+  {
+    name: "goto",
+    usage: "<cell>",
+    help: { en: "jump to a cell and open it", ru: "перейти к клетке и открыть её" },
+    run: (a, env) => {
+      const c = cellArg(env, a[0]);
+      if (c == null || Number.isNaN(c)) return env.say(L(env, "Usage: /goto <cell number>", "Использование: /goto <номер клетки>"), "err");
+      env.goto(c);
+      env.say(L(env, `Going to cell ${c}.`, `Иду к клетке ${c}.`), "ok");
+    },
+  },
+  {
+    name: "random",
+    help: { en: "visit a random voice", ru: "заглянуть к случайному голосу" },
+    run: (_a, env) => {
+      const n = pick(taken(env));
+      if (!n) return env.say(L(env, "Nobody has taken a cell yet.", "Пока никто не занял клетку."), "err");
+      env.goto(n.id);
+      env.say(L(env, `Visiting cell ${n.id}.`, `Захожу к клетке ${n.id}.`), "ok");
+    },
+  },
+  {
+    name: "roll",
+    usage: "[sides]",
+    help: { en: "roll a die (default d20)", ru: "бросить кубик (по умолчанию d20)" },
+    run: (a, env) => {
+      const sides = Math.max(2, Math.min(1000, Number(a[0]) || 20));
+      const r = 1 + Math.floor(Math.random() * sides);
+      env.say(L(env, `d${sides}: ${r}`, `d${sides}: ${r}`), "info");
+      if (r === sides) {
+        skyActions.meteorShower(10);
+        env.say(L(env, "* critical hit: the sky lights up *", "* критический успех: небо вспыхивает *"), "ok");
+      } else if (r === 1) {
+        mindActions.force({ mood: "restless" }, 3000);
+        env.say(L(env, "* the eye rolls *", "* глаз закатывается *"), "info");
+      }
+    },
+  },
   { name: "clear", help: { en: "clear this screen", ru: "очистить экран" }, run: (_a, env) => env.clear() },
 
   // ---- secret ones: not in /help. Found by poking around; they earn a hidden achievement ----
@@ -175,6 +309,16 @@ export const COMMANDS: Cmd[] = [
     run: (_a, env) => {
       mindActions.force({ state: "thinking" }, 2600);
       env.say(L(env, "* the mind pauses for a long moment *", "* разум надолго замирает *"), "info");
+      achActions.unlock("secret-handshake");
+    },
+  },
+  {
+    name: "void",
+    secret: true,
+    help: { en: "", ru: "" },
+    run: (_a, env) => {
+      if (!env.reduced) fxActions.run("void", 4200);
+      env.say(L(env, "* the lights go out. something looks back *", "* свет гаснет. что-то смотрит в ответ *"), "info");
       achActions.unlock("secret-handshake");
     },
   },

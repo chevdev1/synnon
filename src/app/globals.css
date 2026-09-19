@@ -87,6 +87,39 @@ body {
   animation: synnod-own-bob 1s steps(2, end) infinite;
 }
 
+/* Console screen effects (lib/fx.ts): html[data-fx="..."] for a few seconds */
+@keyframes synnod-fx-glitch {
+  0% { transform: translate(0, 0); filter: none; }
+  25% { transform: translate(-5px, 1px) skewX(2deg); filter: hue-rotate(90deg) saturate(2); }
+  50% { transform: translate(4px, -2px); filter: hue-rotate(-60deg) contrast(1.3); }
+  75% { transform: translate(-2px, 2px) skewX(-2deg); filter: invert(0.25); }
+  100% { transform: translate(0, 0); filter: none; }
+}
+@keyframes synnod-fx-spin { to { transform: rotate(360deg); } }
+@keyframes synnod-fx-beat {
+  0%, 100% { transform: scale(1); }
+  12% { transform: scale(1.06); }
+  24% { transform: scale(0.99); }
+  36% { transform: scale(1.045); }
+  55% { transform: scale(1); }
+}
+@keyframes synnod-fx-rainbow { from { filter: hue-rotate(0deg); } to { filter: hue-rotate(360deg); } }
+@keyframes synnod-fx-void { from { opacity: 0; } to { opacity: 1; } }
+html[data-fx="glitch"] .brain-breathe canvas { animation: synnod-fx-glitch 0.2s steps(2) infinite; }
+html[data-fx="matrix"] .brain-breathe canvas { filter: hue-rotate(95deg) saturate(1.7) contrast(1.15) brightness(1.1); }
+html[data-fx="spin"] .brain-breathe canvas { animation: synnod-fx-spin 1.8s cubic-bezier(0.6, 0, 0.3, 1) 1; }
+html[data-fx="heartbeat"] .brain-breathe canvas { animation: synnod-fx-beat 0.85s ease-in-out infinite; }
+html[data-fx="rainbow"] .brain-breathe canvas { animation: synnod-fx-rainbow 3.5s linear infinite; }
+html[data-fx="void"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 45%, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.95));
+  animation: synnod-fx-void 0.8s ease-out both;
+}
+
 /* Achievement pop-up: steps in from the side, a highlight sweeps across, gold/legend shed sparks */
 @keyframes synnod-ach-in {
   from { transform: translateX(110%); opacity: 0; }

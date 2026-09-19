@@ -607,6 +607,7 @@ export default function BrainCanvas({
           reduced: reducedMotion,
           pointer: pointerRef.current,
           poke: sky.poke,
+          dancing: performance.now() < sky.danceUntil,
           font: fontRef.current,
           width,
           height,

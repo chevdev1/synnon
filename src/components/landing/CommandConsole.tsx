@@ -5,6 +5,7 @@ import { useAch } from "@/lib/achStore";
 import { COMMANDS, runCommand, type CmdEnv } from "@/lib/commands";
 import { useHelp } from "@/lib/help";
 import { useLive } from "@/lib/live/context";
+import { useMotion } from "@/lib/motion";
 import { usePet } from "@/lib/pets";
 
 type Line = { text: string; tone: "ok" | "err" | "info" | "in" };
@@ -13,11 +14,12 @@ const TONE: Record<Line["tone"], string> = { ok: "text-[var(--lime)]", err: "tex
 
 // A small command console on the brain stage ( `>_` button, or the ` key ): type a
 // command and watch how the brain reacts. Only your own screen changes.
-export default function CommandConsole({ open, onClose }: { open: boolean; onClose: () => void }) {
+export default function CommandConsole({ open, onClose, onGoto }: { open: boolean; onClose: () => void; onGoto: (id: number) => void }) {
   const { nodes, currentUserNodeId, injectPulse } = useLive();
   const { unlocked } = useAch();
   const { lang } = useHelp();
-  const { choose } = usePet();
+  const { id: petId, choose } = usePet();
+  const { reduced } = useMotion();
   const [lines, setLines] = useState<Line[]>([]);
   const [draft, setDraft] = useState("");
   const [hist, setHist] = useState<string[]>([]);
@@ -43,6 +45,9 @@ export default function CommandConsole({ open, onClose }: { open: boolean; onClo
     say: (text, tone = "info") => setLines((l) => [...l.slice(-40), { text, tone }]),
     clear: () => setLines([]),
     setPet: choose,
+    goto: onGoto,
+    reduced,
+    hasPet: !!petId,
   };
 
   function run(line: string) {

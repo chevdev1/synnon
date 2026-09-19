@@ -23,7 +23,23 @@ export default function PetPicker({ hasCell }: { hasCell: boolean }) {
   const { lang } = useHelp();
   const [open, setOpen] = useState(false);
   const [focus, setFocus] = useState<string | null>(null);
+  // Where the panel floats. It is fixed to the screen (not the brain stage, which clips it)
+  // and always placed so the whole panel fits, whatever the window size.
+  const [pos, setPos] = useState<{ left: number; top: number }>({ left: 8, top: 8 });
   const T = (en: string, ru: string) => (lang === "ru" ? ru : en);
+
+  function toggle(btn: HTMLElement) {
+    if (open) return setOpen(false);
+    const r = btn.getBoundingClientRect();
+    const w = Math.min(280, window.innerWidth - 16);
+    const h = 430; // generous: the panel scrolls inside if the screen is shorter
+    const narrow = window.innerWidth < 640;
+    const left = narrow ? (window.innerWidth - w) / 2 : Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
+    const top = narrow ? Math.max(8, window.innerHeight - h - 12) : Math.max(8, Math.min(r.bottom + 6, window.innerHeight - h - 8));
+    setPos({ left, top });
+    setFocus(null);
+    setOpen(true);
+  }
   const cur = PETS.find((p) => p.id === id && (!p.needs || unlocked[p.needs]));
   const shown = PETS.find((p) => p.id === focus) ?? cur ?? PETS[0];
 
@@ -38,7 +54,7 @@ export default function PetPicker({ hasCell }: { hasCell: boolean }) {
     <div className="absolute left-4 top-[88px]" data-help-id="pet">
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={(e) => toggle(e.currentTarget)}
         aria-expanded={open}
         data-pet-btn
         className="pixel-btn font-head flex h-7 items-center gap-1.5 border-2 border-[var(--accent)] bg-[#080a20]/85 px-2 text-[7px] uppercase text-[var(--link)]"
@@ -47,7 +63,11 @@ export default function PetPicker({ hasCell }: { hasCell: boolean }) {
         {cur ? cur.name[lang] : T("Pet", "Питомец")}
       </button>
       {open && (
-        <div className="fade-in-up fixed inset-x-3 bottom-20 z-[65] mx-auto max-w-[320px] border-2 border-[var(--accent)] bg-[#080a20] p-2.5 shadow-[4px_4px_0_rgba(108,95,214,0.4)] sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 sm:top-full sm:z-10 sm:mx-0 sm:mt-1.5 sm:w-[248px]" role="dialog" aria-label={T("Choose a companion", "Выбери спутника")} data-pet-panel>
+        <div
+          style={{ left: pos.left, top: pos.top, width: "min(280px, calc(100vw - 16px))", maxHeight: "calc(100dvh - 16px)" }}
+          onMouseLeave={() => setFocus(null)}
+          className="fade-in-up fixed z-[65] overflow-y-auto border-2 border-[var(--accent)] bg-[#080a20] p-2.5 shadow-[4px_4px_0_rgba(108,95,214,0.4)]"
+          role="dialog" aria-label={T("Choose a companion", "Выбери спутника")} data-pet-panel>
           <div className="font-head text-[7px] uppercase text-[var(--muted)]">{T("Companion", "Спутник")}</div>
           {!hasCell && <p className="mt-1 text-[15px] leading-snug text-[#ffd166]">{T("It appears next to your cell. Claim one first.", "Он появится возле твоей клетки. Сначала займи её.")}</p>}
           <div className="mt-2 grid grid-cols-3 gap-1.5">

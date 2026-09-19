@@ -148,7 +148,15 @@ export default function BrainStage() {
       >
         &gt;_
       </button>
-      <CommandConsole open={consoleOpen && !tl.active} onClose={() => setConsoleOpen(false)} />
+      <CommandConsole
+        open={consoleOpen && !tl.active}
+        onClose={() => setConsoleOpen(false)}
+        onGoto={(id) => {
+          setPing((p) => ({ id, n: (p?.n ?? 0) + 1 }));
+          setSelectedId(id);
+          window.setTimeout(() => openCell(id), 650);
+        }}
+      />
 
       <div className="pointer-events-none absolute right-3 top-3 z-10 flex select-none flex-col items-center gap-1" data-help-id="face">
         <div className="pointer-events-auto cursor-pointer" onClick={() => achActions.bump("eye-contact")} data-face-eye>

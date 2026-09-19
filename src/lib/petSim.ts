@@ -17,6 +17,7 @@ export interface PetEnv {
   reduced: boolean;
   pointer: { x: number; y: number } | null; // canvas px
   poke: number; // counter that ticks on every keystroke in the chat
+  dancing: boolean; // the /dance command
   font: string;
   width: number;
   height: number;
@@ -101,11 +102,15 @@ export class PetSim {
       } else this.nextEvent = Infinity;
     }
 
+    // ---- /dance: a fast wide loop with a hop every beat ----
+    const dancing = env.dancing && !asleep;
+    if (dancing && t - this.hopAt > 380) this.hopAt = t;
+
     // ---- where it wants to be ----
     const hopAge = this.hopAt >= 0 ? (t - this.hopAt) / 700 : 2;
     const hop = hopAge < 1 ? Math.sin(Math.PI * hopAge) : 0;
-    const anchor = this.target && !asleep ? this.target : { x: mine.x, y: mine.y, r: mine.R * (asleep ? 1.9 : 2.5 + hop * 1.4 + Math.sin(t / 700) * 0.25) };
-    const a = asleep || env.reduced ? 0.9 : t / (this.id === "comet" ? 700 : 1500);
+    const anchor = this.target && !asleep && !dancing ? this.target : { x: mine.x, y: mine.y, r: mine.R * (asleep ? 1.9 : (dancing ? 3.4 : 2.5) + hop * 1.4 + Math.sin(t / 700) * 0.25) };
+    const a = asleep || env.reduced ? 0.9 : t / (dancing ? 260 : this.id === "comet" ? 700 : 1500);
     const wantX = anchor.x + Math.cos(a) * anchor.r;
     const wantY = anchor.y + Math.sin(a) * anchor.r * 0.7 - hop * 5 + (asleep ? Math.sin(t / 900) * 0.8 : Math.sin(t / 240) * 1.2);
     const ease = env.reduced ? 1 : this.id === "comet" ? 0.3 : this.id === "moth" ? 0.07 : 0.14;

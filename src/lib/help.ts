@@ -109,8 +109,8 @@ export const HELP: Record<string, { title: T; body: T }> = {
   console: {
     title: { en: "Brain console", ru: "Консоль мозга" },
     body: {
-      en: "The >_ button (or the ` key) opens a small console. Type /help or tap a command chip and watch how the brain reacts: /dream puts the mind to sleep, /thought sends sparks between cells, /claim sets off a shockwave, /tod changes the time of day, /mood changes the eye, /meteor makes a star shower. Everything happens only on your screen and changes no real data. A few commands are secret.",
-      ru: "Кнопка >_ (или клавиша `) открывает маленькую консоль. Набери /help или нажми на команду и смотри, как реагирует мозг: /dream усыпляет разум, /thought пускает искры между клетками, /claim запускает ударную волну, /tod меняет время суток, /mood меняет глаз, /meteor устраивает звездопад. Всё происходит только на твоём экране и не меняет настоящих данных. Несколько команд секретные.",
+      en: "The >_ button (or the ` key) opens a small console. Type /help or tap a command chip and watch how the brain reacts: /dream puts the mind to sleep, /thought sends sparks between cells, /storm fires 14 cells in a row, /echo sends a ripple, /sing plays a tune, /dance makes your companion dance, /glitch /matrix /spin /heartbeat change how the brain looks, /tod changes the time of day, /mood changes the eye, /who /stats /goto /random look things up. Everything happens only on your screen and changes no real data. A few commands are secret.",
+      ru: "Кнопка >_ (или клавиша `) открывает маленькую консоль. Набери /help или нажми на команду и смотри, как реагирует мозг: /dream усыпляет разум, /thought пускает искры между клетками, /storm заставляет вспыхнуть 14 клеток подряд, /echo пускает рябь, /sing играет мелодию, /dance заставляет спутника танцевать, /glitch /matrix /spin /heartbeat меняют вид мозга, /tod меняет время суток, /mood меняет глаз, /who /stats /goto /random — справки и переходы. Всё происходит только на твоём экране и не меняет настоящих данных. Несколько команд секретные.",
     },
   },
   timelapse: {

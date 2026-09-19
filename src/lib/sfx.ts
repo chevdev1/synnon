@@ -62,6 +62,8 @@ export const sfx = {
       if (tier === "gold" || tier === "legend") blip(c, 196, 0.6, "sine", 0.08, 0, 98);
       if (tier === "legend") notes.forEach((f, i) => blip(c, f * 2, 0.2, "triangle", 0.02, 0.5 + i * 0.07));
     })(),
+  // one soft bell note (the /sing command)
+  note: (freq: number) => run((c) => blip(c, freq, 0.32, "triangle", 0.06))(),
   miss: run((c) => blip(c, 220, 0.14, "sawtooth", 0.03, 0, 140)),
   tick: run((c) => blip(c, 1400 + Math.random() * 500, 0.018, "square", 0.012)),
 };
