@@ -9,7 +9,7 @@ const KEY = "synnod-demo";
 const DEFAULT_ON = process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_SYNNOD_DEFAULT_DEMO === "1";
 const listeners = new Set<() => void>();
 
-function read(): boolean {
+export function read(): boolean {
   try {
     const v = window.localStorage.getItem(KEY);
     return v === null ? DEFAULT_ON : v === "on";

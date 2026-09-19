@@ -12,6 +12,7 @@ import TimelapseBar from "./TimelapseBar";
 import { useTimelapse } from "./useTimelapse";
 import PixelFace from "@/components/ui/PixelFace";
 import { skyActions } from "@/lib/sky";
+import { achActions } from "@/lib/achStore";
 import { useMind } from "@/lib/mind";
 import { sfx } from "@/lib/sfx";
 import { useDemo } from "@/lib/demo";
@@ -31,6 +32,10 @@ export default function BrainStage() {
   const { mode, offline, nodes, me, currentUserNodeId, selectedId, setSelectedId, pulseEvent, events, now } = useLive();
   const { state: mindState, mood, dreaming } = useMind();
   const tl = useTimelapse();
+
+  useEffect(() => {
+    if (tl.view.phase === "done") achActions.unlock("time-traveler");
+  }, [tl.view.phase]);
 
   // The page-wide sky reacts to the mind: calmer while it sleeps, a swell on every event.
   useEffect(() => {
@@ -110,7 +115,9 @@ export default function BrainStage() {
       />
 
       <div className="pointer-events-none absolute right-3 top-3 z-10 flex select-none flex-col items-center gap-1" data-help-id="face">
-        <PixelFace state={mindState} mood={mood} className="h-[42px] w-[68px] sm:h-[56px] sm:w-[90px]" />
+        <div className="pointer-events-auto cursor-pointer" onClick={() => achActions.bump("eye-contact")} data-face-eye>
+          <PixelFace state={mindState} mood={mood} className="h-[42px] w-[68px] sm:h-[56px] sm:w-[90px]" />
+        </div>
         <span className="font-head text-[6px] uppercase text-[var(--muted)] sm:text-[7px]">
           {mindState === "sleeping" ? "dreaming" : mindState === "thinking" ? "thinking…" : mindState === "speaking" ? "speaking" : mood}
         </span>

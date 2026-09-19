@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { generateBrain, NH, NW, type Cell } from "@/lib/brain/generate";
 import { drawCosmos } from "@/lib/cosmos";
 import { useLive } from "@/lib/live/context";
+import { achActions } from "@/lib/achStore";
 import type { NodeProfile } from "@/lib/nodeProfile";
 
 // A 1200x630 animated share card (8-second loop) drawn on a canvas: the living
@@ -257,6 +258,7 @@ export default function AnimatedCard({ profile, thought, autoRecord = false }: {
       a.click();
       window.setTimeout(() => URL.revokeObjectURL(a.href), 4000);
       setRec("done");
+      achActions.unlock("broadcaster");
     };
     setFmt(isMp4 ? "MP4" : "WebM");
     setRec("recording");

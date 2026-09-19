@@ -54,6 +54,14 @@ export const sfx = {
     blip(c, 880, 0.05, "square", 0.035);
     blip(c, 1320, 0.08, "square", 0.035, 0.05);
   }),
+  // one fanfare per rarity: the rarer, the longer and higher
+  achieve: (tier: "bronze" | "silver" | "gold" | "legend") =>
+    run((c) => {
+      const notes = { bronze: [523, 659], silver: [523, 659, 784], gold: [523, 659, 784, 1047], legend: [392, 523, 659, 784, 1047, 1319] }[tier];
+      notes.forEach((f, i) => blip(c, f, tier === "legend" ? 0.22 : 0.15, "square", 0.035, i * 0.085));
+      if (tier === "gold" || tier === "legend") blip(c, 196, 0.6, "sine", 0.08, 0, 98);
+      if (tier === "legend") notes.forEach((f, i) => blip(c, f * 2, 0.2, "triangle", 0.02, 0.5 + i * 0.07));
+    })(),
   miss: run((c) => blip(c, 220, 0.14, "sawtooth", 0.03, 0, 140)),
   tick: run((c) => blip(c, 1400 + Math.random() * 500, 0.018, "square", 0.012)),
 };

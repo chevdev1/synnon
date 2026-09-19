@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLive } from "@/lib/live/context";
 import { useDemo } from "@/lib/demo";
+import { achActions } from "@/lib/achStore";
 import { addTokenToWallet, requestTestTokens, switchToChain, walletAvailable, type Chain, type ChainInfo, type TokenInfo } from "@/lib/wallet";
 
 const EVENT = "synnod:open-claim";
@@ -211,6 +212,7 @@ export default function ClaimDialog() {
     if (!target) return;
     setBusy(true);
     setMsg(null);
+    achActions.noteOwnClaim();
     const r = await claim(target.id);
     setBusy(false);
     if (r.ok) setOpen(false);

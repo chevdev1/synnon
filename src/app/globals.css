@@ -87,6 +87,29 @@ body {
   animation: synnod-own-bob 1s steps(2, end) infinite;
 }
 
+/* Achievement pop-up: steps in from the side, a highlight sweeps across, gold/legend shed sparks */
+@keyframes synnod-ach-in {
+  from { transform: translateX(110%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes synnod-ach-shine {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(220%); }
+}
+@keyframes synnod-ach-spark {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0.4); opacity: 0; }
+}
+.ach-in { animation: synnod-ach-in 0.4s steps(8, end) both; }
+.ach-shine {
+  background: linear-gradient(100deg, transparent 40%, color-mix(in srgb, var(--c) 35%, transparent) 50%, transparent 60%);
+  animation: synnod-ach-shine 1.4s ease-out 0.3s 2 both;
+}
+.ach-spark { animation: synnod-ach-spark 1.1s ease-out infinite; }
+@media (max-width: 639px) {
+  .ach-in { animation-name: synnod-fade-up; }
+}
+
 @theme inline {
   --color-bg: var(--bg);
   --color-panel: var(--panel);
@@ -370,7 +393,10 @@ body {
     .fade-in-up,
     .sheet-in,
     .mini-ping,
-    .own-arrow {
+    .own-arrow,
+    .ach-in,
+    .ach-shine,
+    .ach-spark {
       animation: none;
     }
     .shimmer-border::after {

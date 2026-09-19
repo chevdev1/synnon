@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useLive } from "@/lib/live/context";
 import { sfx } from "@/lib/sfx";
+import { achActions } from "@/lib/achStore";
 
 // "48", "#48" or part of a nickname. Found → the cell pulses on the brain and
 // its card opens; not found → a short pixel "no such voice".
@@ -29,6 +30,7 @@ export default function NodeSearch({ onFound }: { onFound: (id: number) => void 
       return;
     }
     sfx.found();
+    achActions.unlock("cartographer");
     setQ("");
     onFound(id);
   }

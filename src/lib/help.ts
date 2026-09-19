@@ -75,7 +75,7 @@ export const helpActions = {
 };
 
 // Order of the guided tour (also the reading order of the page).
-export const TOUR = ["intro", "brain", "face", "timelapse", "search", "mind", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod"];
+export const TOUR = ["intro", "brain", "face", "timelapse", "search", "mind", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod", "achievements"];
 
 export const HELP: Record<string, { title: T; body: T }> = {
   intro: {
@@ -181,6 +181,13 @@ export const HELP: Record<string, { title: T; body: T }> = {
     body: {
       en: "Turns the animations on or off. If your system has “reduce motion” enabled, the site stays still until you switch this on.",
       ru: "Включает и выключает анимации. Если в системе включено «уменьшить движение», сайт остаётся неподвижным, пока ты не включишь эту кнопку.",
+    },
+  },
+  achievements: {
+    title: { en: "Achievements", ru: "Достижения" },
+    body: {
+      en: "Like in a game: a pop-up appears when you earn something, for example linking a wallet, claiming a cell, getting your first reply or seeing the mind fall asleep. Four rarities (bronze, silver, gold, legendary) and a few hidden ones. Click the trophy to see them all and your progress.",
+      ru: "Как в играх: всплывает окно, когда ты что-то получаешь, например привязал кошелёк, занял клетку, получил первый ответ или увидел, как разум засыпает. Четыре редкости (бронза, серебро, золото, легенда) и несколько скрытых. Нажми на кубок, чтобы увидеть все и свой прогресс.",
     },
   },
   tod: {

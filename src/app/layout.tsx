@@ -3,6 +3,8 @@ import { Press_Start_2P, VT323 } from "next/font/google";
 import "./globals.css";
 import CursorFx from "@/components/ui/CursorFx";
 import TodSync from "@/components/ui/TodSync";
+import AchievementToaster from "@/components/achievements/AchievementToaster";
+import AchievementsPanel from "@/components/achievements/AchievementsPanel";
 
 // 8-bit look: Press Start 2P for headings/labels, VT323 (a crisp 1px-grid
 // terminal face, readable at small sizes) for running text.
@@ -40,6 +42,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         {children}
         <TodSync />
+        <AchievementToaster />
+        <AchievementsPanel />
         <CursorFx />
       </body>
     </html>

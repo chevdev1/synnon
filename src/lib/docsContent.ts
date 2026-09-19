@@ -1,4 +1,5 @@
 import type { Lang } from "@/lib/help";
+import { ACHIEVEMENTS } from "@/lib/achievements";
 
 type T = Record<Lang, string>;
 
@@ -261,6 +262,33 @@ export const DOCS: DocSection[] = [
           "Every cell page (/node/48) also has an animated card: an 8-second loop with the living sky, the brain with your cell pulsing, sparks to the cells you share thoughts with, counters that count up and a thought that types itself out. Press “Download video” to record it in your browser as an MP4 (WebM if your browser cannot do MP4) and upload the file to X. A plain link cannot play video, it only shows the still card.",
           "У каждой страницы клетки (/node/48) есть и анимированная карточка: 8-секундная петля с живым небом, мозгом с пульсирующей вашей клеткой, искрами к клеткам, с которыми у вас общие мысли, счётчиками и мыслью, которая печатается сама. Нажмите «Download video», чтобы записать её в браузере в MP4 (или WebM, если браузер не умеет MP4), и загрузите файл в X. Обычная ссылка видео не проигрывает, она показывает только статичную карточку.",
         ),
+      },
+    ],
+  },
+  {
+    id: "achievements",
+    title: t("Achievements", "Достижения"),
+    blocks: [
+      {
+        kind: "p",
+        text: t(
+          "Like in a game, a pop-up slides in when you earn something, and the trophy in the header opens the full list with your progress. There are four rarities: bronze, silver, gold and legendary. The rarer the achievement, the longer and louder the pop-up, and gold and legendary ones shed pixel sparks. A few are hidden until you find them.",
+          "Как в играх: когда ты что-то получаешь, выезжает окно, а кубок в шапке открывает полный список с прогрессом. Редкостей четыре: бронза, серебро, золото и легенда. Чем реже достижение, тем дольше и громче окно, а золотые и легендарные сыплют пиксельными искрами. Несколько достижений скрыты, пока их не найдёшь.",
+        ),
+      },
+      {
+        kind: "table",
+        head: [t("Achievement", "Достижение"), t("How to get it", "Как получить")],
+        rows: ACHIEVEMENTS.filter((a) => !a.hidden).map((a) => [a.name, a.desc]),
+      },
+      {
+        kind: "list",
+        items: [
+          t("Some are computed from real data (linking a wallet, claiming a cell, your voices, thoughts and share of the mind). They cannot be faked and come back on any browser.", "Часть считается по настоящим данным (привязка кошелька, занятая клетка, твои голоса, мысли и доля в разуме). Их нельзя подделать, и они возвращаются в любом браузере."),
+          t("The rest are things you do (search, a timelapse, all four times of day). Those are remembered in this browser.", "Остальные это то, что ты делаешь (поиск, таймлапс, все четыре времени суток). Они запоминаются в этом браузере."),
+          t("Every cell shows the achievements it has earned on its profile, so anyone can see them.", "Профиль каждой клетки показывает заработанные ей достижения, их видят все."),
+          t("In the demo, achievements are kept separate and simulated: you can click any card to preview its pop-up, and nothing carries over to live mode.", "В демо достижения отдельные и симулированные: можно нажать на любую карточку и увидеть её окно, в live ничего не переносится."),
+        ],
       },
     ],
   },

@@ -6,6 +6,7 @@ import MotionToggle from "./MotionToggle";
 import DemoToggle from "./DemoToggle";
 import MusicToggle from "./MusicToggle";
 import TodChip from "./TodChip";
+import { AchButton } from "@/components/achievements/AchievementsPanel";
 import AuthButton from "./AuthButton";
 import HelpButton from "./HelpButton";
 
@@ -45,6 +46,7 @@ export default function Header() {
         <DemoToggle />
         <MotionToggle />
         <TodChip />
+        <AchButton />
         <AuthButton />
         <HelpButton />
         <div className="font-head hidden items-center gap-2 text-[8px] uppercase text-[var(--text-2)] 2xl:flex">

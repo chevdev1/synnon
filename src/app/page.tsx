@@ -10,6 +10,7 @@ import Footer from "@/components/landing/Footer";
 import Atmosphere from "@/components/landing/Atmosphere";
 import ClaimDialog from "@/components/landing/ClaimDialog";
 import NodeSheet from "@/components/landing/NodeSheet";
+import AchievementsWatcher from "@/components/achievements/AchievementsWatcher";
 import IntroGate from "@/components/landing/IntroGate";
 import HelpLayer from "@/components/landing/HelpLayer";
 import { LiveRoot } from "@/lib/live/LiveRoot";
@@ -34,6 +35,7 @@ export default function Home() {
         <Footer />
         <ClaimDialog />
         <NodeSheet />
+        <AchievementsWatcher />
         <HelpLayer />
         <IntroGate />
       </div>

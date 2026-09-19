@@ -6,6 +6,41 @@ import { formatAgo } from "@/lib/live/format";
 import { useLive } from "@/lib/live/context";
 import type { NodeProfile } from "@/lib/nodeProfile";
 import MiniBrain from "./MiniBrain";
+import { ACH_BY_ID, CELL_ACH_IDS, TIER_COLOR, deriveCell, isDone } from "@/lib/achievements";
+import AchIcon from "@/components/achievements/AchIcon";
+import { useHelp } from "@/lib/help";
+
+// The achievements this cell has earned from its own numbers (no browser needed: anyone sees them).
+function CellBadges({ profile }: { profile: NodeProfile }) {
+  const { lang } = useHelp();
+  const cur = deriveCell(profile);
+  const got = CELL_ACH_IDS.map((id) => ACH_BY_ID.get(id)!).filter((a) => isDone(a, cur[a.id] ?? 0));
+  const next = CELL_ACH_IDS.map((id) => ACH_BY_ID.get(id)!).find((a) => !isDone(a, cur[a.id] ?? 0) && a.max && a.max > 1);
+  return (
+    <div data-cell-badges>
+      <div className="font-head mb-2 text-[9px] uppercase text-[var(--text)]">
+        {lang === "ru" ? "Достижения клетки" : "Cell achievements"} <span className="text-[var(--muted)]">{got.length}/{CELL_ACH_IDS.length}</span>
+      </div>
+      {got.length === 0 ? (
+        <p className="text-[16px] text-[var(--muted)]">{lang === "ru" ? "Пока нет. Первые слова принесут первое." : "None yet. The first words will earn the first one."}</p>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {got.map((a) => (
+            <span key={a.id} title={`${a.name[lang]}: ${a.desc[lang]}`} className="flex items-center gap-1.5 border-2 bg-[#0b0a1f] px-1.5 py-1" style={{ borderColor: TIER_COLOR[a.tier] }} data-cell-badge={a.id}>
+              <AchIcon icon={a.icon} color={TIER_COLOR[a.tier]} size={20} />
+              <span className="font-head text-[7px] uppercase" style={{ color: TIER_COLOR[a.tier] }}>{a.name[lang]}</span>
+            </span>
+          ))}
+        </div>
+      )}
+      {next && (
+        <p className="mt-2 text-[15px] text-[var(--muted)]">
+          {lang === "ru" ? "Дальше" : "Next"}: {next.name[lang]} {Math.min(cur[next.id] ?? 0, next.max!)}/{next.max}
+        </p>
+      )}
+    </div>
+  );
+}
 
 const STATUS_COLOR: Record<string, string> = {
   available: "var(--muted)",
@@ -100,6 +135,8 @@ export default function NodeProfileView({ profile, compact = false }: { profile:
         </div>
         <MiniBrain id={node.id} links={profile.links} />
       </div>
+
+      <CellBadges profile={profile} />
 
       <div>
         <div className="font-head mb-2 text-[9px] uppercase text-[var(--text)]">History of influence</div>

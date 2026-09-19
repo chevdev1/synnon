@@ -7,6 +7,7 @@ import DemoToggle from "@/components/landing/DemoToggle";
 import { HexIcon } from "@/components/ui/PixelIcon";
 import { demoDiary, formatDay, type DiaryEntry } from "@/lib/diary";
 import { useDemo } from "@/lib/demo";
+import { achActions } from "@/lib/achStore";
 
 const nav =
   "pixel-btn font-head flex h-9 items-center border-2 border-[var(--border)] px-3 text-[8px] uppercase text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--lime)]";
@@ -102,6 +103,9 @@ function Entry({ e, single }: { e: DiaryEntry; single?: boolean }) {
 
 export default function DiaryView({ day }: { day?: string }) {
   const { demo, entries, error, loading } = useDiary(day);
+  useEffect(() => {
+    if (day && entries.length > 0) achActions.unlock("diarist");
+  }, [day, entries.length]);
   return (
     <div className="relative min-h-dvh bg-[var(--bg)]">
       <Atmosphere />

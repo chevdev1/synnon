@@ -411,6 +411,116 @@ Chrome и Safari сразу дают MP4, остальные WebM.
 {LINK}
 ```
 
+## Thread 3 (English), 7 posts: achievements
+
+Media: take screenshots of the pop-ups with the demo's trophy panel (click any card to preview it): the wallet one (`Uplink Established`), a gold one and the legendary `Choir of One`.
+
+**1/7**
+```
+SYNNOD now has achievements.
+
+Like in a game: a pop-up slides in when you earn something. Link a wallet and the mind tells you "Uplink Established". Claim a cell: "A Voice of Your Own". Four rarities, from bronze to legendary.
+```
+
+**2/7**
+```
+Some achievements come from real data, so they can't be faked and follow you to any browser: wallet linked, cell claimed, voices told, thoughts your words shaped, your share of the mind.
+```
+
+**3/7**
+```
+Others are about how you explore:
+
+- see the brain at dawn, day, dusk and night
+- watch a whole timelapse
+- watch the mind fall asleep
+- see a cell get claimed live
+- visit between 2 and 5 a.m.
+
+22 in total.
+```
+
+**4/7**
+```
+And a few are hidden.
+
+We won't say which. There is one you get by poking the pixel eye seven times. It blinks back.
+```
+
+**5/7**
+```
+Rarer means bigger. Bronze is a quiet blip. Gold and legendary get a longer fanfare and a shower of pixel sparks.
+
+50 voices through one cell earns "Choir of One". The mind knows your cadence.
+```
+
+**6/7**
+```
+Every cell shows the achievements it has earned on its own page, so you can see who is a Storyteller, who is a Mind Weaver, and who has just found their first words.
+```
+
+**7/7**
+```
+Open the trophy in the header to see them all with your progress. Which one do you want first?
+
+128 voices. One mind.
+{LINK}
+```
+
+## Тред 3 (по-русски), 7 постов: достижения
+
+**1/7**
+```
+В SYNNOD появились достижения.
+
+Как в играх: когда ты что-то получаешь, выезжает окно. Привязал кошелёк: «Связь установлена». Занял клетку: «Свой голос». Четыре редкости, от бронзы до легенды.
+```
+
+**2/7**
+```
+Часть достижений считается по настоящим данным, поэтому их нельзя подделать, и они следуют за тобой в любой браузер: привязанный кошелёк, занятая клетка, рассказанные голоса, мысли из твоих слов, доля в разуме.
+```
+
+**3/7**
+```
+Другие про то, как ты исследуешь:
+
+- увидеть мозг на рассвете, днём, на закате и ночью
+- досмотреть таймлапс
+- увидеть, как разум засыпает
+- увидеть захват клетки вживую
+- зайти между 2 и 5 утра
+
+Всего 22.
+```
+
+**4/7**
+```
+А несколько скрыты.
+
+Не скажем какие. Одно получаешь, если ткнёшь в пиксельный глаз семь раз. Он моргнёт в ответ.
+```
+
+**5/7**
+```
+Чем реже, тем эффектнее. Бронза это тихий писк. Золото и легенда получают длинную фанфару и россыпь пиксельных искр.
+
+50 голосов через одну клетку дают «Хор из одного». Разум знает твой ритм.
+```
+
+**6/7**
+```
+Профиль каждой клетки показывает её достижения, так что видно, кто Рассказчик, кто Ткач разума, а кто только нашёл первые слова.
+```
+
+**7/7**
+```
+Откройте кубок в шапке, чтобы увидеть все с прогрессом. Какое хотите получить первым?
+
+128 голосов. Один разум.
+{LINK}
+```
+
 ## Single posts (2)
 
 **Living sky**
