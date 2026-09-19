@@ -155,6 +155,7 @@ export default function IntroGate() {
       }
       setGone(true);
       seen.forEach((cb) => cb());
+      window.dispatchEvent(new Event("synnod:entered")); // the brain assembles itself now
     }, 750);
   }
 

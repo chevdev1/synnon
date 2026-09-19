@@ -1,26 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { PixelCharacter } from "@/components/ui/PixelArt";
 import { CHARACTER } from "@/lib/mock/data";
 import { useLive } from "@/lib/live/context";
-
-// Demo only: the mood line drifts on its own. In real mode it is whatever the
-// server says (memory_state.character_state_json).
-const MOODS = ["curious", "watching", "listening", "wondering", "restless"];
+import { useMind } from "@/lib/mind";
 
 export default function CharacterCard() {
-  const { mode, character } = useLive();
+  const { character } = useLive();
   const traits = character?.traits ?? CHARACTER.traits;
   const quote = character?.quote ?? CHARACTER.quote;
-  const [mood, setMood] = useState(0);
-  useEffect(() => {
-    if (mode !== "demo") return;
-    const id = window.setInterval(() => setMood((m) => (m + 1) % MOODS.length), 5200);
-    return () => window.clearInterval(id);
-  }, [mode]);
-  const moodLabel = mode === "demo" ? MOODS[mood] : (character?.mood ?? "curious");
+  const { mood: moodLabel } = useMind(); // demo: drifts on its own; live: whatever the server says
 
   return (
     <Card help="character" className="flex h-full min-h-0 flex-col overflow-y-auto">

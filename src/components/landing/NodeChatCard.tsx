@@ -6,10 +6,13 @@ import { HexIcon } from "@/components/ui/PixelIcon";
 import { CHAT_MESSAGES } from "@/lib/mock/data";
 import { useLive } from "@/lib/live/context";
 import { openClaim } from "./ClaimDialog";
+import GlitchText from "@/components/ui/GlitchText";
+import { mindActions } from "@/lib/mind";
 
 interface Msg {
   role: "user" | "synnod" | "system";
   text: string;
+  fresh?: boolean; // just arrived from the mind: typed out with glitch, once
 }
 
 export default function NodeChatCard() {
@@ -25,16 +28,23 @@ export default function NodeChatCard() {
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [messages, typing]);
 
+  const stickToBottom = () => {
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  };
+
   async function send() {
     const text = draft.trim();
     if (!text || typing || currentUserNodeId == null) return;
     setMessages((prev) => [...prev, { role: "user", text }]);
     setDraft("");
     setTyping(true);
+    mindActions.setThinking(true);
     const r = await speak(text);
+    mindActions.setThinking(false);
     setTyping(false);
     if (r.ok) {
-      setMessages((prev) => [...prev, { role: "synnod", text: r.reply }]);
+      setMessages((prev) => [...prev, { role: "synnod", text: r.reply, fresh: true }]);
       triggerPulse(currentUserNodeId);
     } else {
       setMessages((prev) => [...prev, { role: "system", text: r.error }]);
@@ -85,7 +95,7 @@ export default function NodeChatCard() {
                   m.role === "user" ? "bg-[var(--accent)]/20 text-[var(--text)]" : "bg-[var(--divider)] text-[var(--text-2)]"
                 }`}
               >
-                {m.text}
+                {m.role === "synnod" ? <GlitchText text={m.text} animate={!!m.fresh} onProgress={stickToBottom} /> : m.text}
               </div>
             </div>
           )

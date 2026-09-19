@@ -1,11 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import BrainCanvasClient from "@/components/brain/BrainCanvasClient";
 import { StatusDot } from "@/components/ui/Card";
 import { useLive } from "@/lib/live/context";
 import { formatAgo } from "@/lib/live/format";
 import { openClaim } from "./ClaimDialog";
 import { openNode } from "./NodeSheet";
+import NodeSearch from "./NodeSearch";
+import PixelFace from "@/components/ui/PixelFace";
+import { useMind } from "@/lib/mind";
+import { sfx } from "@/lib/sfx";
 import { useDemo } from "@/lib/demo";
 
 // Deterministic (no Math.random) so SSR and client markup match.
@@ -20,10 +25,20 @@ const MOTES = Array.from({ length: 28 }, (_, i) => ({
 
 export default function BrainStage() {
   const demo = useDemo();
-  const { mode, offline, nodes, currentUserNodeId, selectedId, setSelectedId, pulseEvent, events, now } = useLive();
+  const { mode, offline, nodes, me, currentUserNodeId, selectedId, setSelectedId, pulseEvent, events, now } = useLive();
+  const { state: mindState, mood, dreaming } = useMind();
+  const [ping, setPing] = useState<{ id: number; n: number } | null>(null);
   const activeId = selectedId ?? currentUserNodeId;
   const node = activeId == null ? undefined : nodes.find((n) => n.id === activeId);
   const justPulsed = activeId != null && pulseEvent?.nodeId === activeId;
+
+  // A taken cell opens its profile; a free one opens the claim / connect card.
+  function openCell(id: number) {
+    setSelectedId(id);
+    const taken = nodes.find((n) => n.id === id)?.status;
+    if (taken && taken !== "available") openNode(id);
+    else openClaim();
+  }
 
   return (
     <div className="relative min-h-0 flex-1">
@@ -68,14 +83,28 @@ export default function BrainStage() {
         nodes={nodes}
         selectedId={selectedId}
         currentUserNodeId={currentUserNodeId}
+        ownName={me?.name ?? null}
         onSelect={(id) => {
-          setSelectedId(id);
-          // A taken cell opens its profile; a free one opens the claim / connect card.
-          const taken = nodes.find((n) => n.id === id)?.status;
-          if (taken && taken !== "available") openNode(id);
-          else openClaim();
+          sfx.select();
+          openCell(id);
         }}
         pulseEvent={pulseEvent}
+        ping={ping}
+        dreaming={dreaming}
+      />
+
+      <div className="pointer-events-none absolute right-3 top-3 z-10 flex select-none flex-col items-center gap-1" data-help-id="face">
+        <PixelFace state={mindState} mood={mood} className="h-[42px] w-[68px] sm:h-[56px] sm:w-[90px]" />
+        <span className="font-head text-[6px] uppercase text-[var(--muted)] sm:text-[7px]">
+          {mindState === "sleeping" ? "dreaming" : mindState === "thinking" ? "thinking…" : mindState === "speaking" ? "speaking" : mood}
+        </span>
+      </div>
+      <NodeSearch
+        onFound={(id) => {
+          setPing((p) => ({ id, n: (p?.n ?? 0) + 1 }));
+          setSelectedId(id);
+          window.setTimeout(() => openCell(id), 650); // let the ping land first
+        }}
       />
 
       <div className="pointer-events-none absolute left-4 top-4 select-none">
@@ -117,8 +146,6 @@ export default function BrainStage() {
           </li>
         ))}
       </ul>
-
-      <div className="pointer-events-none absolute bottom-3 right-3 text-[var(--faint)]">+</div>
     </div>
   );
 }

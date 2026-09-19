@@ -75,7 +75,7 @@ export const helpActions = {
 };
 
 // Order of the guided tour (also the reading order of the page).
-export const TOUR = ["intro", "brain", "mind", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion"];
+export const TOUR = ["intro", "brain", "face", "search", "mind", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod"];
 
 export const HELP: Record<string, { title: T; body: T }> = {
   intro: {
@@ -90,6 +90,20 @@ export const HELP: Record<string, { title: T; body: T }> = {
     body: {
       en: "Every hexagon is a spot for one person (128 in total). Hover a cell to see its number and status. Click a free one to take it. Glowing cells spoke to the AI recently; the green outline is your own cell.",
       ru: "Каждый шестиугольник — место одного человека (всего 128). Наведи на клетку — увидишь номер и статус. Кликни по свободной, чтобы занять её. Светящиеся клетки недавно говорили с ИИ, зелёный контур — твоя клетка.",
+    },
+  },
+  face: {
+    title: { en: "The face of the mind", ru: "Лицо разума" },
+    body: {
+      en: "One pixel eye that shows what the mind is doing. It blinks and looks around when awake, spins while it thinks about your message, “speaks” while the reply is typed, and falls asleep (with a Z) when nobody has spoken for a few minutes. The iris colour is its mood.",
+      ru: "Один пиксельный глаз показывает, что делает разум. Пока бодрствует — моргает и оглядывается, крутит зрачком, когда думает над твоим сообщением, «говорит», пока печатается ответ, и засыпает (появляется Z), если несколько минут никто не говорил. Цвет радужки — настроение.",
+    },
+  },
+  search: {
+    title: { en: "Find a node", ru: "Поиск клетки" },
+    body: {
+      en: "Type a cell number (48 or #48) or part of a nickname. The cell pulses pink on the brain and its card opens. Useful because 128 hexagons look alike.",
+      ru: "Введи номер клетки (48 или #48) или часть ника. Клетка вспыхнет розовым на мозге и откроется её карточка. Удобно, когда 128 шестиугольников выглядят одинаково.",
     },
   },
   mind: {
@@ -160,6 +174,13 @@ export const HELP: Record<string, { title: T; body: T }> = {
     body: {
       en: "Turns the animations on or off. If your system has “reduce motion” enabled, the site stays still until you switch this on.",
       ru: "Включает и выключает анимации. Если в системе включено «уменьшить движение», сайт остаётся неподвижным, пока ты не включишь эту кнопку.",
+    },
+  },
+  tod: {
+    title: { en: "Time of day", ru: "Время суток" },
+    body: {
+      en: "The whole site follows your local clock: warm pink at dawn, cool blue by day, magenta at dusk, deep violet at night. Click to pin a phase and see the others; “auto” goes back to your clock.",
+      ru: "Весь сайт следует за твоими часами: тёплый розовый на рассвете, прохладный синий днём, малиновый на закате, глубокий фиолетовый ночью. Нажми, чтобы зафиксировать любую фазу и посмотреть остальные; «auto» вернёт по твоим часам.",
     },
   },
 };

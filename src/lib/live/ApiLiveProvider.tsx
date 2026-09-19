@@ -14,6 +14,7 @@ import {
   type Thought,
 } from "./context";
 import { walletSignIn } from "@/lib/wallet";
+import { sfx } from "@/lib/sfx";
 
 // Real data only: everything shown comes from /api/* and the SSE stream. If
 // nothing has happened yet the UI says so instead of inventing activity.
@@ -53,6 +54,7 @@ interface ApiNode {
   id: number;
   status: string;
   ownerName?: string | null;
+  lastActiveAt?: number | null;
 }
 interface ApiMemory {
   id: number;
@@ -78,7 +80,7 @@ export function ApiLiveProvider({ children }: { children: ReactNode }) {
   const refreshNodes = useCallback(async () => {
     const d = await getJson<{ nodes: ApiNode[] }>("/api/nodes");
     setOffline(!d);
-    if (d) setNodes(d.nodes.map((n) => ({ id: n.id, status: n.status as NodeStatus, label: `Node ${label(n.id)}`, ownerName: n.ownerName ?? undefined })));
+    if (d) setNodes(d.nodes.map((n) => ({ id: n.id, status: n.status as NodeStatus, label: `Node ${label(n.id)}`, ownerName: n.ownerName ?? undefined, lastActiveAt: n.lastActiveAt ?? undefined })));
   }, []);
   const refreshMe = useCallback(async () => {
     const d = await getJson<{ user: { username: string; wallet?: string | null } | null; nodeId?: number | null }>("/api/auth/me");
@@ -133,8 +135,13 @@ export function ApiLiveProvider({ children }: { children: ReactNode }) {
     const es = new EventSource("/api/stream");
     es.addEventListener("node.updated", (e) => {
       const d = JSON.parse((e as MessageEvent).data) as ApiNode;
-      setNodes((cur) => cur.map((n) => (n.id === d.id ? { ...n, status: d.status as NodeStatus } : n)));
-      if (d.status === "claimed") bump(`node ${label(d.id)} was claimed`, d.id);
+      setNodes((cur) => cur.map((n) => (n.id === d.id ? { ...n, status: d.status as NodeStatus, lastActiveAt: d.status === "active" ? Date.now() : n.lastActiveAt } : n)));
+      if (d.status === "claimed") {
+        bump(`node ${label(d.id)} was claimed`, d.id);
+        setPulseEvent({ nodeId: d.id, type: "claim" }); // shockwave across the brain
+        sfx.claim();
+        void refreshNodes(); // owner name for the new cell
+      }
     });
     es.addEventListener("output.created", (e) => {
       const d = JSON.parse((e as MessageEvent).data) as { nodeId: number | null };
@@ -145,12 +152,14 @@ export function ApiLiveProvider({ children }: { children: ReactNode }) {
       void refreshMemory();
     });
     es.addEventListener("thought.created", (e) => {
-      const d = JSON.parse((e as MessageEvent).data) as { id: number; text: string; createdAt: string };
+      const d = JSON.parse((e as MessageEvent).data) as { id: number; text: string; createdAt: string; nodeIds?: number[] };
       setThoughts((prev) => [{ id: d.id, text: d.text, ts: new Date(d.createdAt).getTime() }, ...prev].slice(0, 8));
       bump("a new thought surfaced", 0);
+      // The thought grew out of these cells' words: sparks travel between them.
+      if (d.nodeIds && d.nodeIds.length > 1) setPulseEvent({ nodeId: d.nodeIds[0], type: "thought", links: d.nodeIds.slice(1) });
     });
     return () => es.close();
-  }, [bump, refreshMemory, offline]);
+  }, [bump, refreshMemory, refreshNodes, offline]);
 
   // Sparkline = real event rate over the last minute, not a random walk.
   useEffect(() => {
@@ -205,7 +214,7 @@ export function ApiLiveProvider({ children }: { children: ReactNode }) {
       const r = await post(`/api/nodes/${nodeId}/claim`);
       if (r.status !== 200) return { ok: false, error: String(r.data.error ?? "could not claim") };
       await Promise.all([refreshNodes(), refreshMe()]);
-      setSelectedId(nodeId);
+      setSelectedId(nodeId); // the shockwave + sound come from the server's node.updated event
       return { ok: true };
     },
     [refreshNodes, refreshMe]

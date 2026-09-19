@@ -297,6 +297,12 @@ const snapshot = () => {
   return `${wanted ? 1 : 0}${playing ? 1 : 0}`;
 };
 
+// Read by the UI sound effects: they follow the same on/off choice as the music.
+export function soundWanted(): boolean {
+  loadPref();
+  return wanted;
+}
+
 export function useMusic() {
   const s = useSyncExternalStore(subscribe, snapshot, () => "10");
   const flip = useCallback(() => void toggle(), []);

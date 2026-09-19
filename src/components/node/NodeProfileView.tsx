@@ -5,6 +5,7 @@ import { StatusDot } from "@/components/ui/Card";
 import { formatAgo } from "@/lib/live/format";
 import { useLive } from "@/lib/live/context";
 import type { NodeProfile } from "@/lib/nodeProfile";
+import MiniBrain from "./MiniBrain";
 
 const STATUS_COLOR: Record<string, string> = {
   available: "var(--muted)",
@@ -83,6 +84,21 @@ export default function NodeProfileView({ profile, compact = false }: { profile:
       <div>
         <div className="font-head mb-1.5 text-[8px] uppercase text-[var(--muted)]">Influence on the mind</div>
         <ShareBar pct={stats.sharePct} />
+      </div>
+
+      <div>
+        <div className="font-head mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[8px] uppercase text-[var(--muted)]">
+          Where it sits
+          <span className="flex items-center gap-1 text-[var(--lime)]">
+            <span className="h-2 w-2 bg-[var(--lime)]" /> this cell
+          </span>
+          {profile.links.length > 0 && (
+            <span className="flex items-center gap-1 text-[var(--cell-pink)]">
+              <span className="h-2 w-2 bg-[var(--cell-pink)]" /> shares thoughts with {profile.links.length}
+            </span>
+          )}
+        </div>
+        <MiniBrain id={node.id} links={profile.links} />
       </div>
 
       <div>

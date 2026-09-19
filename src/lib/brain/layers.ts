@@ -283,17 +283,76 @@ export interface BrainLayers {
   sparkLayers: HTMLCanvasElement[]; // 2
 }
 
+// Time-of-day tint, baked into the cached layers once per phase change (a CSS
+// filter on the live canvas would be re-applied every frame). Browsers without
+// canvas `filter` support get the untinted layers; the page glow still changes.
+export function tintLayers(layers: BrainLayers, filter: string): BrainLayers {
+  if (filter === "none") return layers;
+  const probe = document.createElement("canvas").getContext("2d");
+  if (!probe || !("filter" in probe)) return layers;
+  const tint = (src: HTMLCanvasElement): HTMLCanvasElement => {
+    const c = document.createElement("canvas");
+    c.width = src.width;
+    c.height = src.height;
+    const x = c.getContext("2d")!;
+    x.filter = filter;
+    x.drawImage(src, 0, 0);
+    return c;
+  };
+  return {
+    ...layers,
+    staticLayer: tint(layers.staticLayer),
+    glowGroups: layers.glowGroups.map(tint),
+    waveLayer: tint(layers.waveLayer),
+    nodeLayer: layers.nodeLayer, // the visitor's own ring stays lime whatever the hour
+    sparkLayers: layers.sparkLayers.map(tint),
+  };
+}
+
+// Rebuilding every layer on each status change froze the main thread for ~1s (the
+// blurs dominate). Most layers don't depend on status at all, and a glow group
+// only depends on which of its own cells are lit, so both are cached. Cached
+// canvases are only ever drawn from, never mutated, so sharing them is safe.
+const independentCache = new WeakMap<BrainModel, { haze: HTMLCanvasElement; wave: HTMLCanvasElement; sparks: HTMLCanvasElement[] }>();
+const blurCache = new WeakMap<BrainModel, Map<string, HTMLCanvasElement>>();
+
+function cachedBlur(model: BrainModel, key: string, build: () => HTMLCanvasElement): HTMLCanvasElement {
+  let m = blurCache.get(model);
+  if (!m) blurCache.set(model, (m = new Map()));
+  const hit = m.get(key);
+  if (hit) return hit;
+  const made = build();
+  m.set(key, made);
+  if (m.size > 24) m.delete(m.keys().next().value as string); // oldest out
+  return made;
+}
+
+function litSignature(model: BrainModel, statusMap: Map<number, NodeStatus>, userId: number | null, group?: number): string {
+  let s = "";
+  for (const cell of model.cells) {
+    const v = resolveCellVisual(cell, statusMap, userId);
+    if (v.lit && (group === undefined || v.group === group)) s += `${cell.claimId}${v.fam[0]}${v.fam.length},`;
+  }
+  return s;
+}
+
 export function buildBrainLayers(
   model: BrainModel,
   statusMap: Map<number, NodeStatus>,
   currentUserNodeId: number | null
 ): BrainLayers {
-  const hazeGlow = applyGlow(upscale(bufferToCanvas(renderHazeBuffer(model)), SCALE), 22, 1.0, false);
-  const litGlow = applyGlow(
-    upscale(bufferToCanvas(renderLitAmbientBuffer(model, statusMap, currentUserNodeId)), SCALE),
-    12,
-    0.55,
-    false
+  let ind = independentCache.get(model);
+  if (!ind) {
+    ind = {
+      haze: applyGlow(upscale(bufferToCanvas(renderHazeBuffer(model)), SCALE), 22, 1.0, false),
+      wave: applyGlow(upscale(bufferToCanvas(renderWaveBuffer(model)), SCALE), 5, 0.5, true),
+      sparks: [40, 41].map((seed) => applyGlow(upscale(bufferToCanvas(renderSparkBuffer(model, seed)), SCALE), 3, 1.6, true)),
+    };
+    independentCache.set(model, ind);
+  }
+  const hazeGlow = ind.haze;
+  const litGlow = cachedBlur(model, `lit|${litSignature(model, statusMap, currentUserNodeId)}`, () =>
+    applyGlow(upscale(bufferToCanvas(renderLitAmbientBuffer(model, statusMap, currentUserNodeId)), SCALE), 12, 0.55, false)
   );
   const b = upscale(bufferToCanvas(renderBaseBuffer(model, statusMap, currentUserNodeId)), SCALE);
 
@@ -306,15 +365,17 @@ export function buildBrainLayers(
   sctx.drawImage(b, 0, 0);
 
   const glowGroups = [0, 1, 2, 3].map((g) =>
-    applyGlow(upscale(bufferToCanvas(renderGlowGroupBuffer(model, statusMap, currentUserNodeId, g)), SCALE), 12, 1.4, true)
+    cachedBlur(model, `g${g}|${litSignature(model, statusMap, currentUserNodeId, g)}`, () =>
+      applyGlow(upscale(bufferToCanvas(renderGlowGroupBuffer(model, statusMap, currentUserNodeId, g)), SCALE), 12, 1.4, true)
+    )
   );
 
-  const waveLayer = applyGlow(upscale(bufferToCanvas(renderWaveBuffer(model)), SCALE), 5, 0.5, true);
+  const waveLayer = ind.wave;
 
   const ndBuf = renderNodeRingBuffer(model, currentUserNodeId);
-  const nodeLayer = ndBuf ? applyGlow(upscale(bufferToCanvas(ndBuf), SCALE), 7, 1.8, true) : null;
+  const nodeLayer = ndBuf ? cachedBlur(model, `node|${currentUserNodeId}`, () => applyGlow(upscale(bufferToCanvas(ndBuf), SCALE), 7, 1.8, true)) : null;
 
-  const sparkLayers = [40, 41].map((seed) => applyGlow(upscale(bufferToCanvas(renderSparkBuffer(model, seed)), SCALE), 3, 1.6, true));
+  const sparkLayers = ind.sparks;
 
   return {
     width: staticLayer.width,

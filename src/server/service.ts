@@ -20,7 +20,7 @@ export async function listNodes() {
     .set({ status: "memory" })
     .where(and(eq(nodes.status, "active"), sql`${nodes.lastActiveAt} < now() - make_interval(mins => ${ACTIVE_WINDOW_MIN})`));
   return db
-    .select({ id: nodes.id, status: nodes.status, label: nodes.label, ownerName: users.username, ownerUserId: nodes.ownerUserId })
+    .select({ id: nodes.id, status: nodes.status, label: nodes.label, ownerName: users.username, ownerUserId: nodes.ownerUserId, lastActiveAt: nodes.lastActiveAt })
     .from(nodes)
     .leftJoin(users, eq(users.id, nodes.ownerUserId))
     .orderBy(nodes.id);
@@ -166,7 +166,7 @@ export async function generateAutonomousThought() {
   if (!llm.available) return null;
   const db = await getDb();
   const [mem] = await db.select().from(memoryState).limit(1);
-  const recent = await db.select({ id: outputs.id, text: outputs.text }).from(outputs).orderBy(desc(outputs.id)).limit(12);
+  const recent = await db.select({ id: outputs.id, text: outputs.text, nodeId: outputs.nodeId }).from(outputs).orderBy(desc(outputs.id)).limit(12);
   if (recent.length === 0 && !mem.summaryText) return null;
   let text = await llm.generate({
     system: CONSTITUTION + "\n\nWrite ONE short thought (max 120 characters) in first person: an observation or a question. No quotes.",
@@ -175,7 +175,9 @@ export async function generateAutonomousThought() {
   });
   if (text.length > 120) text = text.slice(0, 117).replace(/\s+\S*$/, "") + "…";
   const [row] = await db.insert(thoughts).values({ text, sourceOutputIds: recent.map((r) => r.id) }).returning();
-  publish({ type: "thought.created", data: { id: row.id, text: row.text, createdAt: row.createdAt.toISOString() } });
+  // The cells whose words fed this thought: the brain draws links to them.
+  const nodeIds = [...new Set(recent.map((r) => r.nodeId).filter((n): n is number => n != null))].slice(0, 4);
+  publish({ type: "thought.created", data: { id: row.id, text: row.text, createdAt: row.createdAt.toISOString(), nodeIds } });
   return row;
 }
 

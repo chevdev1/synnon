@@ -7,7 +7,7 @@ export default function Atmosphere() {
         className="absolute left-1/2 top-0 h-[70vh] w-[90vw] -translate-x-1/2 opacity-70"
         style={{
           background:
-            "radial-gradient(50% 50% at 50% 0%, rgba(108,95,214,0.16) 0%, rgba(76,50,150,0.08) 35%, rgba(6,7,26,0) 70%)",
+            "radial-gradient(50% 50% at 50% 0%, var(--tod-glow) 0%, color-mix(in srgb, var(--tod-glow) 50%, transparent) 35%, transparent 70%)",
         }}
       />
       <div

@@ -3,7 +3,7 @@
 export type ServerEvent =
   | { type: "node.updated"; data: { id: number; status: string } }
   | { type: "output.created"; data: { id: number; nodeId: number | null; text: string; trigger: string } }
-  | { type: "thought.created"; data: { id: number; text: string; createdAt: string } };
+  | { type: "thought.created"; data: { id: number; text: string; createdAt: string; nodeIds?: number[] } };
 
 type Listener = (e: ServerEvent) => void;
 const g = globalThis as unknown as { __synnodBus?: Set<Listener> };

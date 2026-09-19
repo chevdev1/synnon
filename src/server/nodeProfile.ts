@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { getDb } from "./db";
 import { memoryState, nodes, outputs, scenarios, thoughts, users } from "./schema";
 import type { NodeProfile, HistoryItem } from "@/lib/nodeProfile";
@@ -42,6 +42,13 @@ export async function getNodeProfile(id: number): Promise<NodeProfile | null> {
   const recentThoughts = await db.select().from(thoughts).orderBy(desc(thoughts.id)).limit(200);
   const shaped = recentThoughts.filter((t) => t.sourceOutputIds.some((o) => mine.has(o)));
 
+  // Cells that co-occur with this one in the thoughts it shaped (who else fed the same thoughts).
+  const otherIds = [...new Set(shaped.flatMap((t) => t.sourceOutputIds).filter((o) => !mine.has(o)))];
+  const others = otherIds.length ? await db.select({ id: outputs.id, nodeId: outputs.nodeId }).from(outputs).where(inArray(outputs.id, otherIds)) : [];
+  const weight = new Map<number, number>();
+  for (const o of others) if (o.nodeId != null && o.nodeId !== id) weight.set(o.nodeId, (weight.get(o.nodeId) ?? 0) + 1);
+  const links = [...weight.entries()].sort((a, b) => b[1] - a[1] || a[0] - b[0]).slice(0, 6).map(([n]) => n);
+
   const history: HistoryItem[] = [
     ...rows.map((r): HistoryItem => ({ kind: "voice", id: r.id, ts: r.createdAt.getTime(), title: r.title, reply: r.reply ?? null, inMemory: r.outputId != null && recent.has(r.outputId) })),
     ...shaped.map((t): HistoryItem => ({ kind: "thought", id: t.id, ts: t.createdAt.getTime(), text: t.text })),
@@ -62,5 +69,6 @@ export async function getNodeProfile(id: number): Promise<NodeProfile | null> {
       sharePct: total > 0 ? Math.round((answered / total) * 1000) / 10 : 0,
     },
     history,
+    links,
   };
 }

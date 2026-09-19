@@ -16,6 +16,7 @@ export interface NodeProfile {
     sharePct: number; // share of everything the mind has answered, 0..100
   };
   history: HistoryItem[]; // newest first
+  links: number[]; // other cells whose words appeared in the same thoughts, strongest first
 }
 
 const TITLES = [
@@ -70,5 +71,6 @@ export function demoProfile(id: number, status: NodeStatus, ownerName: string | 
     },
     stats: { voices: n, inMemory: Math.min(n, 2), thoughtsShaped, sharePct: taken ? Math.round(((n * 10) / 6) * 10) / 10 : 0 },
     history,
+    links: taken ? [...new Set([1, 2, 3, 4].map((k) => ((id * 7 + k * 29) % 125) + 1).filter((x) => x !== id))] : [],
   };
 }

@@ -19,6 +19,72 @@
   --cell-ice: #bfe6ff;
   --cell-violet: #8a5ce0;
   --cell-pink: #d674dc;
+
+  /* time of day (html[data-tod]): recolours the brain and the glow, see below */
+  --tod-glow: rgba(108, 95, 214, 0.16);
+  --tod-glow-2: rgba(120, 80, 220, 0.34);
+  --tod-glow-3: rgba(60, 60, 200, 0.14);
+}
+
+html[data-tod="dawn"] {
+  --bg: #12081c;
+  --tod-glow: rgba(255, 140, 110, 0.2);
+  --tod-glow-2: rgba(255, 120, 150, 0.36);
+  --tod-glow-3: rgba(230, 90, 120, 0.16);
+}
+html[data-tod="day"] {
+  --bg: #071428;
+  --tod-glow: rgba(90, 200, 230, 0.18);
+  --tod-glow-2: rgba(80, 170, 240, 0.32);
+  --tod-glow-3: rgba(60, 130, 220, 0.16);
+}
+html[data-tod="dusk"] {
+  --bg: #0f0720;
+  --tod-glow: rgba(214, 116, 220, 0.2);
+  --tod-glow-2: rgba(230, 90, 170, 0.34);
+  --tod-glow-3: rgba(170, 70, 200, 0.16);
+}
+
+body {
+  transition: background-color 1.5s ease;
+}
+
+/* (the brain's own palette shift is baked into its canvas layers, see tintLayers in lib/brain/layers.ts) */
+
+/* asleep: a slower, shallower breath and a dimmer body */
+.brain-dream {
+  animation-duration: 12s;
+}
+.brain-dream canvas {
+  opacity: 0.86;
+}
+
+@keyframes synnod-own-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+@keyframes synnod-mini-ping {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.6);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+.mini-ping {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: synnod-mini-ping 1.8s ease-out infinite;
+}
+.own-arrow {
+  animation: synnod-own-bob 1s steps(2, end) infinite;
 }
 
 @theme inline {
@@ -157,7 +223,7 @@ body {
 }
 
 .stage-glow {
-  background: radial-gradient(closest-side, rgba(120, 80, 220, 0.34), rgba(60, 60, 200, 0.14) 55%, transparent 100%);
+  background: radial-gradient(closest-side, var(--tod-glow-2), var(--tod-glow-3) 55%, transparent 100%);
   filter: blur(24px);
   animation: synnod-glow 6s ease-in-out infinite;
 }
@@ -302,7 +368,9 @@ body {
 @media (prefers-reduced-motion: reduce) {
   :root:not([data-motion="full"]) {
     .fade-in-up,
-    .sheet-in {
+    .sheet-in,
+    .mini-ping,
+    .own-arrow {
       animation: none;
     }
     .shimmer-border::after {

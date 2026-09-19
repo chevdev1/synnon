@@ -111,6 +111,117 @@ export const DOCS: DocSection[] = [
     ],
   },
   {
+    id: "alive",
+    title: t("A living brain: what moves and why", "Живой мозг: что двигается и зачем"),
+    blocks: [
+      {
+        kind: "p",
+        text: t(
+          "Nothing on the brain is decoration. Every effect below is driven by something that really happened in the shared memory.",
+          "Здесь нет декораций ради декораций. Каждый эффект ниже привязан к тому, что реально произошло в общей памяти.",
+        ),
+      },
+      {
+        kind: "table",
+        head: [t("Mechanic", "Механика"), t("What you see", "Что видно")],
+        rows: [
+          [
+            t("Neural links", "Нейронные связи"),
+            t(
+              "When a voice is answered, or when the mind has a thought, pixel sparks travel from the speaking cell to the cells whose words fed it. A thought lights up every voice it grew from.",
+              "Когда голосу отвечают или у разума рождается мысль, пиксельные искры бегут от говорящей клетки к клеткам, чьи слова её питали. Мысль подсвечивает все голоса, из которых выросла.",
+            ),
+          ],
+          [
+            t("Claim shockwave", "Волна захвата"),
+            t(
+              "When someone takes a free cell, a green wave rolls across the whole brain and the event lands in the feed. You can hear it if sound is on.",
+              "Когда кто-то занимает свободную клетку, по всему мозгу расходится зелёная волна, а событие появляется в ленте. Со включённым звуком её ещё и слышно.",
+            ),
+          ],
+          [
+            t("Glow by age", "Свечение по «возрасту»"),
+            t(
+              "A cell that just spoke burns bright and slowly cools; its brightness halves about every 70 minutes. So the brain shows what the mind is remembering right now and what has sunk deeper.",
+              "Клетка, которая только что говорила, горит ярко и постепенно остывает: яркость падает вдвое примерно за 70 минут. Мозг показывает, что разум помнит сейчас, а что ушло глубже.",
+            ),
+          ],
+          [
+            t("Your cell", "Твоя клетка"),
+            t(
+              "A pulsing green frame and a floating “YOU · nickname” tag mark your own cell among the 128.",
+              "Пульсирующая зелёная рамка и парящая метка «YOU · ник» отмечают твою клетку среди 128.",
+            ),
+          ],
+          [
+            t("Find a node", "Поиск клетки"),
+            t(
+              "The search box on the brain takes a number (#48) or part of a nickname. The cell pulses pink and its card opens.",
+              "Поле поиска на мозге принимает номер (#48) или часть ника. Клетка вспыхивает розовым, и открывается её карточка.",
+            ),
+          ],
+          [
+            t("The face", "Лицо"),
+            t(
+              "One pixel eye. It blinks and looks around; spins while it thinks about your message; “speaks” while the reply types out; falls asleep when nobody has spoken for about 6 minutes. Iris colour = mood.",
+              "Один пиксельный глаз. Моргает и оглядывается, крутит зрачком, пока думает над твоим сообщением, «говорит», пока печатается ответ, и засыпает, если ~6 минут никто не говорил. Цвет радужки — настроение.",
+            ),
+          ],
+          [
+            t("Dreaming", "Сны"),
+            t(
+              "While the mind sleeps its breathing slows and old memories flicker up at random. In Live mode this is visual only: the site never invents thoughts for the AI.",
+              "Пока разум спит, дыхание замедляется, а старые воспоминания случайно вспыхивают. В Live-режиме это только визуальный эффект: сайт никогда не придумывает мысли за ИИ.",
+            ),
+          ],
+          [
+            t("Glitch typing", "Печать с глитчем"),
+            t(
+              "The AI's reply types out character by character; the few characters ahead of the cursor flicker as pixel static before they resolve, and the author's cell lights up.",
+              "Ответ ИИ печатается по буквам; несколько символов впереди курсора мерцают пиксельным шумом, прежде чем проявиться, а клетка автора вспыхивает.",
+            ),
+          ],
+          [
+            t("Sounds", "Звуки"),
+            t(
+              "8-bit blips for clicks, replies, finding a node and claims. They follow the music switch: “sound on” plays them, “lofi off” silences them.",
+              "8-битные звуки для кликов, ответов, поиска и захвата клетки. Они подчиняются переключателю музыки: «sound on» — звучат, «lofi off» — тишина.",
+            ),
+          ],
+          [
+            t("Day and night", "День и ночь"),
+            t(
+              "The brain and the glow follow your local clock: pink dawn (5–8), cool blue day (8–17), magenta dusk (17–20), deep violet night. The chip in the header pins any phase; “auto” returns to your clock.",
+              "Мозг и свечение следуют за твоими часами: розовый рассвет (5–8), прохладный синий день (8–17), малиновый закат (17–20), глубокий фиолетовый ночью. Кнопка в шапке фиксирует любую фазу, «auto» возвращает к твоим часам.",
+            ),
+          ],
+          [
+            t("Assembly", "Сборка мозга"),
+            t(
+              "After the intro screen the brain builds itself cell by cell from the centre outwards.",
+              "После стартового экрана мозг собирается клетка за клеткой от центра к краям.",
+            ),
+          ],
+        ],
+      },
+      {
+        kind: "p",
+        text: t(
+          "Click a taken cell to open its profile: how many voices it spoke, how many replies are still in memory, how many thoughts it shaped, its share of the mind, a timeline of what it said and how the mind answered, and a small map of the cells it shares thoughts with. Every profile also has its own page (/node/48) with a share card for social networks.",
+          "Клик по занятой клетке открывает её профиль: сколько голосов она сказала, сколько ответов ещё в памяти, сколько мыслей породила, её долю в разуме, ленту «что сказала и что ответил разум» и карту клеток, с которыми у неё общие мысли. У каждого профиля есть своя страница (/node/48) с карточкой для соцсетей.",
+        ),
+      },
+      {
+        kind: "note",
+        tone: "info",
+        text: t(
+          "All of this respects the Motion switch: with motion off you get calm still frames, no flicker.",
+          "Всё это подчиняется переключателю Motion: при выключенном движении остаются спокойные статичные кадры без мерцания.",
+        ),
+      },
+    ],
+  },
+  {
     id: "memory",
     title: t("Shared memory and thoughts", "Общая память и мысли"),
     blocks: [

@@ -33,7 +33,10 @@ let thoughtIdSeq = 1000;
 let eventSeq = 0;
 
 export function DemoLiveProvider({ children }: { children: ReactNode }) {
-  const [nodes, setNodes] = useState<BrainNode[]>(MOCK_NODES);
+  // Cells that have spoken start with a spread of "last active" times, so the glow-by-age shows.
+  const [nodes, setNodes] = useState<BrainNode[]>(() =>
+    MOCK_NODES.map((n) => (n.status === "available" || n.status === "claimed" ? n : { ...n, lastActiveAt: Date.now() - ((n.id * 37) % 180) * 60_000 }))
+  );
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [pulseEvent, setPulseEvent] = useState<PulseEvent | null>(null);
   const [activitySeries, setActivitySeries] = useState<number[]>(ACTIVITY_SERIES);
@@ -42,7 +45,7 @@ export function DemoLiveProvider({ children }: { children: ReactNode }) {
   );
   const [events, setEvents] = useState<LiveEvent[]>([]);
   const [memories, setMemories] = useState<LiveMemory[]>([]);
-  const [lastMemoryTs, setLastMemoryTs] = useState<number | null>(() => Date.now() - 12 * 60 * 1000);
+  const [lastMemoryTs, setLastMemoryTs] = useState<number | null>(() => Date.now() - 90 * 1000);
   const [now, setNow] = useState(() => Date.now());
   const replyIdx = useRef(0);
 
@@ -69,9 +72,19 @@ export function DemoLiveProvider({ children }: { children: ReactNode }) {
       );
       if (candidates.length > 0) {
         const pick = candidates[Math.floor(Math.random() * candidates.length)];
-        setNodes((cur) => cur.map((n) => (n.id === pick.id ? { ...n, status: "active" } : n)));
-        setPulseEvent({ nodeId: pick.id, type: "output" });
         const label = String(pick.id).padStart(2, "0");
+        if (pick.status === "available" && Math.random() < 0.45) {
+          // a new voice takes a free cell: shockwave across the brain
+          setNodes((cur) => cur.map((n) => (n.id === pick.id ? { ...n, status: "claimed", lastActiveAt: Date.now() } : n)));
+          setPulseEvent({ nodeId: pick.id, type: "claim" });
+          eventSeq += 1;
+          const claimed: LiveEvent = { id: eventSeq, nodeId: pick.id, text: `node ${label} was claimed`, ts: Date.now() };
+          setEvents((prev) => [claimed, ...prev].slice(0, 4));
+          scheduleNext(6000 + Math.random() * 6000);
+          return;
+        }
+        setNodes((cur) => cur.map((n) => (n.id === pick.id ? { ...n, status: "active", lastActiveAt: Date.now() } : n)));
+        setPulseEvent({ nodeId: pick.id, type: "output" });
         eventSeq += 1;
         const wake: LiveEvent = { id: eventSeq, nodeId: pick.id, text: `node ${label} is speaking`, ts: Date.now() };
         setEvents((prev) => [wake, ...prev].slice(0, 4));
@@ -124,6 +137,12 @@ export function DemoLiveProvider({ children }: { children: ReactNode }) {
       const id = thoughtIdSeq;
       const ts = Date.now();
       setThoughts((prev) => [{ id, text, ts }, ...prev].slice(0, 6));
+      // the thought "grows out of" a few voices: sparks travel between their cells
+      const spoken = nodesRef.current.filter((n) => n.status !== "available");
+      if (spoken.length >= 3) {
+        const pickN = [...spoken].sort(() => Math.random() - 0.5).slice(0, 3 + Math.floor(Math.random() * 2));
+        setPulseEvent({ nodeId: pickN[0].id, type: "thought", links: pickN.slice(1).map((n) => n.id) });
+      }
       scheduleNext(16000 + Math.random() * 9000);
     }
     scheduleNext(9000 + Math.random() * 5000);
@@ -133,7 +152,10 @@ export function DemoLiveProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const triggerPulse = useCallback((nodeId: number) => setPulseEvent({ nodeId, type: "output" }), []);
+  const triggerPulse = useCallback((nodeId: number) => {
+    setPulseEvent({ nodeId, type: "output" });
+    setNodes((cur) => cur.map((n) => (n.id === nodeId ? { ...n, lastActiveAt: Date.now() } : n)));
+  }, []);
 
   const stats = useMemo<Stats>(
     () =>

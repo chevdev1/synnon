@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import Atmosphere from "@/components/landing/Atmosphere";
 import DemoToggle from "@/components/landing/DemoToggle";
 import { HexIcon } from "@/components/ui/PixelIcon";
@@ -11,6 +12,39 @@ import { useNodeProfile } from "./useNodeProfile";
 
 const TOTAL = 128;
 const nav = "pixel-btn font-head flex h-9 items-center border-2 border-[var(--border)] px-3 text-[8px] uppercase text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--lime)]";
+
+// Share card: the link unfurls into the pixel card from opengraph-image.tsx.
+function ShareRow({ id, voices, thoughts, mine }: { id: number; voices: number; thoughts: number; mine: boolean }) {
+  const [copied, setCopied] = useState(false);
+  const url = typeof window === "undefined" ? "" : `${window.location.origin}/node/${id}`;
+  const text = mine
+    ? `Node ${String(id).padStart(2, "0")} of SYNNOD: ${voices} voice${voices === 1 ? "" : "s"}, ${thoughts} thought${thoughts === 1 ? "" : "s"} shaped. One mind, 128 voices.`
+    : `Node ${String(id).padStart(2, "0")} of SYNNOD is still free. 128 voices, one mind.`;
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* clipboard blocked */
+    }
+  }
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-2">
+      <a
+        href={`https://x.com/intent/post?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`}
+        target="_blank"
+        rel="noreferrer"
+        className="pixel-btn font-head flex h-9 items-center border-2 border-[var(--accent)] bg-[var(--accent)]/10 px-3 text-[8px] uppercase text-[var(--text)]"
+      >
+        Share on X →
+      </a>
+      <button type="button" onClick={() => void copy()} className={nav}>
+        {copied ? "Copied ✓" : "Copy link"}
+      </button>
+    </div>
+  );
+}
 
 function Body({ id }: { id: number }) {
   const { mode } = useLive();
@@ -44,6 +78,7 @@ function Body({ id }: { id: number }) {
             <p className="font-head text-[8px] uppercase text-[var(--muted)]">{loading ? "reading the cell…" : ""}</p>
           )}
         </div>
+        {profile && <ShareRow id={id} voices={profile.stats.voices} thoughts={profile.stats.thoughtsShaped} mine={profile.node.status !== "available"} />}
       </main>
 
       <footer className="flex items-center justify-between gap-2 border-t-2 border-[var(--divider)] pt-3">
