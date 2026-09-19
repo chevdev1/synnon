@@ -269,10 +269,171 @@ SYNNOD, это один общий ИИ-персонаж, которым ник�
 
 ---
 
+## Thread 2 (English), 8 posts: timelapse, sky, diary, animated cards
+
+Media: `08-timelapse.mp4` (23 s, simulated demo data, say so if asked), `07-animated-card-node-29.mp4` (8 s, real data from a test run).
+
+**1/8**  (media: `08-timelapse.mp4`)
+```
+Timelapse.
+
+One button and the last 24 hours of the SYNNOD mind play back in 20 seconds. Cells appear when they were claimed, flash when they spoke, and sparks jump between the voices behind every thought.
+
+Only cell numbers and times are used. Never anyone's words.
+```
+
+**2/8**
+```
+The brain now has a sky behind it.
+
+Three layers of stars that follow your mouse, slow nebulae tinted by the hour, the odd shooting star. It swells when something happens in the mind, most of all when a cell is claimed, and it calms down when the mind sleeps.
+```
+
+**3/8**
+```
+The mind keeps a diary.
+
+Once a day it writes a short entry: what it noticed, in its own words. It only sees its own replies and thoughts, never anyone's raw messages, so nothing private can end up in a public page.
+
+{LINK}/diary
+```
+
+**4/8**
+```
+Rules of the diary:
+
+- no names, wallets or usernames, ever
+- under each entry you see which cells spoke that day
+- a day with no voices gets no entry
+- one entry per day, written once, never rewritten
+
+Silence stays silence.
+```
+
+**5/8**  (media: `07-animated-card-node-29.mp4`)
+```
+Every cell has an animated card.
+
+The living sky, the brain with your cell pulsing, sparks to the cells you share thoughts with, counters counting up, and a thought typing itself out. 8 seconds, 1200x630.
+
+Yours lives at {LINK}/node/<your number>
+```
+
+**6/8**
+```
+"Download video" records the card as an MP4 right in your browser and hands you the file.
+
+Upload it to X as a video: a plain link can't play video, it only shows the still card. So we made both, the still for links and the clip for posts.
+```
+
+**7/8**  (for builders)
+```
+How the card video works: one canvas, canvas.captureStream(30) into a MediaRecorder, 8 seconds, download. No render farm, no ffmpeg on a server.
+
+Chrome and Safari give MP4 directly, the rest get WebM.
+```
+
+**8/8**
+```
+Take a cell, say something small and true, and come back tomorrow to read what the mind wrote about it.
+
+128 voices. One mind.
+{LINK}
+```
+
+## Тред 2 (по-русски), 8 постов
+
+**1/8**  (медиа: `08-timelapse.mp4`)
+```
+Таймлапс.
+
+Одна кнопка, и последние 24 часа разума SYNNOD проигрываются за 20 секунд. Клетки появляются, когда их заняли, вспыхивают, когда говорили, а искры перескакивают между голосами, из которых родилась каждая мысль.
+
+Только номера клеток и время. Никаких чужих слов.
+```
+
+**2/8**
+```
+За мозгом теперь есть небо.
+
+Три слоя звёзд, которые следят за мышью, медленные туманности в цветах текущего часа, редкие падающие звёзды. Небо вспыхивает, когда в разуме что-то происходит, сильнее всего при захвате клетки, и затихает, когда разум спит.
+```
+
+**3/8**
+```
+У разума есть дневник.
+
+Раз в сутки он пишет короткую запись: что заметил, своими словами. Он видит только свои ответы и мысли, но не чужие сообщения, поэтому ничего личного в публичную страницу не попадёт.
+
+{LINK}/diary
+```
+
+**4/8**
+```
+Правила дневника:
+
+- никаких имён, кошельков и никнеймов
+- под записью видно, какие клетки говорили в тот день
+- день без голосов записи не получает
+- одна запись в сутки, пишется один раз и не переписывается
+
+Тишина остаётся тишиной.
+```
+
+**5/8**  (медиа: `07-animated-card-node-29.mp4`)
+```
+У каждой клетки есть анимированная карточка.
+
+Живое небо, мозг с пульсирующей вашей клеткой, искры к клеткам с общими мыслями, счётчики и мысль, которая печатается сама. 8 секунд, 1200x630.
+
+Ваша живёт по адресу {LINK}/node/<ваш номер>
+```
+
+**6/8**
+```
+«Download video» записывает карточку в MP4 прямо в браузере и отдаёт файл.
+
+Загрузите его в X как видео: обычная ссылка видео не играет, только статичную карточку. Поэтому мы сделали оба формата: картинку для ссылок и клип для постов.
+```
+
+**7/8**  (для разработчиков)
+```
+Как устроено видео карточки: один canvas, canvas.captureStream(30) в MediaRecorder, 8 секунд, скачать. Ни фермы рендеринга, ни ffmpeg на сервере.
+
+Chrome и Safari сразу дают MP4, остальные WebM.
+```
+
+**8/8**
+```
+Займите клетку, скажите что-то маленькое и правдивое и вернитесь завтра почитать, что разум об этом записал.
+
+128 голосов. Один разум.
+{LINK}
+```
+
+## Single posts (2)
+
+**Living sky**
+```
+Behind the SYNNOD brain: three layers of stars that follow your mouse, slow nebulae in the colours of the hour, and the occasional shooting star.
+
+Same sky on the animated card.
+{LINK}
+```
+
+**Timelapse teaser**
+```
+24 hours of a shared mind in 20 seconds.
+▶ Timelapse, top right of the brain.
+{LINK}
+```
+
 ## Notes for posting
 
 - Record a short screen capture (GIF/MP4, 5-8 s) for posts 4, 5 and 6: the typing glitch, the sparks between cells, the claim shockwave. Stills do not show motion; the frames in `docs/media/` are for the other posts.
 - Post 6 works best with a second browser window claiming a free cell while the first watches.
 - Post 7: take the four frames of `02-day-and-night.png` in real time if you can (open the site at different hours).
 - Keep the test-network line (12/12) in the thread: it keeps expectations honest until the real token exists.
+- The two MP4s in `docs/media/` are ready to upload as native video (kept out of git because of size). The timelapse clip is simulated demo data; once the site has real activity, record a new one with the real thing (Live data mode, `▶ Timelapse`).
+- Diary: after a few real days, screenshot a real entry and post it (the share card at `/diary/<date>/opengraph-image` is already made for this).
 - Add the token contract address and a "how to get test tokens" post once the token is deployed.

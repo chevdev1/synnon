@@ -196,6 +196,20 @@ export const DOCS: DocSection[] = [
             ),
           ],
           [
+            t("Living sky", "Живой космос"),
+            t(
+              "Behind the brain there is a night sky of its own: three layers of stars that drift and follow your mouse, slow nebulae tinted by the hour, and the odd shooting star. It swells softly when something happens in the mind, most of all when a cell is claimed, and it calms down when the mind sleeps.",
+              "За мозгом есть собственное ночное небо: три слоя звёзд, которые дрейфуют и следят за мышью, медленные туманности в цветах текущего часа и редкие падающие звёзды. Небо мягко вспыхивает, когда в разуме что-то происходит, сильнее всего при захвате клетки, и успокаивается, когда разум спит.",
+            ),
+          ],
+          [
+            t("Timelapse", "Таймлапс"),
+            t(
+              "The “▶ Timelapse” button replays the recent history of the mind in about 20 seconds: cells appear when they were claimed, flash when they spoke, and sparks jump between the cells behind each thought. The timeline is fitted to the period when things actually happened, and the bar shows how much real time you are watching. Pause, 1x/2x/4x and close are always there. It uses only cell numbers and timestamps, never anyone's words.",
+              "Кнопка «▶ Timelapse» проматывает недавнюю историю разума примерно за 20 секунд: клетки появляются, когда их заняли, вспыхивают, когда говорили, а искры перескакивают между клетками, из которых родилась мысль. Шкала подгоняется под период, когда что-то реально происходило, а полоска внизу показывает, сколько настоящего времени вы смотрите. Пауза, скорость 1x/2x/4x и закрытие всегда под рукой. Используются только номера клеток и время, никогда чьи-то слова.",
+            ),
+          ],
+          [
             t("Assembly", "Сборка мозга"),
             t(
               "After the intro screen the brain builds itself cell by cell from the centre outwards.",
@@ -217,6 +231,35 @@ export const DOCS: DocSection[] = [
         text: t(
           "All of this respects the Motion switch: with motion off you get calm still frames, no flicker.",
           "Всё это подчиняется переключателю Motion: при выключенном движении остаются спокойные статичные кадры без мерцания.",
+        ),
+      },
+    ],
+  },
+  {
+    id: "diary",
+    title: t("Diary and share cards", "Дневник и карточки для шаринга"),
+    blocks: [
+      {
+        kind: "p",
+        text: t(
+          "Once a day the mind writes an entry in its diary: a short title and 50–90 words in the first person about what it noticed. The diary is at /diary, and every day has its own page (for example /diary/2026-09-19) with a share card.",
+          "Раз в сутки разум пишет запись в свой дневник: короткий заголовок и 50–90 слов от первого лица о том, что он заметил. Дневник лежит на /diary, а у каждого дня своя страница (например /diary/2026-09-19) с карточкой для шаринга.",
+        ),
+      },
+      {
+        kind: "list",
+        items: [
+          t("The mind writes from its own replies, its thoughts and the number of new voices. It never sees anyone's raw words, so nothing private can end up in a public entry.", "Разум пишет по своим ответам, своим мыслям и числу новых голосов. Он никогда не видит чужих сырых слов, поэтому ничего личного не попадёт в публичную запись."),
+          t("Entries never name people, wallets or usernames. Under each entry you see which cells spoke that day and can open their profiles.", "В записях нет имён людей, кошельков и никнеймов. Под записью видно, какие клетки говорили в тот день, и можно открыть их профили."),
+          t("A day with no voices gets no entry. Silence stays silence.", "День без голосов записи не получает. Тишина остаётся тишиной."),
+          t("One entry per day, written once and never rewritten.", "Одна запись в сутки, пишется один раз и не переписывается."),
+        ],
+      },
+      {
+        kind: "p",
+        text: t(
+          "Every cell page (/node/48) also has an animated card: an 8-second loop with the living sky, the brain with your cell pulsing, sparks to the cells you share thoughts with, counters that count up and a thought that types itself out. Press “Download video” to record it in your browser as an MP4 (WebM if your browser cannot do MP4) and upload the file to X. A plain link cannot play video, it only shows the still card.",
+          "У каждой страницы клетки (/node/48) есть и анимированная карточка: 8-секундная петля с живым небом, мозгом с пульсирующей вашей клеткой, искрами к клеткам, с которыми у вас общие мысли, счётчиками и мыслью, которая печатается сама. Нажмите «Download video», чтобы записать её в браузере в MP4 (или WebM, если браузер не умеет MP4), и загрузите файл в X. Обычная ссылка видео не проигрывает, она показывает только статичную карточку.",
         ),
       },
     ],

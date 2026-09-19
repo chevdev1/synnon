@@ -8,7 +8,10 @@ import { formatAgo } from "@/lib/live/format";
 import { openClaim } from "./ClaimDialog";
 import { openNode } from "./NodeSheet";
 import NodeSearch from "./NodeSearch";
+import TimelapseBar from "./TimelapseBar";
+import { useTimelapse } from "./useTimelapse";
 import PixelFace from "@/components/ui/PixelFace";
+import CosmosBg from "@/components/ui/CosmosBg";
 import { useMind } from "@/lib/mind";
 import { sfx } from "@/lib/sfx";
 import { useDemo } from "@/lib/demo";
@@ -27,6 +30,7 @@ export default function BrainStage() {
   const demo = useDemo();
   const { mode, offline, nodes, me, currentUserNodeId, selectedId, setSelectedId, pulseEvent, events, now } = useLive();
   const { state: mindState, mood, dreaming } = useMind();
+  const tl = useTimelapse();
   const [ping, setPing] = useState<{ id: number; n: number } | null>(null);
   const activeId = selectedId ?? currentUserNodeId;
   const node = activeId == null ? undefined : nodes.find((n) => n.id === activeId);
@@ -42,6 +46,7 @@ export default function BrainStage() {
 
   return (
     <div className="relative min-h-0 flex-1">
+      <CosmosBg />
       <div
         aria-hidden
         className="stage-glow pointer-events-none absolute left-1/2 top-[46%] h-[78%] w-[78%] -translate-x-1/2 -translate-y-1/2 rounded-full"
@@ -80,17 +85,19 @@ export default function BrainStage() {
         </div>
       )}
       <BrainCanvasClient
-        nodes={nodes}
+        nodes={tl.tlNodes ?? nodes}
         selectedId={selectedId}
         currentUserNodeId={currentUserNodeId}
         ownName={me?.name ?? null}
         onSelect={(id) => {
+          if (tl.active) return; // the timelapse is a replay: no card popping up over it
           sfx.select();
           openCell(id);
         }}
-        pulseEvent={pulseEvent}
+        pulseEvent={tl.active ? tl.tlPulse : pulseEvent}
         ping={ping}
-        dreaming={dreaming}
+        dreaming={dreaming && !tl.active}
+        glowHalfLifeMin={tl.active ? 0.06 : undefined}
       />
 
       <div className="pointer-events-none absolute right-3 top-3 z-10 flex select-none flex-col items-center gap-1" data-help-id="face">
@@ -99,13 +106,25 @@ export default function BrainStage() {
           {mindState === "sleeping" ? "dreaming" : mindState === "thinking" ? "thinking…" : mindState === "speaking" ? "speaking" : mood}
         </span>
       </div>
-      <NodeSearch
-        onFound={(id) => {
-          setPing((p) => ({ id, n: (p?.n ?? 0) + 1 }));
-          setSelectedId(id);
-          window.setTimeout(() => openCell(id), 650); // let the ping land first
-        }}
-      />
+      <button
+        type="button"
+        data-help-id="timelapse"
+        onClick={() => (tl.active ? tl.stop() : void tl.start())}
+        className="pixel-btn font-head absolute right-3 top-[76px] z-10 flex h-7 items-center gap-1 border-2 border-[var(--accent)] bg-[#080a20]/85 px-2 text-[7px] uppercase text-[var(--link)] sm:top-[92px]"
+      >
+        {tl.active ? "■ Live" : "▶ Timelapse"}
+      </button>
+      {tl.active ? (
+        <TimelapseBar view={tl.view} onToggle={tl.togglePause} onSpeed={tl.cycleSpeed} onClose={tl.stop} />
+      ) : (
+        <NodeSearch
+          onFound={(id) => {
+            setPing((p) => ({ id, n: (p?.n ?? 0) + 1 }));
+            setSelectedId(id);
+            window.setTimeout(() => openCell(id), 650); // let the ping land first
+          }}
+        />
+      )}
 
       <div className="pointer-events-none absolute left-4 top-4 select-none">
         <div className="font-head text-[9px] text-[var(--muted)]">{`// NODE ${activeId == null ? "--" : String(activeId).padStart(2, "0")}`}</div>
@@ -124,28 +143,30 @@ export default function BrainStage() {
         preserveAspectRatio="none"
       >
         <line x1="18" y1="30" x2="34" y2="38" stroke="#3a4180" strokeWidth="0.15" />
-        <line x1="78" y1="26" x2="64" y2="34" stroke="#3a4180" strokeWidth="0.15" />
+        <line x1="78" y1="38" x2="64" y2="44" stroke="#3a4180" strokeWidth="0.15" />
         <line x1="72" y1="78" x2="58" y2="68" stroke="#3a4180" strokeWidth="0.15" />
       </svg>
       <div className="pointer-events-none absolute left-[8%] top-[26%] hidden text-[14px] text-[var(--muted)] lg:block">
         memories grow here
       </div>
-      <div className="pointer-events-none absolute right-[8%] top-[22%] hidden text-[14px] text-[var(--muted)] lg:block">
+      <div className="pointer-events-none absolute right-[8%] top-[34%] hidden text-[14px] text-[var(--muted)] lg:block">
         each cell is a voice
       </div>
       <div className="pointer-events-none absolute bottom-[16%] right-[14%] hidden text-[14px] text-[var(--muted)] lg:block">
         it breathes. it watches.
       </div>
 
-      <ul className="pointer-events-none absolute bottom-3 left-4 space-y-1 text-[16px] text-[var(--muted)]">
-        {events.map((e, i) => (
-          <li key={e.id} className="fade-in-up flex items-center gap-1.5" style={{ opacity: 1 - i * 0.24 }}>
-            <span className="h-1 w-1 rounded-full bg-[var(--lime)]" />
-            <span className="uppercase tracking-[0.06em]">{e.text}</span>
-            <span className="text-[var(--faint)]">{formatAgo(e.ts, now)}</span>
-          </li>
-        ))}
-      </ul>
+      {!tl.active && (
+        <ul className="pointer-events-none absolute bottom-3 left-4 space-y-1 text-[16px] text-[var(--muted)]">
+          {events.map((e, i) => (
+            <li key={e.id} className="fade-in-up flex items-center gap-1.5" style={{ opacity: 1 - i * 0.24 }}>
+              <span className="h-1 w-1 rounded-full bg-[var(--lime)]" />
+              <span className="uppercase tracking-[0.06em]">{e.text}</span>
+              <span className="text-[var(--faint)]">{formatAgo(e.ts, now)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

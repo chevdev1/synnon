@@ -17,6 +17,7 @@ export interface BrainCanvasProps {
   pulseEvent?: PulseEvent | null;
   ping?: { id: number; n: number } | null; // search result: pulses a cell so it is easy to spot
   dreaming?: boolean; // the mind is asleep: slow breath, random memories flicker
+  glowHalfLifeMin?: number; // how fast a spoken-through cell cools (timelapse plays it in seconds)
   className?: string;
 }
 
@@ -111,6 +112,7 @@ export default function BrainCanvas({
   pulseEvent = null,
   ping = null,
   dreaming = false,
+  glowHalfLifeMin = GLOW_HALF_LIFE_MIN,
   className,
 }: BrainCanvasProps) {
   const model = useMemo(() => generateBrain(), []);
@@ -152,12 +154,14 @@ export default function BrainCanvas({
   const introRef = useRef<{ start: number | null; done: boolean }>({ start: null, done: false });
   const nodesRef = useRef(nodes);
   const dreamingRef = useRef(dreaming);
+  const halfLifeRef = useRef(glowHalfLifeMin);
   const { reduced: reducedMotion } = useMotion();
 
   useEffect(() => {
     nodesRef.current = nodes;
     dreamingRef.current = dreaming;
-  }, [nodes, dreaming]);
+    halfLifeRef.current = glowHalfLifeMin;
+  }, [nodes, dreaming, glowHalfLifeMin]);
 
   // Cached raster layers only depend on node statuses and the current
   // user's node, not on animation state, so they're built once per change
@@ -329,7 +333,7 @@ export default function BrainCanvas({
         const n = nodesRef.current.find((x) => x.id === c.claimId);
         if (!n || n.status === "available") continue;
         const ageMin = n.lastActiveAt ? (nowMs - n.lastActiveAt) / 60000 : Infinity;
-        let k = ageMin === Infinity ? 0.05 : Math.pow(0.5, ageMin / GLOW_HALF_LIFE_MIN);
+        let k = ageMin === Infinity ? 0.05 : Math.pow(0.5, ageMin / halfLifeRef.current);
         if (ageMin < 1 && !reducedMotion) k *= 1 + 0.35 * Math.sin(t / 160);
         if (k < 0.03) continue;
         ctx.fillStyle = n.status === "active" ? `rgba(196,242,96,${(k * 0.34).toFixed(3)})` : `rgba(150,210,255,${(k * 0.3).toFixed(3)})`;

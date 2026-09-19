@@ -35,6 +35,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS users_wallet_uidx ON users (wallet_address);
 CREATE TABLE IF NOT EXISTS wallet_nonces (
   nonce text PRIMARY KEY, chain text NOT NULL, address text NOT NULL, origin text NOT NULL,
   issued_at timestamptz NOT NULL DEFAULT now(), expires_at timestamptz NOT NULL, used_at timestamptz);
+CREATE TABLE IF NOT EXISTS diary (
+  id serial PRIMARY KEY, day date NOT NULL UNIQUE, title text NOT NULL, body text NOT NULL,
+  node_ids integer[] NOT NULL DEFAULT '{}', voices integer NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL DEFAULT now());
 CREATE TABLE IF NOT EXISTS sessions (
   id text PRIMARY KEY, user_id integer NOT NULL REFERENCES users(id), expires_at timestamptz NOT NULL);
 `;

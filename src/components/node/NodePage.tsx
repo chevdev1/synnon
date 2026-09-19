@@ -8,6 +8,7 @@ import { HexIcon } from "@/components/ui/PixelIcon";
 import { LiveRoot } from "@/lib/live/LiveRoot";
 import { useLive } from "@/lib/live/context";
 import NodeProfileView from "./NodeProfileView";
+import AnimatedCard from "@/components/card/AnimatedCard";
 import { useNodeProfile } from "./useNodeProfile";
 
 const TOTAL = 128;
@@ -78,6 +79,12 @@ function Body({ id }: { id: number }) {
             <p className="font-head text-[8px] uppercase text-[var(--muted)]">{loading ? "reading the cell…" : ""}</p>
           )}
         </div>
+        {profile && (
+          <section className="mt-4">
+            <div className="font-head mb-2 text-[9px] uppercase text-[var(--text)]">Animated card</div>
+            <AnimatedCard profile={profile} />
+          </section>
+        )}
         {profile && <ShareRow id={id} voices={profile.stats.voices} thoughts={profile.stats.thoughtsShaped} mine={profile.node.status !== "available"} />}
       </main>
 

@@ -48,3 +48,6 @@ dev.log
 
 .vercel
 .env*
+
+# large social-media renders (regenerate or keep locally)
+docs/media/*.mp4

@@ -1,4 +1,4 @@
-import { integer, jsonb, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { date, integer, jsonb, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 
 // SYNNOD_PROJECT.md section 9, plus the two auth tables the magic-link flow needs.
 export const users = pgTable("users", {
@@ -53,6 +53,17 @@ export const thoughts = pgTable("thoughts", {
   id: serial("id").primaryKey(),
   text: text("text").notNull(),
   sourceOutputIds: integer("source_output_ids").array().notNull().default([]),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// One entry per UTC day, written by the mind itself from what really happened that day.
+export const diary = pgTable("diary", {
+  id: serial("id").primaryKey(),
+  day: date("day", { mode: "string" }).notNull().unique(), // YYYY-MM-DD (UTC)
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  nodeIds: integer("node_ids").array().notNull().default([]), // cells that spoke that day, most active first
+  voices: integer("voices").notNull().default(0), // distinct cells that spoke
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
