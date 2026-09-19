@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SYNNOD
 
-## Getting Started
+**128 voices. One mind.** A shared digital character with no single author. Claim a cell of a pixel brain, speak through it, and watch one mind grow from everyone who talks to it.
 
-First, run the development server:
+Full brief: [`docs/SYNNOD_PROJECT.md`](docs/SYNNOD_PROJECT.md) (Russian).
+
+## What's in here
+
+- **Pixel brain** — a 2.5D cluster of hexagonal prisms rendered on Canvas 2D (`src/lib/brain`, `src/components/brain`), ported from the reference generator in `docs/brain_reference_generator.py`.
+- **8-bit UI** — Press Start 2P + VT323, animated pixel-art scenes, themed scrollbars, opening splash with generative lo-fi (Web Audio, no audio files).
+- **Backend** (Route Handlers in `src/app/api`, logic in `src/server`) — Postgres via Drizzle, guest nickname or wallet sign-in (EVM `personal_sign`, Solana `signMessage`), node claiming, scenarios with guards + LLM moderation, SSE stream, cron-driven autonomous thoughts.
+- **DEMO / LIVE toggle** (header) — DEMO is a clearly labelled simulated feed; LIVE shows only real data from the API.
+
+## Run locally
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # optional; see below
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+With no `DATABASE_URL` it uses an embedded Postgres (PGlite) stored in `.data/`, so nothing needs installing. Without `ANTHROPIC_API_KEY` the mind stays quiet: scenarios are saved but no replies or thoughts are invented.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | Postgres connection string. **Required on Vercel** (serverless has no persistent disk). |
+| `ANTHROPIC_API_KEY` | Enables replies, moderation, summaries and thoughts. |
+| `SYNNOD_MODEL` | Model id (default `claude-haiku-4-5-20251001`). |
+| `CRON_SECRET` | Bearer secret for `POST /api/cron/thoughts`. |
+| `NEXT_PUBLIC_SYNNOD_DEFAULT_DEMO` | `1` = open in simulated DEMO mode by default (showcase deploys without a database). |
 
-## Learn More
+## Deploying to Vercel
 
-To learn more about Next.js, take a look at the following resources:
+1. Import the repo in Vercel (framework: Next.js, defaults are fine).
+2. For a **showcase** with no database: set `NEXT_PUBLIC_SYNNOD_DEFAULT_DEMO=1`.
+3. For **live data**: add a Postgres (Storage → Neon in the Vercel dashboard sets `DATABASE_URL`), optionally `ANTHROPIC_API_KEY` and `CRON_SECRET`, and remove the demo variable.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Known limits on serverless: the SSE stream and rate limiter are per-instance (in-memory). Use Redis pub/sub and a shared limiter before running multiple instances at scale.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Status
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Stage 1 (UI prototype) and Stage 2 (working MVP backend) are done. Not built yet: `$SYNOD` token-gated claiming (blocked on tokenomics, see brief §14), node history pages, TTS, admin/moderation UI.

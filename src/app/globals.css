@@ -1,26 +1,392 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #06071a;
+  --panel: #080a20;
+  --border: #262c5e;
+  --divider: #1a1f47;
+  --text: #d9ddec;
+  --text-2: #aab0cc;
+  --muted: #7a82a8;
+  --faint: #4d5680;
+
+  --accent: #6c5fd6;
+  --link: #b9a6f5;
+  --lime: #c4f260;
+
+  --cell-idle: #181e4e;
+  --cell-blue: #5aa0e6;
+  --cell-ice: #bfe6ff;
+  --cell-violet: #8a5ce0;
+  --cell-pink: #d674dc;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-border: var(--border);
+  --color-divider: var(--divider);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-link: var(--link);
+  --color-lime: var(--lime);
+  --font-sans: var(--font-pixel-body);
+  --font-mono: var(--font-pixel-body);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-pixel-body), ui-monospace, monospace;
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.25;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+
+/* Themed 8-bit scrollbars. Chromium/Edge ignore ::-webkit-scrollbar once
+   scrollbar-color is set, so the standard properties are Firefox-only. */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: #04051a;
+  border-left: 2px solid var(--divider);
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border: 2px solid #04051a;
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.35), inset 2px 2px 0 rgba(255, 255, 255, 0.22);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--lime);
+}
+*::-webkit-scrollbar-thumb:active {
+  background: var(--cell-pink);
+}
+*::-webkit-scrollbar-corner {
+  background: #04051a;
+}
+*::-webkit-scrollbar-button {
+  display: none;
+}
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) #04051a;
+  }
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+.pixelated {
+  image-rendering: pixelated;
+}
+
+@keyframes synnod-breathe {
+  0%,
+  100% {
+    transform: scale(0.96);
+    filter: brightness(0.88);
+  }
+  50% {
+    transform: scale(1.03);
+    filter: brightness(1.16);
+  }
+}
+
+.brain-breathe {
+  animation: synnod-breathe 6s ease-in-out infinite;
+  transform-origin: 50% 55%;
+}
+
+/* Reduced motion is honoured unless the visitor flips the in-app Motion
+   toggle (html[data-motion="full"]) — Windows often has it on by accident. */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="full"]) {
+    .brain-breathe {
+      animation: none;
+      filter: brightness(1);
+    }
+  }
+}
+
+@keyframes synnod-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.cursor-blink {
+  animation: synnod-blink 1s steps(1) infinite;
+}
+
+@keyframes synnod-dot {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.status-dot {
+  animation: synnod-dot 2.2s ease-in-out infinite;
+}
+
+.stage-glow {
+  background: radial-gradient(closest-side, rgba(120, 80, 220, 0.34), rgba(60, 60, 200, 0.14) 55%, transparent 100%);
+  filter: blur(24px);
+  animation: synnod-glow 6s ease-in-out infinite;
+}
+
+@keyframes synnod-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: translate(-50%, -50%) scale(0.94);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.06);
+  }
+}
+
+.mote {
+  opacity: 0;
+  animation: synnod-mote linear infinite;
+}
+
+@keyframes synnod-mote {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  20%,
+  80% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(18px, -60px);
+  }
+}
+
+.activity-flow {
+  filter: drop-shadow(0 0 3px rgba(108, 95, 214, 0.8));
+}
+
+.typing-dot {
+  animation: synnod-typing 1s ease-in-out infinite;
+}
+
+@keyframes synnod-typing {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+.memory-new {
+  animation: synnod-fade-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both, synnod-flash 2.4s ease-out both;
+}
+
+@keyframes synnod-flash {
+  0% {
+    background: rgba(196, 242, 96, 0.18);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="full"]) {
+    .stage-glow,
+    .activity-flow,
+    .typing-dot,
+    .memory-new {
+      animation: none;
+    }
+    .mote {
+      display: none;
+    }
+  }
+}
+
+@keyframes synnod-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: synnod-fade-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes synnod-shimmer {
+  0% {
+    background-position: -120% 0;
+  }
+  100% {
+    background-position: 220% 0;
+  }
+}
+
+.shimmer-border {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-border::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 40%, rgba(185, 166, 245, 0.35) 50%, transparent 60%);
+  background-size: 250% 100%;
+  animation: synnod-shimmer 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="full"]) {
+    .fade-in-up {
+      animation: none;
+    }
+    .shimmer-border::after {
+      animation: none;
+      display: none;
+    }
+    .status-dot {
+      animation: none;
+      opacity: 1;
+    }
+    .cursor-blink {
+      animation: none;
+    }
+  }
+}
+
+@keyframes synnod-eq {
+  0%,
+  100% {
+    height: 3px;
+  }
+  50% {
+    height: 12px;
+  }
+}
+.eq-bar {
+  animation: synnod-eq 0.9s steps(4) infinite;
+}
+
+@keyframes synnod-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+.intro-float {
+  animation: synnod-float 4s steps(6) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="full"]) {
+    .eq-bar,
+    .intro-float {
+      animation: none;
+    }
+  }
+}
+
+.font-head {
+  font-family: var(--font-pixel-head), monospace;
+  letter-spacing: 0;
+  line-height: 1.5;
+}
+
+/* 8-bit UI chrome: stepped hover lift + pressed state on buttons */
+.pixel-btn {
+  transition: transform 0.08s steps(2), box-shadow 0.08s steps(2);
+  box-shadow: 3px 3px 0 rgba(108, 95, 214, 0.55);
+}
+.pixel-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 rgba(185, 166, 245, 0.7);
+}
+.pixel-btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+
+@keyframes synnod-twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.twinkle {
+  animation: synnod-twinkle 2.4s steps(4) infinite;
+}
+
+@keyframes synnod-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: synnod-marquee 40s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="full"]) {
+    .twinkle,
+    .marquee-track {
+      animation: none;
+    }
+  }
 }
