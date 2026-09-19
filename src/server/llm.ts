@@ -45,7 +45,8 @@ interface Preset {
 const PRESETS: Record<string, Preset> = {
   gemini: {
     baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai",
-    model: "gemini-2.5-flash",
+    // Comma-separated = fallback chain, tried in order (free models get overloaded or retired).
+    model: "gemini-3.6-flash,gemini-3.5-flash",
     // Reasoning tokens would otherwise eat the small max_tokens budgets we use.
     extra: { reasoning_effort: "none" },
   },
@@ -64,19 +65,31 @@ async function post(url: string, headers: Record<string, string>, body: unknown)
   return res.json();
 }
 
-function openaiCompatible(label: string, baseUrl: string, key: string, model: string, extra: Record<string, unknown> = {}): LlmProvider {
+function openaiCompatible(label: string, baseUrl: string, key: string, modelSpec: string, extra: Record<string, unknown> = {}): LlmProvider {
+  const models = modelSpec.split(",").map((m) => m.trim()).filter(Boolean);
   return {
     available: true,
     label,
     async generate({ system, messages, maxTokens }) {
-      const json = (await post(
-        `${baseUrl.replace(/\/$/, "")}/chat/completions`,
-        { authorization: `Bearer ${key}` },
-        { model, max_tokens: maxTokens, messages: [{ role: "system", content: system }, ...messages], ...extra }
-      )) as { choices?: { message?: { content?: string | null } }[] };
-      const text = json.choices?.[0]?.message?.content?.trim();
-      if (!text) throw new Error("LLM returned no text");
-      return text;
+      let lastError: unknown;
+      // Fallback chain: any failure (overload 503, rate limit 429, retired model
+      // 404, empty reply) moves on to the next model instead of failing the user.
+      for (const model of models) {
+        try {
+          const json = (await post(
+            `${baseUrl.replace(/\/$/, "")}/chat/completions`,
+            { authorization: `Bearer ${key}` },
+            { model, max_tokens: maxTokens, messages: [{ role: "system", content: system }, ...messages], ...extra }
+          )) as { choices?: { message?: { content?: string | null } }[] };
+          const text = json.choices?.[0]?.message?.content?.trim();
+          if (!text) throw new Error("LLM returned no text");
+          return text;
+        } catch (e) {
+          lastError = e;
+          if (models.length > 1) console.warn(`[llm] ${model} failed (${(e as Error).message}); trying the next model`);
+        }
+      }
+      throw lastError;
     },
   };
 }
