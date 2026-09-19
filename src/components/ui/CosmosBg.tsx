@@ -2,54 +2,49 @@
 
 import { useEffect, useRef } from "react";
 import { COSMOS_H, COSMOS_PALETTE, COSMOS_W, drawCosmos } from "@/lib/cosmos";
-import { useLive } from "@/lib/live/context";
-import { useMind } from "@/lib/mind";
 import { useMotion } from "@/lib/motion";
+import { sky } from "@/lib/sky";
 import { useTod } from "@/lib/tod";
 
-// A living night sky behind the brain: three star layers with mouse parallax,
-// slowly drifting nebulae tinted by the time of day, shooting stars, and a soft
-// swell whenever something happens in the mind (a claim swells it the most).
-// Drawn at a tiny resolution and scaled up, so it stays pixel art and costs almost nothing.
+// The living pixel sky behind the whole interface (every page): three star layers
+// with mouse parallax, slow nebulae tinted by the time of day, shooting stars and
+// a soft swell whenever something happens in the mind. Drawn at a tiny resolution
+// and scaled up, so it stays pixel art and costs almost nothing. Panels are
+// slightly translucent, so it shows through them too.
 export default function CosmosBg() {
   const ref = useRef<HTMLCanvasElement>(null);
   const { reduced } = useMotion();
   const { phase } = useTod();
-  const { dreaming } = useMind();
-  const { pulseEvent } = useLive();
-  const live = useRef({ phase, dreaming });
-  const swell = useRef({ v: 0, t: 0 });
+  const live = useRef({ phase });
 
   useEffect(() => {
-    live.current = { phase, dreaming };
-  }, [phase, dreaming]);
-
-  useEffect(() => {
-    if (!pulseEvent) return;
-    swell.current = { v: pulseEvent.type === "claim" ? 1 : pulseEvent.type === "thought" ? 0.7 : 0.45, t: performance.now() };
-  }, [pulseEvent]);
+    live.current = { phase };
+  }, [phase]);
 
   useEffect(() => {
     const canvas = ref.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
-    const host = canvas.parentElement;
+    // Resolution follows the window (about one sky pixel per 3 screen pixels), so stars
+    // stay small crisp pixels on a big monitor instead of turning into fat squares.
+    let W = COSMOS_W;
+    let H = COSMOS_H;
+    const resize = () => {
+      W = Math.max(160, Math.min(640, Math.round(window.innerWidth / 3)));
+      H = Math.max(110, Math.min(400, Math.round(window.innerHeight / 3)));
+      canvas.width = W;
+      canvas.height = H;
+      if (reduced) draw(0, false);
+    };
     let px = 0; // parallax target / current, -1..1
     let py = 0;
     let cx = 0;
     let cy = 0;
     const onMove = (e: PointerEvent) => {
-      if (!host) return;
-      const r = host.getBoundingClientRect();
-      px = ((e.clientX - r.left) / r.width - 0.5) * 2;
-      py = ((e.clientY - r.top) / r.height - 0.5) * 2;
+      px = (e.clientX / window.innerWidth - 0.5) * 2;
+      py = (e.clientY / window.innerHeight - 0.5) * 2;
     };
-    const onLeave = () => {
-      px = 0;
-      py = 0;
-    };
-    host?.addEventListener("pointermove", onMove);
-    host?.addEventListener("pointerleave", onLeave);
+    window.addEventListener("pointermove", onMove, { passive: true });
 
     let meteor: { x: number; y: number; vx: number; vy: number; life: number } | null = null;
     let nextMeteor = 3500;
@@ -57,18 +52,18 @@ export default function CosmosBg() {
     let last = -1000;
 
     const draw = (t: number, animated: boolean) => {
-      const { phase: ph, dreaming: dz } = live.current;
+      const ph = live.current.phase;
+      const dz = sky.dreaming;
       cx += (px - cx) * 0.06;
       cy += (py - cy) * 0.06;
-      ctx.clearRect(0, 0, COSMOS_W, COSMOS_H);
-      const sw = swell.current;
-      const boost = animated ? Math.max(0, sw.v * (1 - (performance.now() - sw.t) / 1400)) : 0;
-      drawCosmos(ctx, COSMOS_W, COSMOS_H, t, { phase: ph, dreaming: dz, animated, cx, cy, boost });
+      ctx.clearRect(0, 0, W, H);
+      const boost = animated ? Math.max(0, sky.swell * (1 - (performance.now() - sky.swellAt) / 1400)) : 0;
+      drawCosmos(ctx, W, H, t, { phase: ph, dreaming: dz, animated, cx, cy, boost });
 
       // the occasional shooting star
       if (animated && !dz) {
         if (!meteor && t > nextMeteor) {
-          meteor = { x: COSMOS_W * (0.35 + Math.random() * 0.65), y: Math.random() * COSMOS_H * 0.35, vx: -2.6 - Math.random(), vy: 1.2 + Math.random() * 0.6, life: 1 };
+          meteor = { x: W * (0.35 + Math.random() * 0.65), y: Math.random() * H * 0.35, vx: -2.6 - Math.random(), vy: 1.2 + Math.random() * 0.6, life: 1 };
           nextMeteor = t + 6000 + Math.random() * 9000;
         }
         if (meteor) {
@@ -81,14 +76,14 @@ export default function CosmosBg() {
           meteor.x += meteor.vx;
           meteor.y += meteor.vy;
           meteor.life -= 0.022;
-          if (meteor.life <= 0 || meteor.x < -10 || meteor.y > COSMOS_H + 10) meteor = null;
+          if (meteor.life <= 0 || meteor.x < -10 || meteor.y > H + 10) meteor = null;
         }
       }
     };
 
-    if (reduced) {
-      draw(0, false);
-    } else {
+    window.addEventListener("resize", resize);
+    resize();
+    if (!reduced) {
       const loop = (t: number) => {
         if (t - last > 50 && !document.hidden) {
           last = t;
@@ -100,8 +95,8 @@ export default function CosmosBg() {
     }
     return () => {
       cancelAnimationFrame(raf);
-      host?.removeEventListener("pointermove", onMove);
-      host?.removeEventListener("pointerleave", onLeave);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("resize", resize);
     };
   }, [reduced, phase]);
 

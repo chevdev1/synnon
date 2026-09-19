@@ -198,8 +198,8 @@ export const DOCS: DocSection[] = [
           [
             t("Living sky", "Живой космос"),
             t(
-              "Behind the brain there is a night sky of its own: three layers of stars that drift and follow your mouse, slow nebulae tinted by the hour, and the odd shooting star. It swells softly when something happens in the mind, most of all when a cell is claimed, and it calms down when the mind sleeps.",
-              "За мозгом есть собственное ночное небо: три слоя звёзд, которые дрейфуют и следят за мышью, медленные туманности в цветах текущего часа и редкие падающие звёзды. Небо мягко вспыхивает, когда в разуме что-то происходит, сильнее всего при захвате клетки, и успокаивается, когда разум спит.",
+              "Behind the whole interface, on every page, there is a pixel night sky: three layers of stars that drift and follow your mouse, slow nebulae tinted by the hour, and the odd shooting star. The panels are slightly see-through, so it shows through them too. It swells softly when something happens in the mind, most of all when a cell is claimed, and it calms down when the mind sleeps.",
+              "За всем интерфейсом, на каждой странице, есть пиксельное ночное небо: три слоя звёзд, которые дрейфуют и следят за мышью, медленные туманности в цветах текущего часа и редкие падающие звёзды. Панели чуть прозрачные, поэтому небо просвечивает и сквозь них. Небо мягко вспыхивает, когда в разуме что-то происходит, сильнее всего при захвате клетки, и успокаивается, когда разум спит.",
             ),
           ],
           [

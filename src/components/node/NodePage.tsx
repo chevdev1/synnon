@@ -70,7 +70,7 @@ function Body({ id }: { id: number }) {
 
       <main className="flex-1 py-5">
         {mode === "demo" && <p className="font-head mb-3 text-[7px] uppercase text-[#ffd166]">simulated demo data</p>}
-        <div className="rounded-[3px] border-2 border-[var(--border)] bg-[var(--panel)] p-4 md:p-6">
+        <div className="rounded-[3px] border-2 border-[var(--border)] bg-[color-mix(in_srgb,var(--panel)_76%,transparent)] p-4 md:p-6">
           {profile ? (
             <NodeProfileView profile={profile} />
           ) : error ? (

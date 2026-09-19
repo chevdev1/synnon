@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import BrainCanvasClient from "@/components/brain/BrainCanvasClient";
 import { StatusDot } from "@/components/ui/Card";
 import { useLive } from "@/lib/live/context";
@@ -11,7 +11,7 @@ import NodeSearch from "./NodeSearch";
 import TimelapseBar from "./TimelapseBar";
 import { useTimelapse } from "./useTimelapse";
 import PixelFace from "@/components/ui/PixelFace";
-import CosmosBg from "@/components/ui/CosmosBg";
+import { skyActions } from "@/lib/sky";
 import { useMind } from "@/lib/mind";
 import { sfx } from "@/lib/sfx";
 import { useDemo } from "@/lib/demo";
@@ -31,6 +31,16 @@ export default function BrainStage() {
   const { mode, offline, nodes, me, currentUserNodeId, selectedId, setSelectedId, pulseEvent, events, now } = useLive();
   const { state: mindState, mood, dreaming } = useMind();
   const tl = useTimelapse();
+
+  // The page-wide sky reacts to the mind: calmer while it sleeps, a swell on every event.
+  useEffect(() => {
+    skyActions.setDreaming(dreaming && !tl.active);
+    return () => skyActions.setDreaming(false);
+  }, [dreaming, tl.active]);
+  useEffect(() => {
+    const p = tl.active ? tl.tlPulse : pulseEvent;
+    if (p) skyActions.pulse(p.type === "claim" ? 1 : p.type === "thought" ? 0.7 : 0.45);
+  }, [pulseEvent, tl.active, tl.tlPulse]);
   const [ping, setPing] = useState<{ id: number; n: number } | null>(null);
   const activeId = selectedId ?? currentUserNodeId;
   const node = activeId == null ? undefined : nodes.find((n) => n.id === activeId);
@@ -46,7 +56,6 @@ export default function BrainStage() {
 
   return (
     <div className="relative min-h-0 flex-1">
-      <CosmosBg />
       <div
         aria-hidden
         className="stage-glow pointer-events-none absolute left-1/2 top-[46%] h-[78%] w-[78%] -translate-x-1/2 -translate-y-1/2 rounded-full"

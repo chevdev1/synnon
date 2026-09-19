@@ -1,8 +1,11 @@
-// Purely decorative, fixed ambient backdrop: a soft glow behind the brain
-// and a faint film-grain texture so panels don't read as flat black boxes.
+import CosmosBg from "@/components/ui/CosmosBg";
+
+// Purely decorative, fixed ambient backdrop: the living pixel sky, a soft glow
+// and a faint film-grain texture, so panels don't read as flat black boxes.
 export default function Atmosphere() {
   return (
     <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
+      <CosmosBg />
       <div
         className="absolute left-1/2 top-0 h-[70vh] w-[90vw] -translate-x-1/2 opacity-70"
         style={{

@@ -81,7 +81,7 @@ function ShareRow({ e }: { e: DiaryEntry }) {
 
 function Entry({ e, single }: { e: DiaryEntry; single?: boolean }) {
   return (
-    <article className="fade-in-up rounded-[3px] border-2 border-[var(--border)] bg-[var(--panel)] p-4 md:p-6">
+    <article className="fade-in-up rounded-[3px] border-2 border-[var(--border)] bg-[color-mix(in_srgb,var(--panel)_76%,transparent)] p-4 md:p-6">
       <div className="font-head text-[8px] uppercase text-[var(--muted)]">{formatDay(e.day)}</div>
       <h2 className="font-head mt-2 text-[13px] leading-relaxed text-[var(--lime)] md:text-[15px]">
         {single ? e.title : <Link href={`/diary/${e.day}`} className="hover:text-[var(--text)]">{e.title}</Link>}

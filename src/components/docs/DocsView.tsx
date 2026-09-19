@@ -173,7 +173,7 @@ export default function DocsView() {
 
         <article className="space-y-6">
           {DOCS.map((s, i) => (
-            <section key={s.id} id={s.id} className="scroll-mt-6 border-2 border-[var(--border)] bg-[var(--panel)] p-5">
+            <section key={s.id} id={s.id} className="scroll-mt-6 border-2 border-[var(--border)] bg-[color-mix(in_srgb,var(--panel)_76%,transparent)] p-5">
               <h2 className="font-head flex items-baseline gap-3 text-[12px] uppercase leading-relaxed text-[var(--text)]">
                 <span className="text-[var(--lime)]">{String(i + 1).padStart(2, "0")}</span>
                 {s.title[L]}
