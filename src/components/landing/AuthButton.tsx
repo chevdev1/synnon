@@ -13,6 +13,7 @@ export default function AuthButton() {
     return (
       <button
         type="button"
+        data-help-id="connect"
         onClick={openClaim}
         className="pixel-btn shimmer-border font-head flex h-8 items-center gap-2 border-2 border-[var(--lime)] bg-[var(--lime)]/10 px-3 text-[8px] uppercase text-[var(--lime)]"
       >
@@ -26,6 +27,7 @@ export default function AuthButton() {
   return (
     <button
       type="button"
+      data-help-id="connect"
       onClick={openClaim}
       title="Your account"
       className="pixel-btn font-head flex h-8 max-w-[220px] items-center gap-2 border-2 border-[var(--lime)] px-3 text-[8px] uppercase text-[var(--lime)]"

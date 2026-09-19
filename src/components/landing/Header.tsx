@@ -5,6 +5,7 @@ import MotionToggle from "./MotionToggle";
 import DemoToggle from "./DemoToggle";
 import MusicToggle from "./MusicToggle";
 import AuthButton from "./AuthButton";
+import HelpButton from "./HelpButton";
 
 const navLink =
   "font-head relative py-1 text-[9px] uppercase text-[var(--text-2)] transition-colors hover:text-[var(--lime)] after:absolute after:-bottom-0.5 after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:bg-[var(--lime)] after:transition-transform after:duration-150 hover:after:scale-x-100";
@@ -36,6 +37,7 @@ export default function Header() {
         <DemoToggle />
         <MotionToggle />
         <AuthButton />
+        <HelpButton />
         <div className="font-head hidden items-center gap-2 text-[8px] uppercase text-[var(--text-2)] 2xl:flex">
           <StatusDot />
           <span>One mind / {CLAIMABLE_COUNT} nodes</span>

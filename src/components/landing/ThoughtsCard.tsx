@@ -8,7 +8,7 @@ export default function ThoughtsCard() {
   const { thoughts, now } = useLive();
 
   return (
-    <Card className="flex h-full min-h-0 flex-col">
+    <Card help="thoughts" className="flex h-full min-h-0 flex-col">
       <div className="flex shrink-0 items-center justify-between">
         <CardTitle>Autonomous thoughts</CardTitle>
         <span className="font-head flex items-center gap-1.5 text-[8px] uppercase text-[var(--lime)]">

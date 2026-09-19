@@ -9,6 +9,7 @@ export default function MusicToggle() {
   return (
     <button
       type="button"
+      data-help-id="music"
       onClick={toggle}
       aria-pressed={playing}
       title={playing ? "Pause the lofi" : "Play some lofi"}

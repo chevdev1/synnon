@@ -5,15 +5,18 @@ export function Card({
   className = "",
   padded = true,
   id,
+  help,
 }: {
   children: ReactNode;
   className?: string;
   padded?: boolean;
   id?: string;
+  help?: string;
 }) {
   return (
     <div
       id={id}
+      data-help-id={help}
       className={`group rounded-[3px] border-2 border-[var(--border)] bg-[var(--panel)] transition-[border-color,box-shadow] duration-300 hover:border-[color-mix(in_srgb,var(--accent)_60%,var(--border))] hover:shadow-[0_0_0_1px_rgba(108,95,214,0.15),0_8px_28px_-12px_rgba(108,95,214,0.35)] ${padded ? "p-4" : ""} ${className}`}
     >
       {children}

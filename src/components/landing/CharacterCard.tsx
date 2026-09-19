@@ -23,7 +23,7 @@ export default function CharacterCard() {
   const moodLabel = mode === "demo" ? MOODS[mood] : (character?.mood ?? "curious");
 
   return (
-    <Card className="flex h-full min-h-0 flex-col overflow-y-auto">
+    <Card help="character" className="flex h-full min-h-0 flex-col overflow-y-auto">
       <CardTitle>Character</CardTitle>
       <div className="mt-3 flex items-center gap-3">
         <PixelCharacter scale={2} className="shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5" />

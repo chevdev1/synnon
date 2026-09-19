@@ -300,6 +300,36 @@ body {
   }
 }
 
+/* Help mode: every explainable block gets a dashed outline; the one being
+   explained is lit up. Badges themselves are rendered by <HelpLayer />. */
+html[data-help="on"] [data-help-id] {
+  outline: 2px dashed rgba(196, 242, 96, 0.55);
+  outline-offset: -2px;
+}
+html[data-help="on"] [data-help-active] {
+  outline: 2px solid var(--lime);
+  box-shadow: 0 0 0 4px rgba(196, 242, 96, 0.14), 0 0 34px rgba(196, 242, 96, 0.28);
+}
+.help-badge {
+  animation: synnod-help-pulse 1.8s steps(3) infinite;
+}
+@keyframes synnod-help-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.18);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="full"]) {
+    .help-badge {
+      animation: none;
+    }
+  }
+}
+
 @keyframes synnod-eq {
   0%,
   100% {

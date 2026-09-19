@@ -63,7 +63,7 @@ export default function MemoryCard() {
   }
 
   return (
-    <Card className="flex h-full min-h-0 flex-col" id="memory">
+    <Card help="memory" className="flex h-full min-h-0 flex-col" id="memory">
       <div className="flex shrink-0 items-center justify-between">
         <CardTitle>Memory</CardTitle>
         <div className="font-head flex gap-2.5 text-[8px] uppercase text-[var(--muted)]">

@@ -7,6 +7,7 @@ export default function DemoToggle() {
   return (
     <button
       type="button"
+      data-help-id="demo"
       onClick={toggle}
       aria-pressed={on}
       title={on ? "Showing simulated activity. Click to see real data." : "Showing real data. Click for a simulated demo."}

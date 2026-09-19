@@ -9,6 +9,7 @@ export default function MotionToggle() {
   return (
     <button
       type="button"
+      data-help-id="motion"
       onClick={toggle}
       aria-pressed={on}
       title={

@@ -28,7 +28,7 @@ export default function HeroRight() {
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 p-4">
-      <Card className="flex min-h-0 flex-1 flex-col overflow-y-auto" id="mind">
+      <Card help="mind" className="flex min-h-0 flex-1 flex-col overflow-y-auto" id="mind">
         <CardTitle>The mind</CardTitle>
         <div className="mt-3 flex flex-1 items-center gap-3">
           <p className="min-w-0 flex-1 text-[17px] leading-snug text-[var(--text-2)]">
@@ -44,7 +44,7 @@ export default function HeroRight() {
         </a>
       </Card>
 
-      <Card className="shrink-0">
+      <Card help="node" className="shrink-0">
         {currentUserNodeId == null ? (
           <>
             <div className="font-head flex items-center gap-1.5 text-[8px] uppercase text-[var(--text-2)]">

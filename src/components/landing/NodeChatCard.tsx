@@ -42,7 +42,7 @@ export default function NodeChatCard() {
   }
 
   return (
-    <Card className="flex h-full min-h-0 flex-col" id="nodes">
+    <Card help="chat" className="flex h-full min-h-0 flex-col" id="nodes">
       <div className="flex shrink-0 items-center gap-1.5">
         <CardTitle>{hasNode ? `Node ${String(currentUserNodeId).padStart(2, "0")}` : "Your node"}</CardTitle>
         {hasNode && <StatusDot />}
