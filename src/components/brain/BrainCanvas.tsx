@@ -364,7 +364,9 @@ export default function BrainCanvas({
         grad.addColorStop(0, "rgba(140,120,255,0)");
         grad.addColorStop(0.5, "rgba(140,120,255,0.07)");
         grad.addColorStop(1, "rgba(140,120,255,0)");
-        ctx.globalCompositeOperation = "lighter";
+        // source-atop: the band only tints what is already drawn (the brain and its haze),
+        // so it has no visible rectangle edges at the canvas border
+        ctx.globalCompositeOperation = "source-atop";
         ctx.fillStyle = grad;
         ctx.fillRect(0, sy - bandH, width, bandH * 2);
         ctx.globalCompositeOperation = "source-over";
@@ -464,7 +466,8 @@ export default function BrainCanvas({
         if (el > CLAIM_WAVE_MS) claimWaveRef.current = null;
         else {
           const maxR = Math.hypot(width, height) * 0.7;
-          ctx.globalCompositeOperation = "lighter";
+          // source-atop again: the wave travels through the brain instead of being cut off by the canvas edge
+          ctx.globalCompositeOperation = "source-atop";
           if (el < 700) {
             ctx.fillStyle = `rgba(196,242,96,${(0.07 * (1 - el / 700)).toFixed(3)})`;
             ctx.fillRect(0, 0, width, height);
