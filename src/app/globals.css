@@ -257,6 +257,24 @@ body {
   animation: synnod-fade-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* Node profile: bottom sheet on phones, right drawer from md up. Stepped, to stay pixel. */
+@keyframes synnod-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes synnod-sheet-left {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.sheet-in {
+  animation: synnod-sheet-up 0.28s steps(8, end) both;
+}
+@media (min-width: 768px) {
+  .sheet-in {
+    animation-name: synnod-sheet-left;
+  }
+}
+
 @keyframes synnod-shimmer {
   0% {
     background-position: -120% 0;
@@ -283,7 +301,8 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   :root:not([data-motion="full"]) {
-    .fade-in-up {
+    .fade-in-up,
+    .sheet-in {
       animation: none;
     }
     .shimmer-border::after {

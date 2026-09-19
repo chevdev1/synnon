@@ -5,6 +5,7 @@ import { StatusDot } from "@/components/ui/Card";
 import { useLive } from "@/lib/live/context";
 import { formatAgo } from "@/lib/live/format";
 import { openClaim } from "./ClaimDialog";
+import { openNode } from "./NodeSheet";
 import { useDemo } from "@/lib/demo";
 
 // Deterministic (no Math.random) so SSR and client markup match.
@@ -69,8 +70,10 @@ export default function BrainStage() {
         currentUserNodeId={currentUserNodeId}
         onSelect={(id) => {
           setSelectedId(id);
-          // Real mode: a click on a cell opens its card (claim / connect wallet).
-          if (mode === "api") openClaim();
+          // A taken cell opens its profile; a free one opens the claim / connect card.
+          const taken = nodes.find((n) => n.id === id)?.status;
+          if (taken && taken !== "available") openNode(id);
+          else openClaim();
         }}
         pulseEvent={pulseEvent}
       />

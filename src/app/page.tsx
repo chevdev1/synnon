@@ -9,6 +9,7 @@ import CharacterCard from "@/components/landing/CharacterCard";
 import Footer from "@/components/landing/Footer";
 import Atmosphere from "@/components/landing/Atmosphere";
 import ClaimDialog from "@/components/landing/ClaimDialog";
+import NodeSheet from "@/components/landing/NodeSheet";
 import IntroGate from "@/components/landing/IntroGate";
 import HelpLayer from "@/components/landing/HelpLayer";
 import { LiveRoot } from "@/lib/live/LiveRoot";
@@ -32,6 +33,7 @@ export default function Home() {
         </main>
         <Footer />
         <ClaimDialog />
+        <NodeSheet />
         <HelpLayer />
         <IntroGate />
       </div>

@@ -275,7 +275,7 @@ export default function BrainCanvas({
   }, [layers, reducedMotion, hoveredId, focusedId, claimable]);
 
   const pickCell = useCallback(
-    (clientX: number, clientY: number): number | null => {
+    (clientX: number, clientY: number, snap = false): number | null => {
       const canvas = canvasRef.current;
       if (!canvas) return null;
       const rect = canvas.getBoundingClientRect();
@@ -285,7 +285,19 @@ export default function BrainCanvas({
         const c = claimable[i];
         if (pointInHexFace(lx, ly, c.x, c.y, c.R)) return c.claimId;
       }
-      return null;
+      if (!snap) return null;
+      // A fingertip is far bigger than a cell and lands in the gaps between them:
+      // on touch, take the nearest cell instead of missing.
+      let best: number | null = null;
+      let bestD = Infinity;
+      for (const c of claimable) {
+        const d = Math.hypot(lx - c.x, ly - c.y);
+        if (d < c.R * 2.2 && d < bestD) {
+          bestD = d;
+          best = c.claimId;
+        }
+      }
+      return best;
     },
     [claimable]
   );
@@ -299,8 +311,9 @@ export default function BrainCanvas({
     setHoveredId(null);
     setHoverPos(null);
   }
-  function handleClick(e: React.PointerEvent<HTMLCanvasElement>) {
-    const id = pickCell(e.clientX, e.clientY);
+  function handleClick(e: React.MouseEvent<HTMLCanvasElement>) {
+    const type = (e.nativeEvent as PointerEvent).pointerType;
+    const id = pickCell(e.clientX, e.clientY, type === "touch" || type === "pen");
     if (id != null) {
       setFocusedId(id);
       onSelect?.(id);
@@ -372,6 +385,7 @@ export default function BrainCanvas({
           objectFit: "contain",
           imageRendering: "pixelated",
           outline: "none",
+          touchAction: "manipulation",
         }}
       />
       {hoveredId != null && hoverPos && (
