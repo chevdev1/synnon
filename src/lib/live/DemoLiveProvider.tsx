@@ -154,6 +154,7 @@ export function DemoLiveProvider({ children }: { children: ReactNode }) {
   const value = useMemo<LiveContextValue>(
     () => ({
       mode: "demo",
+      offline: false,
       nodes,
       me: { name: "you", nodeId: CURRENT_USER_NODE_ID },
       currentUserNodeId: CURRENT_USER_NODE_ID,

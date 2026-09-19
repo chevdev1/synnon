@@ -72,10 +72,12 @@ export function ApiLiveProvider({ children }: { children: ReactNode }) {
   const [pulseEvent, setPulseEvent] = useState<PulseEvent | null>(null);
   const [activitySeries, setActivitySeries] = useState<number[]>(() => Array(24).fill(8));
   const [now, setNow] = useState(() => Date.now());
+  const [offline, setOffline] = useState(false);
   const eventTimes = useRef<number[]>([]);
 
   const refreshNodes = useCallback(async () => {
     const d = await getJson<{ nodes: ApiNode[] }>("/api/nodes");
+    setOffline(!d);
     if (d) setNodes(d.nodes.map((n) => ({ id: n.id, status: n.status as NodeStatus, label: `Node ${label(n.id)}`, ownerName: n.ownerName ?? undefined })));
   }, []);
   const refreshMe = useCallback(async () => {
@@ -127,6 +129,7 @@ export function ApiLiveProvider({ children }: { children: ReactNode }) {
   }, [refreshNodes, refreshMe, refreshMemory]);
 
   useEffect(() => {
+    if (offline) return; // no backend: don't hammer a failing endpoint
     const es = new EventSource("/api/stream");
     es.addEventListener("node.updated", (e) => {
       const d = JSON.parse((e as MessageEvent).data) as ApiNode;
@@ -147,7 +150,7 @@ export function ApiLiveProvider({ children }: { children: ReactNode }) {
       bump("a new thought surfaced", 0);
     });
     return () => es.close();
-  }, [bump, refreshMemory]);
+  }, [bump, refreshMemory, offline]);
 
   // Sparkline = real event rate over the last minute, not a random walk.
   useEffect(() => {
@@ -232,6 +235,7 @@ export function ApiLiveProvider({ children }: { children: ReactNode }) {
   const value = useMemo<LiveContextValue>(
     () => ({
       mode: "api",
+      offline,
       nodes,
       me,
       currentUserNodeId: me?.nodeId ?? null,
@@ -253,7 +257,7 @@ export function ApiLiveProvider({ children }: { children: ReactNode }) {
       speak,
       logout,
     }),
-    [nodes, me, selectedId, pulseEvent, triggerPulse, stats, activitySeries, now, lastMemoryTs, thoughts, events, memories, character, signIn, signInWithWallet, claim, speak, logout]
+    [offline, nodes, me, selectedId, pulseEvent, triggerPulse, stats, activitySeries, now, lastMemoryTs, thoughts, events, memories, character, signIn, signInWithWallet, claim, speak, logout]
   );
 
   return <LiveContext.Provider value={value}>{children}</LiveContext.Provider>;

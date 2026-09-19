@@ -50,6 +50,8 @@ export interface Character {
 
 export interface LiveContextValue {
   mode: "demo" | "api";
+  offline: boolean; // API mode only: the backend/database isn't reachable
+
   nodes: BrainNode[];
   me: Me | null;
   currentUserNodeId: number | null;

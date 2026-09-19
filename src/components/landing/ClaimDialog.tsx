@@ -39,7 +39,7 @@ function WalletButton({ chain, name, sub, busy, onPick }: { chain: Chain; name: 
 }
 
 export default function ClaimDialog() {
-  const { mode, me, nodes, selectedId, signIn, signInWithWallet, claim, logout } = useLive();
+  const { mode, offline, me, nodes, selectedId, signIn, signInWithWallet, claim, logout } = useLive();
   const [open, setOpen] = useState(false);
   const [nick, setNick] = useState("");
   const [guest, setGuest] = useState(false);
@@ -119,6 +119,10 @@ export default function ClaimDialog() {
         {mode === "demo" ? (
           <p className="mt-4 text-[17px] leading-snug text-[var(--text-2)]">
             You are looking at the simulated demo. Switch the header toggle to <span className="text-[var(--lime)]">Live data</span> to connect a wallet and claim a real node.
+          </p>
+        ) : offline ? (
+          <p className="mt-4 text-[17px] leading-snug text-[var(--text-2)]">
+            The live backend isn&apos;t connected on this deployment (no database yet), so sign-in and claiming are unavailable here. Use the <span className="text-[#ffd166]">Demo data</span> toggle in the header to explore, or run the project locally.
           </p>
         ) : !me ? (
           <div className="mt-4 space-y-3">

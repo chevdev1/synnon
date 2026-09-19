@@ -5,6 +5,7 @@ import { StatusDot } from "@/components/ui/Card";
 import { useLive } from "@/lib/live/context";
 import { formatAgo } from "@/lib/live/format";
 import { openClaim } from "./ClaimDialog";
+import { useDemo } from "@/lib/demo";
 
 // Deterministic (no Math.random) so SSR and client markup match.
 const MOTES = Array.from({ length: 28 }, (_, i) => ({
@@ -17,7 +18,8 @@ const MOTES = Array.from({ length: 28 }, (_, i) => ({
 }));
 
 export default function BrainStage() {
-  const { mode, nodes, currentUserNodeId, selectedId, setSelectedId, pulseEvent, events, now } = useLive();
+  const demo = useDemo();
+  const { mode, offline, nodes, currentUserNodeId, selectedId, setSelectedId, pulseEvent, events, now } = useLive();
   const activeId = selectedId ?? currentUserNodeId;
   const node = activeId == null ? undefined : nodes.find((n) => n.id === activeId);
   const justPulsed = activeId != null && pulseEvent?.nodeId === activeId;
@@ -46,6 +48,21 @@ export default function BrainStage() {
           />
         ))}
       </div>
+      {mode === "api" && offline && (
+        <div className="absolute left-1/2 top-4 z-10 w-[min(92%,420px)] -translate-x-1/2 border-2 border-[#ff8a6c] bg-[#0b0a1f]/95 p-3 text-center shadow-[4px_4px_0_rgba(255,138,108,0.35)]">
+          <div className="font-head text-[8px] uppercase text-[#ff8a6c]">Live backend not connected</div>
+          <p className="mt-2 text-[16px] leading-snug text-[var(--text-2)]">
+            This deployment has no database yet, so there is no real data to show. The simulated demo works fully.
+          </p>
+          <button
+            type="button"
+            onClick={demo.toggle}
+            className="pixel-btn font-head mt-2 h-8 border-2 border-[#ffd166] px-3 text-[8px] uppercase text-[#ffd166]"
+          >
+            Switch to demo
+          </button>
+        </div>
+      )}
       <BrainCanvasClient
         nodes={nodes}
         selectedId={selectedId}
