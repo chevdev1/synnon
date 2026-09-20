@@ -75,7 +75,7 @@ export const helpActions = {
 };
 
 // Order of the guided tour (also the reading order of the page).
-export const TOUR = ["intro", "brain", "face", "pet", "console", "timelapse", "search", "mind", "stage", "goal", "question", "daily", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod", "clock", "notify", "achievements"];
+export const TOUR = ["intro", "brain", "face", "pet", "console", "timelapse", "search", "mind", "stage", "goal", "question", "daily", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod", "clock", "notify", "weather", "achievements"];
 // (resonance has no anchor of its own in the tour: it appears on the brain by itself)
 
 export const HELP: Record<string, { title: T; body: T }> = {
@@ -231,6 +231,13 @@ export const HELP: Record<string, { title: T; body: T }> = {
     body: {
       en: "Like in a game: a pop-up appears when you earn something, for example linking a wallet, claiming a cell, getting your first reply or seeing the mind fall asleep. Four rarities (bronze, silver, gold, legendary) and a few hidden ones. Click the trophy to see them all and your progress.",
       ru: "Как в играх: всплывает окно, когда ты что-то получаешь, например привязал кошелёк, занял клетку, получил первый ответ или увидел, как разум засыпает. Четыре редкости (бронза, серебро, золото, легенда) и несколько скрытых. Нажми на кубок, чтобы увидеть все и свой прогресс.",
+    },
+  },
+  weather: {
+    title: { en: "Weather switch", ru: "Переключатель погоды" },
+    body: {
+      en: "The little cloud switches all weather effects off and on: rain, snow, thunderstorms, the leaves, petals and fireflies of the season, and fireworks. It also shows what the sky is doing right now. The calendar clock still tells you what the sky is up to.",
+      ru: "Маленькое облачко выключает и включает все погодные эффекты: дождь, снег, грозу, листья, лепестки и светлячков сезона и салют. Оно же показывает, что сейчас делает небо. Что происходит в небе, по-прежнему можно узнать в календаре у часов.",
     },
   },
   notify: {

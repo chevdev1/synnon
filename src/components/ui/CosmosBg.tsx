@@ -67,13 +67,16 @@ export default function CosmosBg() {
     let calAt = 0;
     let raf = 0;
     let last = -1000;
+    let drawnAt = 0;
 
     const draw = (t: number, animated: boolean) => {
       const ph = live.current.phase;
       const dz = sky.dreaming;
-      cx += (px - cx) * 0.06;
-      sy *= 0.94;
-      cy += (py + sy - cy) * 0.06;
+      const k = drawnAt > 0 ? Math.min(100, t - drawnAt) / 50 : 1; // motion below was tuned for 20 fps
+      drawnAt = t;
+      cx += (px - cx) * (1 - Math.pow(0.94, k));
+      sy *= Math.pow(0.94, k);
+      cy += (py + sy - cy) * (1 - Math.pow(0.94, k));
       ctx.clearRect(0, 0, W, H);
       const boost = animated ? Math.max(0, sky.swell * (1 - (performance.now() - sky.swellAt) / 1400)) : 0;
       const gt = sky.goalTier; // community goal: 1 more shooting stars, 2 aurora, 3 golden stars
@@ -104,9 +107,9 @@ export default function CosmosBg() {
             ctx.fillRect(Math.floor(meteor.x - meteor.vx * i * 0.9), Math.floor(meteor.y - meteor.vy * i * 0.9), 1, 1);
           }
           ctx.globalAlpha = 1;
-          meteor.x += meteor.vx;
-          meteor.y += meteor.vy;
-          meteor.life -= 0.022;
+          meteor.x += meteor.vx * k;
+          meteor.y += meteor.vy * k;
+          meteor.life -= 0.022 * k;
           if (meteor.life <= 0 || meteor.x < -10 || meteor.y > H + 10) meteors.splice(m, 1);
         }
       }
@@ -116,7 +119,7 @@ export default function CosmosBg() {
     resize();
     if (!reduced) {
       const loop = (t: number) => {
-        if (t - last > 50 && !document.hidden) {
+        if (t - last >= 30 && !document.hidden) {
           last = t;
           draw(t, true);
         }

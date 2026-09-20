@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { achActions, useAch } from "@/lib/achStore";
 import { useMotion } from "@/lib/motion";
+import { loadWeatherPref } from "@/lib/weatherPref";
 import { sky, type Weather } from "@/lib/sky";
 import { useTod } from "@/lib/tod";
 import { calendarSky } from "@/lib/weather";
@@ -29,6 +30,7 @@ export default function WeatherFx() {
     const canvas = ref.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx || reduced) return;
+    loadWeatherPref(); // the visitor may have switched the weather off
     let W = 320;
     let H = 200;
     const resize = () => {
@@ -80,6 +82,7 @@ export default function WeatherFx() {
     const weather = (t: number, dz: boolean) => {
       const dt = lastT ? Math.min(1000, t - lastT) : 0;
       lastT = t;
+      const k = Math.min(dt, 100) / 50; // motion below was tuned for 20 fps: scale it by real elapsed time
       if (t - calAt > 5000) {
         cal = calendarSky(new Date(), test);
         calAt = t;
@@ -95,7 +98,7 @@ export default function WeatherFx() {
         }
       }
       if (wx === "clear") target = 0;
-      wAmt += (target - wAmt) * 0.025;
+      wAmt += (target - wAmt) * (1 - Math.pow(1 - 0.025, k));
       sky.weather = wx;
       if (!document.hidden && wAmt > 0.6) {
         if (wx === "rain") watch("rain", "sky-rain", dt);
@@ -115,12 +118,12 @@ export default function WeatherFx() {
         while (flies.length < n) flies.push({ x: Math.random() * W, y: Math.random() * H, vx: 0, vy: 0.2 + Math.random() * 0.3, ph: Math.random() * 6.3, c: kind === "leaf" ? LEAF[flies.length % 3] : kind === "petal" ? PETAL[flies.length % 3] : "#d8ff7a" });
         for (const f of flies) {
           if (kind === "firefly") {
-            f.vx += (Math.random() - 0.5) * 0.06;
-            f.vy += (Math.random() - 0.5) * 0.06;
+            f.vx += (Math.random() - 0.5) * 0.06 * k;
+            f.vy += (Math.random() - 0.5) * 0.06 * k;
             f.vx = Math.max(-0.3, Math.min(0.3, f.vx));
             f.vy = Math.max(-0.3, Math.min(0.3, f.vy));
-            f.x = (f.x + f.vx + W) % W;
-            f.y = (f.y + f.vy + H) % H;
+            f.x = (f.x + f.vx * k + W) % W;
+            f.y = (f.y + f.vy * k + H) % H;
             const a = 0.5 + 0.5 * Math.sin(t / 420 + f.ph);
             ctx.globalAlpha = 0.14 * a;
             ctx.fillStyle = f.c;
@@ -128,8 +131,8 @@ export default function WeatherFx() {
             ctx.globalAlpha = 0.35 + 0.65 * a;
             ctx.fillRect(Math.floor(f.x), Math.floor(f.y), 1, 1);
           } else {
-            f.y += f.vy;
-            f.x += kind === "leaf" ? Math.sin(t / 700 + f.ph) * 0.4 : 0.25 + Math.sin(t / 900 + f.ph) * 0.25;
+            f.y += f.vy * k;
+            f.x += (kind === "leaf" ? Math.sin(t / 700 + f.ph) * 0.4 : 0.25 + Math.sin(t / 900 + f.ph) * 0.25) * k;
             if (f.y > H + 2 || f.x > W + 3 || f.x < -3) {
               f.y = -2;
               f.x = Math.random() * W;
@@ -173,8 +176,8 @@ export default function WeatherFx() {
       ctx.beginPath(); // every drop in one path and one fill
       for (let i = drops.length - 1; i >= 0; i--) {
         const d = drops[i];
-        d.y += d.vy;
-        d.x += snow ? Math.sin((d.y + i * 9) / 9) * 0.35 : d.vx;
+        d.y += d.vy * k;
+        d.x += (snow ? Math.sin((d.y + i * 9) / 9) * 0.35 : d.vx) * k;
         if (d.y > H || d.x < -4) {
           if (drops.length > want2) {
             drops.splice(i, 1);
@@ -203,7 +206,7 @@ export default function WeatherFx() {
           ctx.fillStyle = "#ffffff";
           for (const [x, y] of b.pts) ctx.fillRect(x, y, 1, 2);
           ctx.globalAlpha = 1;
-          b.life -= 0.13;
+          b.life -= 0.13 * k;
           if (b.life <= 0) bolt = null;
         }
       }
@@ -214,12 +217,18 @@ export default function WeatherFx() {
     let last = -1000;
     let wasBusy = true;
     const loop = (t: number) => {
-      if (t - last > 50 && !document.hidden) {
+      if (t - last >= 15 && !document.hidden) {
         last = t;
         // nothing to show (clear sky, no visitors, no fireworks): clear once, then do no work
         const busy = wx !== "clear" || wAmt > 0.01 || flyKind !== null || booms.length > 0 || cal.newYear || bolt !== null;
         if (busy || wasBusy) ctx.clearRect(0, 0, W, H);
         wasBusy = busy;
+        if (sky.weatherOff) {
+          if (wasBusy) ctx.clearRect(0, 0, W, H);
+          wasBusy = false;
+          raf = requestAnimationFrame(loop);
+          return;
+        }
         weather(t, false); // the sky has its own life, awake mind or not
       }
       raf = requestAnimationFrame(loop);

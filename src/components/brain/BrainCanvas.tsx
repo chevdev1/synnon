@@ -522,7 +522,7 @@ export default function BrainCanvas({
       // ---- the sky's weather falls on the brain itself: ripples, snow, lightning strikes ----
       {
         const Wx = wxRef.current;
-        const kind = sky.weather;
+        const kind = sky.weatherOff ? "clear" : sky.weather; // the visitor can switch the weather off
         if (kind !== "clear") Wx.kind = kind;
         Wx.amt += ((kind === "clear" ? 0 : 1) - Wx.amt) * 0.02;
         if (Wx.amt > 0.03 && !reducedMotion && !assembling) {
@@ -786,14 +786,11 @@ export default function BrainCanvas({
       addHex(c, cx, cy, R);
     }
 
-    // ~30 fps is plenty for pixel art and halves the cost of redrawing the big canvas
-    let lastDraw = -1000;
     function loop(t: number) {
-      if (document.hidden || t - lastDraw < 30) {
+      if (document.hidden) {
         raf = requestAnimationFrame(loop);
         return;
       }
-      lastDraw = t;
       frame(t);
     }
 

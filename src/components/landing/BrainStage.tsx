@@ -10,6 +10,7 @@ import { openNode } from "./NodeSheet";
 import NodeSearch from "./NodeSearch";
 import TimelapseBar from "./TimelapseBar";
 import ClockChip from "./ClockChip";
+import WeatherToggle from "./WeatherToggle";
 import { useResonance } from "@/lib/useResonance";
 import NotifyBell from "@/components/notify/NotifyBell";
 import { notifyActions } from "@/lib/notify";
@@ -243,6 +244,7 @@ export default function BrainStage() {
       </button>
       <div className="absolute right-3 top-[110px] z-10 flex items-center gap-1.5 sm:top-[126px]">
         <NotifyBell />
+        <WeatherToggle />
         <ClockChip compact />
       </div>
       {tl.active ? (
