@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import BrainCanvasClient from "@/components/brain/BrainCanvasClient";
 import { StatusDot } from "@/components/ui/Card";
 import { useLive } from "@/lib/live/context";
@@ -39,11 +39,12 @@ export default function BrainStage() {
   const { mode, offline, nodes, me, currentUserNodeId, selectedId, setSelectedId, pulseEvent, events, now } = useLive();
   const { state: mindState, mood, dreaming } = useMind();
   const stg = useStage();
+  const parallaxBusy = useRef(false);
   const pairs = useResonance(demo.on, nodes);
   const [rIdx, setRIdx] = useState(0);
   useEffect(() => {
     if (pairs.length < 2) return;
-    const id = window.setInterval(() => setRIdx((i) => i + 1), 6000);
+    const id = window.setInterval(() => setRIdx((i) => i + 1), 10000);
     return () => window.clearInterval(id);
   }, [pairs.length]);
   const shownPair = pairs.length ? pairs[rIdx % pairs.length] : null;
@@ -101,10 +102,16 @@ export default function BrainStage() {
     <div
       className="relative min-h-0 flex-1"
       onPointerMove={(e) => {
-        if (e.pointerType !== "mouse") return;
-        const r = e.currentTarget.getBoundingClientRect();
-        e.currentTarget.style.setProperty("--px", ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
-        e.currentTarget.style.setProperty("--py", ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
+        if (e.pointerType !== "mouse" || parallaxBusy.current) return;
+        parallaxBusy.current = true; // at most once per frame
+        const el = e.currentTarget;
+        const { clientX, clientY } = e;
+        requestAnimationFrame(() => {
+          parallaxBusy.current = false;
+          const r = el.getBoundingClientRect();
+          el.style.setProperty("--px", ((clientX - r.left) / r.width - 0.5).toFixed(3));
+          el.style.setProperty("--py", ((clientY - r.top) / r.height - 0.5).toFixed(3));
+        });
       }}
     >
       <div
@@ -244,14 +251,17 @@ export default function BrainStage() {
         it breathes. it watches.
       </div>
 
-      {!tl.active && !consoleOpen && shownPair && (
-        <div key={rIdx} className="fade-in-up pointer-events-none absolute bottom-[92px] left-4 max-w-[60%] text-[16px] text-[#ffd166]" data-resonance-caption data-help-id="resonance">
-          ✦ {String(shownPair.a).padStart(2, "0")} ↔ {String(shownPair.b).padStart(2, "0")} resonate: {shownPair.words.map((w) => `“${w}”`).join(", ")}
-          {demo.on ? " (simulated)" : ""}
-        </div>
-      )}
       {!tl.active && !consoleOpen && (
         <ul className="pointer-events-none absolute bottom-3 left-4 space-y-1 text-[16px] text-[var(--muted)]">
+          {shownPair && (
+            <li key={rIdx} className="fade-in-up mb-2 flex items-center gap-1.5 text-[#ffd166]" data-resonance-caption data-help-id="resonance">
+              <span>✦</span>
+              <span>
+                {String(shownPair.a).padStart(2, "0")} ↔ {String(shownPair.b).padStart(2, "0")} · {shownPair.words.map((w) => `“${w}”`).join(", ")}
+                {demo.on ? " (sim)" : ""}
+              </span>
+            </li>
+          )}
           {events.map((e, i) => (
             <li key={e.id} className="fade-in-up flex items-center gap-1.5" style={{ opacity: 1 - i * 0.24 }}>
               <span className="h-1 w-1 rounded-full bg-[var(--lime)]" />

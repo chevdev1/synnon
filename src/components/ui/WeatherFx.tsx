@@ -68,6 +68,7 @@ export default function WeatherFx() {
         if (Math.random() < 0.06) x += Math.random() < 0.5 ? -3 : 3;
       }
       bolt = { pts, life: 1 };
+      sky.boltSeq += 1; // the brain hears the thunder too (see BrainCanvas)
     };
     // watching a phenomenon for a while earns its achievement
     const dwell: Record<string, number> = {};
@@ -94,7 +95,7 @@ export default function WeatherFx() {
         }
       }
       if (wx === "clear") target = 0;
-      wAmt += (target - wAmt) * 0.06;
+      wAmt += (target - wAmt) * 0.025;
       sky.weather = wx;
       if (!document.hidden && wAmt > 0.6) {
         if (wx === "rain") watch("rain", "sky-rain", dt);
@@ -209,10 +210,14 @@ export default function WeatherFx() {
 
     let raf = 0;
     let last = -1000;
+    let wasBusy = true;
     const loop = (t: number) => {
       if (t - last > 50 && !document.hidden) {
         last = t;
-        ctx.clearRect(0, 0, W, H);
+        // nothing to show (clear sky, no visitors, no fireworks): clear once, then do no work
+        const busy = wx !== "clear" || wAmt > 0.01 || flyKind !== null || booms.length > 0 || cal.newYear || bolt !== null;
+        if (busy || wasBusy) ctx.clearRect(0, 0, W, H);
+        wasBusy = busy;
         weather(t, sky.dreaming);
       }
       raf = requestAnimationFrame(loop);

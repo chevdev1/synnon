@@ -86,21 +86,27 @@ function ShareRow({ e }: { e: DiaryEntry }) {
 const SKY_COLOR = { rain: "#7fb8ff", snow: "#e8f0ff", storm: "#c9b8ff" } as const;
 const SKY_LABEL = { rain: "rain", snow: "snow", storm: "thunderstorm" } as const;
 
-// What the sky did that day, from the schedule the whole site follows (in your local time).
+// What the sky did that day, in one short line: how long each phenomenon lasted in total.
 function SkyLine({ day, demo }: { day: string; demo: boolean }) {
-  const events = useMemo(() => skyEventsForDay(day, demo), [day, demo]);
-  if (events.length === 0) return null;
-  const hm = (ms: number) => new Date(ms).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const totals = useMemo(() => {
+    const t: Record<string, number> = {};
+    for (const s of skyEventsForDay(day, demo)) t[s.w] = (t[s.w] ?? 0) + (s.to - s.from);
+    return (["rain", "snow", "storm"] as const).filter((w) => (t[w] ?? 0) >= 20 * 60_000).map((w) => ({ w, ms: t[w] }));
+  }, [day, demo]);
+  if (totals.length === 0) return null;
+  const dur = (ms: number) => {
+    const m = Math.round(ms / 60_000 / 10) * 10;
+    return m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ""}` : `${m} min`;
+  };
   return (
-    <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-t-2 border-[var(--divider)] pt-3" data-sky-line>
-      <span className="font-head text-[7px] uppercase text-[var(--muted)]">Sky that day</span>
-      {events.slice(0, 6).map((s) => (
-        <span key={s.from} className="flex items-center gap-1.5 text-[17px] text-[var(--text-2)]">
+    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[17px] text-[var(--text-2)]" data-sky-line>
+      <span className="font-head text-[7px] uppercase text-[var(--muted)]">Sky</span>
+      {totals.map((s) => (
+        <span key={s.w} className="flex items-center gap-1.5">
           <span className="h-2 w-2" style={{ background: SKY_COLOR[s.w] }} />
-          {SKY_LABEL[s.w]} {hm(s.from)}–{hm(s.to)}
+          {SKY_LABEL[s.w]}, about {dur(s.ms)}
         </span>
       ))}
-      {events.length > 6 && <span className="text-[17px] text-[var(--muted)]">+{events.length - 6} more</span>}
     </div>
   );
 }

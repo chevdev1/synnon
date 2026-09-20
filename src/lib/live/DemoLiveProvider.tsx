@@ -83,7 +83,7 @@ export function DemoLiveProvider({ children }: { children: ReactNode }) {
           eventSeq += 1;
           const claimed: LiveEvent = { id: eventSeq, nodeId: pick.id, text: `node ${label} was claimed`, ts: Date.now() };
           setEvents((prev) => [claimed, ...prev].slice(0, 4));
-          scheduleNext(6000 + Math.random() * 6000);
+          scheduleNext(11000 + Math.random() * 9000);
           return;
         }
         setNodes((cur) => cur.map((n) => (n.id === pick.id ? { ...n, status: "active", lastActiveAt: Date.now() } : n)));
@@ -105,9 +105,9 @@ export function DemoLiveProvider({ children }: { children: ReactNode }) {
           }, 3600)
         );
       }
-      scheduleNext(6000 + Math.random() * 6000);
+      scheduleNext(11000 + Math.random() * 9000);
     }
-    scheduleNext(4000 + Math.random() * 3000);
+    scheduleNext(6000 + Math.random() * 4000);
     return () => {
       cancelled = true;
       timeouts.forEach(clearTimeout);

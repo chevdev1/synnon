@@ -162,6 +162,7 @@ export default function BrainCanvas({
   const introRef = useRef<{ start: number | null; done: boolean }>({ start: null, done: false });
   const nodesRef = useRef(nodes);
   const dreamingRef = useRef(dreaming);
+  const wxRef = useRef({ amt: 0, kind: "rain" as string, drops: [] as { x: number; y: number; start: number; snow: boolean }[], strike: null as null | { start: number; cell: { x: number; y: number; R: number }; pts: [number, number][] }, seq: sky.boltSeq });
   const resonanceRef = useRef(resonance);
   const halfLifeRef = useRef(glowHalfLifeMin);
   const petSimRef = useRef<PetSim | null>(null);
@@ -497,6 +498,87 @@ export default function BrainCanvas({
           return alive;
         });
         ctx.globalCompositeOperation = "source-over";
+      }
+
+      // ---- the sky's weather falls on the brain itself: ripples, snow, lightning strikes ----
+      {
+        const Wx = wxRef.current;
+        const kind = sky.weather;
+        if (kind !== "clear") Wx.kind = kind;
+        Wx.amt += ((kind === "clear" || dreamingRef.current ? 0 : 1) - Wx.amt) * 0.02;
+        if (Wx.amt > 0.03 && !reducedMotion && !assembling) {
+          const snowing = Wx.kind === "snow";
+          ctx.globalCompositeOperation = "lighter";
+          // a drop lands on a cell (a flat ring spreads) or a snowflake glints on it
+          if (Math.random() < 0.3 * Wx.amt && Wx.drops.length < 28) {
+            const c = claimable[Math.floor(Math.random() * claimable.length)];
+            Wx.drops.push({ x: c.x * SCALE + (Math.random() - 0.5) * c.R * SCALE, y: c.y * SCALE + (Math.random() - 0.5) * c.R * SCALE * 0.6, start: t, snow: snowing });
+          }
+          Wx.drops = Wx.drops.filter((d) => {
+            const p = (t - d.start) / (d.snow ? 1500 : 950);
+            if (p >= 1) return false;
+            if (d.snow) {
+              ctx.fillStyle = `rgba(240,247,255,${(0.85 * Math.sin(Math.PI * p)).toFixed(3)})`;
+              ctx.fillRect(Math.round(d.x) - 1, Math.round(d.y) - 3, 3, 7);
+              ctx.fillRect(Math.round(d.x) - 3, Math.round(d.y) - 1, 7, 3);
+            } else {
+              ctx.strokeStyle = `rgba(160,205,255,${(0.6 * (1 - p)).toFixed(3)})`;
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.ellipse(d.x, d.y, 3 + p * 20, (3 + p * 20) * 0.5, 0, 0, Math.PI * 2);
+              ctx.stroke();
+            }
+            return true;
+          });
+          if (snowing) {
+            // a light dusting on top of every third cell
+            ctx.fillStyle = `rgba(235,245,255,${(0.09 * Wx.amt).toFixed(3)})`;
+            for (const c of claimable) {
+              if (c.claimId % 3 !== 0) continue;
+              ctx.beginPath();
+              addHex(ctx, c.x * SCALE, c.y * SCALE - 2, c.R * SCALE * 0.78);
+              ctx.fill();
+            }
+          }
+          // thunder in the sky: a bolt strikes one of the cells and the whole brain flashes
+          if (Wx.seq !== sky.boltSeq) {
+            Wx.seq = sky.boltSeq;
+            const c = claimable[Math.floor(Math.random() * claimable.length)];
+            const sx = c.x * SCALE;
+            const sy = c.y * SCALE;
+            const pts: [number, number][] = [];
+            let x = sx + (Math.random() - 0.5) * 60;
+            for (let y = -6; y < sy; y += 10) {
+              pts.push([x, y]);
+              x += (sx - x) * 0.18 + (Math.random() - 0.5) * 14;
+            }
+            pts.push([sx, sy]);
+            Wx.strike = { start: t, cell: c, pts };
+          }
+          const s = Wx.strike;
+          if (s) {
+            const a = 1 - (t - s.start) / 420;
+            if (a <= 0) Wx.strike = null;
+            else {
+              ctx.strokeStyle = `rgba(190,205,255,${(0.4 * a).toFixed(3)})`;
+              ctx.lineWidth = 9;
+              ctx.beginPath();
+              s.pts.forEach(([px, py], i) => (i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)));
+              ctx.stroke();
+              ctx.strokeStyle = `rgba(255,255,255,${a.toFixed(3)})`;
+              ctx.lineWidth = 3;
+              ctx.stroke();
+              ctx.fillStyle = `rgba(255,255,255,${(0.7 * a).toFixed(3)})`;
+              ctx.beginPath();
+              addHex(ctx, s.cell.x * SCALE, s.cell.y * SCALE, s.cell.R * SCALE * 1.15);
+              ctx.fill();
+              ctx.globalCompositeOperation = "source-atop"; // light up only the brain, not the empty canvas
+              ctx.fillStyle = `rgba(200,215,255,${(0.2 * a).toFixed(3)})`;
+              ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            }
+          }
+          ctx.globalCompositeOperation = "source-over";
+        }
       }
 
       // ---- resonance: a slow golden thread between cells whose words echo each other ----

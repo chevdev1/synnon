@@ -100,12 +100,12 @@ export default function ClockChip({ compact = false }: { compact?: boolean }) {
 
   useEffect(() => {
     const first = window.setTimeout(() => setNow(new Date()), 0);
-    const id = window.setInterval(() => setNow(new Date()), 1000);
+    const id = window.setInterval(() => setNow(new Date()), open ? 1000 : 10000);
     return () => {
       window.clearTimeout(first);
       window.clearInterval(id);
     };
-  }, []);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;

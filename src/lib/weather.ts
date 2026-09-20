@@ -9,10 +9,10 @@ export type Visitor = "leaf" | "petal" | "firefly" | null;
 const SLOT_MS = 12 * 60_000;
 // chance per slot of [rain, snow, storm]
 const CHANCE: Record<Season, [number, number, number]> = {
-  winter: [0.05, 0.24, 0.02],
-  spring: [0.14, 0.01, 0.04],
-  summer: [0.05, 0, 0.08],
-  autumn: [0.15, 0, 0.05],
+  winter: [0.05, 0.3, 0.02],
+  spring: [0.18, 0.01, 0.05],
+  summer: [0.07, 0, 0.1],
+  autumn: [0.2, 0, 0.06],
 };
 
 const h32 = (n: number) => {
