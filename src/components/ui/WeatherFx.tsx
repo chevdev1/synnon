@@ -41,7 +41,7 @@ export default function WeatherFx() {
     window.addEventListener("resize", resize);
 
     // Calendar and clock decide everything (see lib/weather); nobody can call it.
-    const test = process.env.NODE_ENV !== "production" ? new URLSearchParams(window.location.search).get("skytest") : null;
+    const test = new URLSearchParams(window.location.search).get("skytest");
     type Drop = { x: number; y: number; vx: number; vy: number; big: boolean };
     const drops: Drop[] = [];
     let wx: Weather = "clear";
@@ -77,7 +77,7 @@ export default function WeatherFx() {
       if (dwell[key] > 20000) achActions.unlock(ach);
     };
     const weather = (t: number, dz: boolean) => {
-      const dt = lastT ? Math.min(200, t - lastT) : 0;
+      const dt = lastT ? Math.min(1000, t - lastT) : 0;
       lastT = t;
       if (t - calAt > 5000) {
         cal = calendarSky(new Date(), test);

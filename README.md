@@ -29,7 +29,8 @@ With no `DATABASE_URL` it uses an embedded Postgres (PGlite) stored in `.data/`,
 | `LLM_API_KEY`, `LLM_PROVIDER` | Free-tier LLM, no credit card: `gemini` (default), `groq` or `openrouter`. Any OpenAI-compatible API works with `LLM_PROVIDER=openai` + `LLM_BASE_URL` + `LLM_MODEL`. |
 | `LLM_MODEL` | Override the preset model (free model names change over time). |
 | `ANTHROPIC_API_KEY` | Alternative: Anthropic (paid). |
-| `CRON_SECRET` | Bearer secret for the two scheduler endpoints: `POST /api/cron/thoughts` (every 1-3 hours) and `POST /api/cron/diary` (once a day, e.g. 23:55 UTC; writes that day's diary entry, `?day=YYYY-MM-DD` backfills). |
+| `CRON_SECRET` | (On the free Vercel plan `vercel.json` runs two daily jobs: `/api/cron/daily` = yesterday's diary + this week's question + a thought, and `/api/cron/thoughts`. The site also thinks and writes the diary lazily when somebody visits, so no frequent scheduler is needed.) |
+| `CRON_SECRET` (details) | Bearer secret for the two scheduler endpoints: `POST /api/cron/thoughts` (every 1-3 hours) and `POST /api/cron/diary` (once a day, e.g. 23:55 UTC; writes that day's diary entry, `?day=YYYY-MM-DD` backfills). |
 | `NEXT_PUBLIC_SYNOD_TOKEN_ADDRESS` | ERC-20 a wallet must hold to claim a node. Empty = claiming is free. |
 | `NEXT_PUBLIC_SYNOD_CHAIN`, `..._TOKEN_SYMBOL`, `..._TOKEN_DECIMALS`, `..._MIN_HOLD`, `..._TOKEN_FAUCET` | Chain (`testnet` 46630 / `mainnet` 4663), token metadata, required balance, and whether the test faucet button is shown. |
 | `SYNOD_RPC_URL` | Override the public Robinhood Chain RPC. |

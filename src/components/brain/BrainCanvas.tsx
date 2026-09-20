@@ -518,8 +518,8 @@ export default function BrainCanvas({
           for (let i = 0; i <= 36; i++) {
             const u = i / 36;
             const [x, y] = quad(ax, ay, cx, cy, bx, by, u);
-            ctx.fillStyle = `rgba(255,209,102,${(0.16 + 0.22 * breathe).toFixed(3)})`;
-            ctx.fillRect(Math.round(x / 2) * 2 - 1, Math.round(y / 2) * 2 - 1, 2, 2);
+            ctx.fillStyle = `rgba(255,209,102,${(0.34 + 0.36 * breathe).toFixed(3)})`;
+            ctx.fillRect(Math.round(x / 2) * 2 - 1, Math.round(y / 2) * 2 - 1, 3, 3);
           }
           // a bead travelling to and fro
           const u = 0.5 + 0.5 * Math.sin(t / 1600 + k);

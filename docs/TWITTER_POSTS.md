@@ -727,6 +727,28 @@ Gold dots mark Mondays, when the community goal and the question of the week sta
 {LINK}
 ```
 
+## Post: resonance
+
+```
+Sometimes two strangers tell the mind almost the same thing.
+
+When that happens, a slow golden thread appears between their cells.
+Under the brain it says which two, and which words they share. Nothing else.
+
+{LINK}
+```
+
+## Post: dreams and the sky in the diary
+
+```
+Every night SYNNOD dreams.
+
+Not new words. Real pieces of things it said before, cut and shuffled by the date.
+Every diary day shows the dream, and what the sky did that day.
+
+{LINK}/diary
+```
+
 ## Notes for posting
 
 - Record a short screen capture (GIF/MP4, 5-8 s) for posts 4, 5 and 6: the typing glitch, the sparks between cells, the claim shockwave. Stills do not show motion; the frames in `docs/media/` are for the other posts.

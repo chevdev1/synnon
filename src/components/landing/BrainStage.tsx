@@ -245,7 +245,7 @@ export default function BrainStage() {
       </div>
 
       {!tl.active && !consoleOpen && shownPair && (
-        <div key={rIdx} className="fade-in-up pointer-events-none absolute bottom-[92px] left-4 max-w-[60%] text-[16px] text-[#ffd166]" data-resonance-caption>
+        <div key={rIdx} className="fade-in-up pointer-events-none absolute bottom-[92px] left-4 max-w-[60%] text-[16px] text-[#ffd166]" data-resonance-caption data-help-id="resonance">
           ✦ {String(shownPair.a).padStart(2, "0")} ↔ {String(shownPair.b).padStart(2, "0")} resonate: {shownPair.words.map((w) => `“${w}”`).join(", ")}
           {demo.on ? " (simulated)" : ""}
         </div>

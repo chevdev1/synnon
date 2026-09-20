@@ -6,13 +6,13 @@ import type { Weather } from "@/lib/sky";
 export type Season = "winter" | "spring" | "summer" | "autumn";
 export type Visitor = "leaf" | "petal" | "firefly" | null;
 
-const SLOT_MS = 9 * 60_000;
+const SLOT_MS = 12 * 60_000;
 // chance per slot of [rain, snow, storm]
 const CHANCE: Record<Season, [number, number, number]> = {
-  winter: [0.06, 0.34, 0.02],
-  spring: [0.2, 0.01, 0.05],
-  summer: [0.06, 0, 0.14],
-  autumn: [0.24, 0, 0.08],
+  winter: [0.05, 0.24, 0.02],
+  spring: [0.14, 0.01, 0.04],
+  summer: [0.05, 0, 0.08],
+  autumn: [0.15, 0, 0.05],
 };
 
 const h32 = (n: number) => {
@@ -50,7 +50,7 @@ export interface CalendarSky {
   newYear: boolean; // fireworks
 }
 
-// `test` only works outside production (?skytest=storm|snow|rain|leaf|petal|firefly|shower|fireworks)
+// `test`: a private peek at a phenomenon on your own screen (?skytest=storm|snow|rain|leaf|petal|firefly|shower|fireworks)
 export function calendarSky(d: Date, test: string | null = null): CalendarSky {
   let season = seasonOf(d);
   const m = d.getMonth();

@@ -62,7 +62,7 @@ export default function CosmosBg() {
     let nextBurst = 0;
 
     // real meteor-shower nights come from the calendar (lib/weather)
-    const test = process.env.NODE_ENV !== "production" ? new URLSearchParams(window.location.search).get("skytest") : null;
+    const test = new URLSearchParams(window.location.search).get("skytest");
     let cal = calendarSky(new Date(), test);
     let calAt = 0;
     let raf = 0;

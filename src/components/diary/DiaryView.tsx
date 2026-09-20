@@ -94,12 +94,13 @@ function SkyLine({ day, demo }: { day: string; demo: boolean }) {
   return (
     <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-t-2 border-[var(--divider)] pt-3" data-sky-line>
       <span className="font-head text-[7px] uppercase text-[var(--muted)]">Sky that day</span>
-      {events.map((s) => (
+      {events.slice(0, 6).map((s) => (
         <span key={s.from} className="flex items-center gap-1.5 text-[17px] text-[var(--text-2)]">
           <span className="h-2 w-2" style={{ background: SKY_COLOR[s.w] }} />
           {SKY_LABEL[s.w]} {hm(s.from)}–{hm(s.to)}
         </span>
       ))}
+      {events.length > 6 && <span className="text-[17px] text-[var(--muted)]">+{events.length - 6} more</span>}
     </div>
   );
 }
