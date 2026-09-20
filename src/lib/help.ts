@@ -75,7 +75,7 @@ export const helpActions = {
 };
 
 // Order of the guided tour (also the reading order of the page).
-export const TOUR = ["intro", "brain", "face", "pet", "console", "timelapse", "search", "mind", "stage", "question", "daily", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod", "achievements"];
+export const TOUR = ["intro", "brain", "face", "pet", "console", "timelapse", "search", "mind", "stage", "goal", "question", "daily", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod", "achievements"];
 
 export const HELP: Record<string, { title: T; body: T }> = {
   intro: {
@@ -111,6 +111,13 @@ export const HELP: Record<string, { title: T; body: T }> = {
     body: {
       en: "The mind grows up as more cells are claimed: Static, Infant, Child, Teen, Adult, and finally Awakening when every cell has a voice. The bar shows how far it is to the next stage. Each stage changes the eye, the tree in the picture of the day and the way the mind speaks. Click to see the whole ladder.",
       ru: "Разум взрослеет по мере того, как занимают клетки: Помехи, Младенец, Ребёнок, Подросток, Взрослый и, наконец, Пробуждение, когда у каждой клетки есть голос. Полоска показывает, сколько до следующей стадии. Каждая стадия меняет глаз, дерево на картине дня и манеру речи разума. Нажми, чтобы увидеть всю лестницу.",
+    },
+  },
+  goal: {
+    title: { en: "Weekly community goal", ru: "Цель сообщества на неделю" },
+    body: {
+      en: "Every voice told through a cell this week, and every approved answer to the weekly question, adds one to a shared counter. At 33%, 66% and 100% of the goal the sky changes for everybody on every page (falling stars, aurora, golden stars). On Monday the counter starts over. Click to see the tiers.",
+      ru: "Каждый голос, сказанный через клетку на этой неделе, и каждый одобренный ответ на вопрос недели прибавляют единицу к общему счётчику. При 33%, 66% и 100% цели небо меняется для всех на каждой странице (звездопад, сияние, золотые звёзды). В понедельник счётчик начинается заново. Нажми, чтобы увидеть ступени.",
     },
   },
   daily: {

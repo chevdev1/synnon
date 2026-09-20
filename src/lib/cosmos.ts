@@ -52,7 +52,11 @@ export interface CosmosOpts {
   cx: number; // parallax, -1..1
   cy: number;
   boost: number; // 0..1 swell after an event
+  aurora?: boolean; // community goal, tier 2
+  gold?: boolean; // community goal, tier 3
 }
+
+const GOLD_STARS = ["#ffffff", "#ffe9a8", "#ffd166", "#fff3c4"];
 
 // Draws nebulae + stars onto a canvas of any size (coordinates scale from 256x172).
 export function drawCosmos(ctx: CanvasRenderingContext2D, W: number, H: number, t: number, o: CosmosOpts) {
@@ -75,6 +79,21 @@ export function drawCosmos(ctx: CanvasRenderingContext2D, W: number, H: number, 
   });
   ctx.globalCompositeOperation = "source-over";
 
+  // community goal, tier 2: ribbons of aurora across the upper sky
+  if (o.aurora) {
+    ctx.globalCompositeOperation = "lighter";
+    for (let x = 0; x < W; x += 2) {
+      const y0 = H * 0.2 + Math.sin((x / k) * 0.05 + t / 1700) * H * 0.06 + Math.sin((x / k) * 0.13 + t / 900) * H * 0.02;
+      const h = H * (0.16 + 0.03 * Math.sin((x / k) * 0.09 + t / 1200));
+      for (let j = 0; j < 6; j++) {
+        const a = 0.13 * Math.sin(((j + 0.5) / 6) * Math.PI);
+        ctx.fillStyle = j < 3 ? `rgba(110,255,190,${a.toFixed(3)})` : `rgba(214,116,220,${a.toFixed(3)})`;
+        ctx.fillRect(x, y0 + (h * j) / 6, 2, h / 6 + 1);
+      }
+    }
+    ctx.globalCompositeOperation = "source-over";
+  }
+
   for (const s of STARS) {
     const depth = s.layer + 1; // 1 far .. 3 near
     const drift = o.animated ? (t / 1000) * depth * 0.9 * speed * k : 0;
@@ -82,7 +101,7 @@ export function drawCosmos(ctx: CanvasRenderingContext2D, W: number, H: number, 
     const y = (((s.y * (H / COSMOS_H) - o.cy * depth * 2.4) % H) + H) % H;
     const tw = o.animated ? 0.55 + 0.45 * Math.sin(t / (o.dreaming ? 1100 : 520) + s.ph) : 1;
     ctx.globalAlpha = tw * (o.dreaming ? 0.7 : 1);
-    ctx.fillStyle = pal.stars[s.c];
+    ctx.fillStyle = o.gold ? GOLD_STARS[s.c] : pal.stars[s.c];
     const size = s.layer === 2 ? 2 : 1;
     ctx.fillRect(Math.floor(x), Math.floor(y), size, size);
     if (s.layer === 2 && tw > 0.85) {

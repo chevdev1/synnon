@@ -10,6 +10,7 @@ import { soundWanted } from "@/lib/lofi";
 import { sfx } from "@/lib/sfx";
 import { STAGES } from "@/lib/stages";
 import { questActions } from "@/lib/questStore";
+import { goalActions } from "@/lib/goalStore";
 import { stageActions } from "@/lib/useStage";
 
 // The brain console: local commands that poke the interface so you can see how the
@@ -138,6 +139,22 @@ export const COMMANDS: Cmd[] = [
       if (!(MOODS as readonly string[]).includes(v)) return env.say(L(env, `Moods: ${MOODS.join(", ")}, auto`, `Настроения: ${MOODS.join(", ")}, auto`), "err");
       mindActions.force({ mood: v });
       env.say(L(env, `The eye is ${v} now (a minute).`, `Глаз теперь: ${v} (на минуту).`), "ok");
+    },
+  },
+  {
+    name: "goal",
+    usage: "<0-100|auto>",
+    help: { en: "preview the community goal at a % (sky effects)", ru: "посмотреть цель сообщества при N% (эффекты неба)" },
+    run: (a, env) => {
+      const v = (a[0] ?? "").toLowerCase();
+      if (v === "auto") {
+        goalActions.force(null);
+        return env.say(L(env, "Goal back to the real number.", "Цель вернулась к настоящему числу."), "ok");
+      }
+      const n = Number(v);
+      if (!v || !Number.isFinite(n) || n < 0 || n > 100) return env.say(L(env, "Use: /goal 0-100 or /goal auto", "Используй: /goal 0-100 или /goal auto"), "err");
+      goalActions.force(Math.round(n));
+      env.say(L(env, `Previewing the community goal at ${Math.round(n)}%: 33% shooting stars, 66% aurora, 100% golden sky. Only on your screen.`, `Смотрим цель сообщества при ${Math.round(n)}%: 33% звездопад, 66% сияние, 100% золотое небо. Только на твоём экране.`), "ok");
     },
   },
   {

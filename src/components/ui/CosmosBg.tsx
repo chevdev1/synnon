@@ -61,13 +61,14 @@ export default function CosmosBg() {
       cy += (py - cy) * 0.06;
       ctx.clearRect(0, 0, W, H);
       const boost = animated ? Math.max(0, sky.swell * (1 - (performance.now() - sky.swellAt) / 1400)) : 0;
-      drawCosmos(ctx, W, H, t, { phase: ph, dreaming: dz, animated, cx, cy, boost });
+      const gt = sky.goalTier; // community goal: 1 more shooting stars, 2 aurora, 3 golden stars
+      drawCosmos(ctx, W, H, t, { phase: ph, dreaming: dz, animated, cx, cy, boost, aurora: gt >= 2, gold: gt >= 3 });
 
       // the occasional shooting star, plus bursts asked for by the console (/meteor)
       if (animated) {
-        if (!dz && meteors.length === 0 && t > nextMeteor) {
+        if (!dz && meteors.length < (sky.goalTier >= 1 ? 3 : 1) && t > nextMeteor) {
           spawn();
-          nextMeteor = t + 6000 + Math.random() * 9000;
+          nextMeteor = t + (6000 + Math.random() * 9000) / (sky.goalTier >= 1 ? 3.5 : 1);
         }
         if (sky.meteors > 0 && t > nextBurst) {
           spawn();

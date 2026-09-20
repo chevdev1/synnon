@@ -1,7 +1,7 @@
 // Tiny shared state for the page-wide sky. The landing page feeds it (the mind is
 // asleep, something just happened); the sky reads it every frame, so any page
 // can show the sky without needing the live data provider.
-export const sky = { dreaming: false, swell: 0, swellAt: 0, poke: 0, meteors: 0, danceUntil: 0 };
+export const sky = { dreaming: false, swell: 0, swellAt: 0, poke: 0, meteors: 0, danceUntil: 0, goalTier: 0 };
 
 export const skyActions = {
   setDreaming(v: boolean) {

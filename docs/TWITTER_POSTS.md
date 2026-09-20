@@ -686,6 +686,22 @@ Same sky on the animated card.
 {LINK}
 ```
 
+## Post: community goal
+
+```
+Every week SYNNOD has one shared goal.
+
+Every voice told through a cell + every approved answer to the weekly question = +1.
+
+33% -> falling stars
+66% -> aurora
+100% -> golden sky
+
+For everyone, on every page, until Monday resets it.
+
+Your move: {LINK}/goal
+```
+
 ## Notes for posting
 
 - Record a short screen capture (GIF/MP4, 5-8 s) for posts 4, 5 and 6: the typing glitch, the sparks between cells, the claim shockwave. Stills do not show motion; the frames in `docs/media/` are for the other posts.
