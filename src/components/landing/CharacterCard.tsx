@@ -5,6 +5,7 @@ import { PixelCharacter } from "@/components/ui/PixelArt";
 import { CHARACTER } from "@/lib/mock/data";
 import { useLive } from "@/lib/live/context";
 import { useMind } from "@/lib/mind";
+import MoodWeek from "@/components/mind/MoodWeek";
 
 export default function CharacterCard() {
   const { character } = useLive();
@@ -23,6 +24,7 @@ export default function CharacterCard() {
             {moodLabel}
           </div>
         </div>
+        <MoodWeek compact />
       </div>
       <ul className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1 text-[16px] text-[var(--text-2)]">
         {traits.map((t, i) => (

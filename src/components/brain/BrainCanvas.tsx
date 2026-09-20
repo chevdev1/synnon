@@ -19,6 +19,7 @@ export interface BrainCanvasProps {
   onSelect?: (id: number) => void;
   pulseEvent?: PulseEvent | null;
   ping?: { id: number; n: number } | null; // search result: pulses a cell so it is easy to spot
+  chorus?: number[][]; // groups of 3+ cells on one theme: drawn as one glowing group
   resonance?: [number, number][]; // pairs of cells whose words echo each other: a slow golden thread between them
   dreaming?: boolean; // the mind is asleep: slow breath, random memories flicker
   glowHalfLifeMin?: number; // how fast a spoken-through cell cools (timelapse plays it in seconds)
@@ -27,6 +28,7 @@ export interface BrainCanvasProps {
 }
 
 const NO_PAIRS: [number, number][] = [];
+const NO_GROUPS: number[][] = [];
 const GROUP_PERIODS_MS = [4200, 5600, 3800, 6400];
 const WAVE_PERIOD_MS = 6000;
 const SCAN_PERIOD_MS = 6000;
@@ -119,6 +121,7 @@ export default function BrainCanvas({
   ping = null,
   dreaming = false,
   resonance = NO_PAIRS,
+  chorus = NO_GROUPS,
   glowHalfLifeMin = GLOW_HALF_LIFE_MIN,
   pet = null,
   className,
@@ -164,6 +167,8 @@ export default function BrainCanvas({
   const dreamingRef = useRef(dreaming);
   const wxRef = useRef({ amt: 0, kind: "rain" as string, drops: [] as { x: number; y: number; start: number; snow: boolean }[], strike: null as null | { start: number; cell: { x: number; y: number; R: number }; pts: [number, number][] }, seq: sky.boltSeq });
   const resonanceRef = useRef(resonance);
+  const chorusRef = useRef(chorus);
+  const cellById = useMemo(() => new Map(claimable.map((c) => [c.claimId, c])), [claimable]);
   const halfLifeRef = useRef(glowHalfLifeMin);
   const petSimRef = useRef<PetSim | null>(null);
   const petIdRef = useRef<string | null>(null);
@@ -176,9 +181,10 @@ export default function BrainCanvas({
     nodesRef.current = nodes;
     dreamingRef.current = dreaming;
     resonanceRef.current = resonance;
+    chorusRef.current = chorus;
     halfLifeRef.current = glowHalfLifeMin;
     mineRef.current = currentUserNodeId;
-  }, [nodes, dreaming, resonance, glowHalfLifeMin, currentUserNodeId]);
+  }, [nodes, dreaming, resonance, chorus, glowHalfLifeMin, currentUserNodeId]);
 
   // A new companion (or none) gets a fresh simulation; the font is the site's pixel font.
   const petId = pet?.id ?? null;
@@ -643,6 +649,88 @@ export default function BrainCanvas({
         ctx.globalCompositeOperation = "source-over";
       }
 
+      // ---- a chorus: three or more cells on one theme, drawn as one glowing group ----
+      if (chorusRef.current.length > 0 && !reducedMotion && !assembling) {
+        ctx.globalCompositeOperation = "lighter";
+        chorusRef.current.forEach((members, gi) => {
+          const cs = members.map((id) => cellById.get(id)).filter((x): x is NonNullable<typeof x> => !!x);
+          if (cs.length < 3) return;
+          const gx = (cs.reduce((s, c) => s + c.x, 0) / cs.length) * SCALE;
+          const gy = (cs.reduce((s, c) => s + c.y, 0) / cs.length) * SCALE;
+          const beat = 0.5 + 0.5 * Math.sin(t / 650 + gi);
+          const halo = ctx.createRadialGradient(gx, gy, 0, gx, gy, 46);
+          halo.addColorStop(0, `rgba(255,155,224,${(0.22 + 0.2 * beat).toFixed(3)})`);
+          halo.addColorStop(1, "rgba(255,155,224,0)");
+          ctx.fillStyle = halo;
+          ctx.fillRect(gx - 50, gy - 50, 100, 100);
+          for (const c of cs) {
+            const mx = c.x * SCALE;
+            const my = c.y * SCALE;
+            for (let i = 1; i < 16; i++) {
+              const u = i / 16;
+              ctx.fillStyle = `rgba(255,155,224,${(0.3 + 0.4 * beat * (1 - Math.abs(0.5 - u))).toFixed(3)})`;
+              ctx.fillRect(Math.round(mx + (gx - mx) * u) - 1, Math.round(my + (gy - my) * u) - 1, 3, 3);
+            }
+            ctx.strokeStyle = `rgba(255,155,224,${(0.35 + 0.4 * beat).toFixed(3)})`;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            addHex(ctx, mx, my, (c.R + 1.8) * SCALE);
+            ctx.stroke();
+          }
+          const p = ((t / 2200 + gi * 0.5) % 1);
+          ctx.strokeStyle = `rgba(255,190,235,${(0.5 * (1 - p)).toFixed(3)})`;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(gx, gy, 6 + p * 44, 0, Math.PI * 2);
+          ctx.stroke();
+        });
+        ctx.globalCompositeOperation = "source-over";
+      }
+
+      // ---- cell skins: the style each owner picked, seen by everybody ----
+      if (!assembling) {
+        for (const n of nodesRef.current) {
+          if (!n.skin) continue;
+          const c = cellById.get(n.id);
+          if (!c) continue;
+          const x = c.x * SCALE;
+          const y = c.y * SCALE;
+          const R = c.R * SCALE;
+          const wob = Math.sin(t / 900 + n.id);
+          if (n.skin === "void") {
+            ctx.fillStyle = "rgba(8,5,26,0.5)";
+            ctx.beginPath();
+            addHex(ctx, x, y, R * 0.98);
+            ctx.fill();
+          }
+          ctx.globalCompositeOperation = "lighter";
+          ctx.lineWidth = 2;
+          if (n.skin === "ice") ctx.strokeStyle = `rgba(155,227,255,${(0.55 + 0.2 * wob).toFixed(3)})`;
+          else if (n.skin === "ember") ctx.strokeStyle = `rgba(255,138,76,${(0.5 + 0.3 * Math.sin(t / 210 + n.id * 1.7)).toFixed(3)})`;
+          else if (n.skin === "aurora") ctx.strokeStyle = `hsla(${Math.round(130 + 190 * (0.5 + 0.5 * Math.sin(t / 2600 + n.id)))},90%,68%,0.75)`;
+          else if (n.skin === "gold") ctx.strokeStyle = "rgba(255,209,102,0.85)";
+          else ctx.strokeStyle = "rgba(185,166,245,0.8)";
+          ctx.beginPath();
+          addHex(ctx, x, y, R * 1.1);
+          ctx.stroke();
+          // a little life on top of the rim
+          const ph = ((t / 1500 + (n.id % 7) * 0.31) % 1);
+          if (n.skin === "ice" || n.skin === "gold" || n.skin === "void") {
+            const a = Math.sin(Math.PI * ph);
+            const ang = (n.id * 2.4 + Math.floor(t / 1500 + (n.id % 7) * 0.31) * 1.9) % (Math.PI * 2);
+            ctx.fillStyle = n.skin === "ice" ? `rgba(225,247,255,${a.toFixed(3)})` : n.skin === "gold" ? `rgba(255,232,150,${a.toFixed(3)})` : `rgba(240,235,255,${a.toFixed(3)})`;
+            const sx = Math.round(x + Math.cos(ang) * R * 0.8);
+            const sy = Math.round(y + Math.sin(ang) * R * 0.7);
+            ctx.fillRect(sx - 1, sy - 3, 2, 6);
+            ctx.fillRect(sx - 3, sy - 1, 6, 2);
+          } else if (n.skin === "ember") {
+            ctx.fillStyle = `rgba(255,190,110,${(1 - ph).toFixed(3)})`;
+            ctx.fillRect(Math.round(x + Math.sin(n.id * 3) * R * 0.5), Math.round(y - R * 0.4 - ph * R * 0.9), 2, 3);
+          }
+          ctx.globalCompositeOperation = "source-over";
+        }
+      }
+
       // ---- a cell was claimed: a shockwave rolls across the whole brain ----
       const wave = claimWaveRef.current;
       if (wave) {
@@ -799,7 +887,7 @@ export default function BrainCanvas({
       cancelled = true;
       cancelAnimationFrame(raf);
     };
-  }, [layers, reducedMotion, hoveredId, focusedId, claimable, model, reveal]);
+  }, [layers, reducedMotion, hoveredId, focusedId, claimable, model, reveal, cellById]);
 
   const pickCell = useCallback(
     (clientX: number, clientY: number, snap = false): number | null => {

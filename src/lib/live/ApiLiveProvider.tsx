@@ -55,6 +55,7 @@ interface ApiNode {
   status: string;
   ownerName?: string | null;
   lastActiveAt?: number | null;
+  skin?: string | null;
 }
 interface ApiMemory {
   id: number;
@@ -80,7 +81,7 @@ export function ApiLiveProvider({ children }: { children: ReactNode }) {
   const refreshNodes = useCallback(async () => {
     const d = await getJson<{ nodes: ApiNode[] }>("/api/nodes");
     setOffline(!d);
-    if (d) setNodes(d.nodes.map((n) => ({ id: n.id, status: n.status as NodeStatus, label: `Node ${label(n.id)}`, ownerName: n.ownerName ?? undefined, lastActiveAt: n.lastActiveAt ?? undefined })));
+    if (d) setNodes(d.nodes.map((n) => ({ id: n.id, status: n.status as NodeStatus, label: `Node ${label(n.id)}`, ownerName: n.ownerName ?? undefined, lastActiveAt: n.lastActiveAt ?? undefined, skin: n.skin ?? null })));
   }, []);
   const refreshMe = useCallback(async () => {
     const d = await getJson<{ user: { username: string; wallet?: string | null } | null; nodeId?: number | null }>("/api/auth/me");
@@ -121,12 +122,15 @@ export function ApiLiveProvider({ children }: { children: ReactNode }) {
     }, 0);
     // Server settles quiet "active" nodes into "memory" on read, so re-read now and then.
     const poll = setInterval(() => void refreshNodes(), 30_000);
+    const onRefresh = () => void refreshNodes(); // e.g. right after you change your cell skin
+    window.addEventListener("synnod:refresh-nodes", onRefresh);
     const tick = setInterval(() => setNow(Date.now()), 15_000);
     return () => {
       cancelled = true;
       clearTimeout(initial);
       clearInterval(poll);
       clearInterval(tick);
+      window.removeEventListener("synnod:refresh-nodes", onRefresh);
     };
   }, [refreshNodes, refreshMe, refreshMemory]);
 

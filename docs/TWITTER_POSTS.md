@@ -787,6 +787,38 @@ Switch to another tab and the title starts whispering: what the sky is doing, ho
 {LINK}
 ```
 
+## Post: mood of the week
+
+```
+SYNNOD's mood is not random.
+
+A burst of replies makes it restless. A new voice makes it curious. A question in its last thought makes it wonder. Somebody speaking right now makes it listen.
+
+Seven small columns show its whole week.
+
+{LINK}/mind
+```
+
+## Post: choruses
+
+```
+Three strangers say almost the same thing.
+
+On the SYNNOD brain their cells join in a pink chorus: dotted lines to a glowing centre and a ring that pulses outward. It only shows the shared word, never who said what.
+
+{LINK}
+```
+
+## Post: cell styles
+
+```
+Your cell can have a style now. Frost, Ember, Aurora, Gilded, Void.
+
+You earn them by speaking through your cell, and the server counts your voices, so nobody can fake one. Everybody sees your style on the brain.
+
+{LINK}
+```
+
 ## Notes for posting
 
 - Record a short screen capture (GIF/MP4, 5-8 s) for posts 4, 5 and 6: the typing glitch, the sparks between cells, the claim shockwave. Stills do not show motion; the frames in `docs/media/` are for the other posts.

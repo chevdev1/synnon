@@ -46,6 +46,7 @@ export const ACHIEVEMENTS: Ach[] = [
   a("pet-grown", "bronze", "ghost", { en: "Growing Together", ru: "Растём вместе" }, { en: "Your companion grew up after 3 days together.", ru: "Твой спутник вырос после 3 дней вместе." }),
   a("pet-elder", "silver", "ghost", { en: "Old Friends", ru: "Старые друзья" }, { en: "Your companion became an Elder after 10 days together.", ru: "Твой спутник стал взрослым после 10 дней вместе." }),
   a("pet-legend", "gold", "ghost", { en: "Inseparable", ru: "Неразлучны" }, { en: "Your companion became a Legend after 30 days together.", ru: "Твой спутник стал легендой после 30 дней вместе." }),
+  a("in-chorus", "silver", "star", { en: "Part of a Chorus", ru: "Часть хора" }, { en: "Your cell sang in a chorus: three or more cells on one theme.", ru: "Твоя клетка спела в хоре: три и больше клеток на одну тему." }),
   a("sky-rain", "bronze", "clock", { en: "Caught in the Rain", ru: "Попал под дождь" }, { en: "You watched the rain fall over the mind.", ru: "Ты смотрел, как над разумом идёт дождь." }),
   a("sky-snow", "bronze", "star", { en: "Snow Day", ru: "Снежный день" }, { en: "You watched the snow fall over the mind.", ru: "Ты смотрел, как над разумом идёт снег." }),
   a("sky-storm", "silver", "bolt", { en: "Thunder Watcher", ru: "Свидетель грозы" }, { en: "You sat through a thunderstorm and saw the lightning.", ru: "Ты пересидел грозу и увидел молнии." }),

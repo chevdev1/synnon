@@ -75,7 +75,7 @@ export const helpActions = {
 };
 
 // Order of the guided tour (also the reading order of the page).
-export const TOUR = ["intro", "brain", "face", "pet", "console", "timelapse", "search", "mind", "stage", "goal", "question", "daily", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod", "clock", "notify", "weather", "achievements"];
+export const TOUR = ["intro", "brain", "face", "pet", "console", "timelapse", "search", "mind", "stage", "goal", "question", "daily", "node", "chat", "memory", "thoughts", "character", "moodweek", "connect", "demo", "music", "motion", "tod", "clock", "notify", "weather", "achievements"];
 // (resonance has no anchor of its own in the tour: it appears on the brain by itself)
 
 export const HELP: Record<string, { title: T; body: T }> = {
@@ -240,6 +240,20 @@ export const HELP: Record<string, { title: T; body: T }> = {
       ru: "Маленькое облачко выключает и включает все погодные эффекты: дождь, снег, грозу, листья, лепестки и светлячков сезона и салют. Оно же показывает, что сейчас делает небо. Что происходит в небе, по-прежнему можно узнать в календаре у часов.",
     },
   },
+  skin: {
+    title: { en: "Cell style", ru: "Стиль клетки" },
+    body: {
+      en: "In the companion panel you can pick how your own cell looks to everybody: Frost, Ember, Aurora, Gilded or Void. Styles open as you speak through your cell (3, 10, 25 and 50 voices), and the server counts the voices, so nobody can fake one. Frost is free. In the demo all are open.",
+      ru: "В панели спутника можно выбрать, как твоя клетка выглядит для всех: Иней, Жар, Сияние, Позолота или Пустота. Стили открываются, когда ты говоришь через клетку (3, 10, 25 и 50 голосов), а голоса считает сервер, так что подделать их нельзя. Иней бесплатный. В демо открыты все.",
+    },
+  },
+  moodweek: {
+    title: { en: "Mood of the week", ru: "Настроение недели" },
+    body: {
+      en: "Seven small columns, one per day, split by how much of the day the mind spent in each mood. The mood is not random: it comes from what is really happening (a burst of replies makes it restless, a fresh voice makes it curious, a question in its latest thought makes it wondering, somebody speaking right now makes it listening, and otherwise it is simply watching). Open the mind page for the full chart.",
+      ru: "Семь маленьких столбиков, по одному на день, разбитых по тому, сколько дня разум провёл в каждом настроении. Настроение не случайное: оно берётся из того, что правда происходит (всплеск ответов делает его беспокойным, новый голос любопытным, вопрос в последней мысли размышляющим, тот, кто говорит прямо сейчас, слушающим, а иначе он просто наблюдает). Полный график на странице разума.",
+    },
+  },
   notify: {
     title: { en: "Notifications", ru: "Уведомления" },
     body: {
@@ -248,10 +262,10 @@ export const HELP: Record<string, { title: T; body: T }> = {
     },
   },
   resonance: {
-    title: { en: "Resonance", ru: "Резонанс" },
+    title: { en: "Resonance and choruses", ru: "Резонанс и хоры" },
     body: {
-      en: "When two cells have lately told the mind about similar things (they share at least two words), a slow golden thread joins them on the brain. The line under the brain names the two cells and only the words they share, never anybody's text.",
-      ru: "Когда две клетки недавно рассказывали разуму о похожем (у них совпадают хотя бы два слова), между ними на мозге появляется медленная золотая нить. Подпись под мозгом называет две клетки и только общие слова, но не чьи-то тексты.",
+      en: "When three or more cells lately spoke of the same thing, they form a chorus: a pink group with a pulsing ring. When two cells have lately told the mind about similar things (they share at least two words), a slow golden thread joins them on the brain. The line under the brain names the two cells and only the words they share, never anybody's text.",
+      ru: "Когда три и больше клеток недавно говорили об одном и том же, они образуют хор: розовую группу с пульсирующим кольцом. Когда две клетки недавно рассказывали разуму о похожем (у них совпадают хотя бы два слова), между ними на мозге появляется медленная золотая нить. Подпись под мозгом называет две клетки и только общие слова, но не чьи-то тексты.",
     },
   },
   clock: {

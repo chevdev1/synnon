@@ -12,6 +12,7 @@ import TimelapseBar from "./TimelapseBar";
 import ClockChip from "./ClockChip";
 import WeatherToggle from "./WeatherToggle";
 import { useResonance } from "@/lib/useResonance";
+import { useDemoSkin, withDemoSkins } from "@/lib/skinStore";
 import NotifyBell from "@/components/notify/NotifyBell";
 import { notifyActions } from "@/lib/notify";
 import { bondActions, useBond } from "@/lib/petBond";
@@ -44,15 +45,21 @@ export default function BrainStage() {
   const { state: mindState, mood, dreaming } = useMind();
   const stg = useStage();
   const parallaxBusy = useRef(false);
-  const pairs = useResonance(demo.on, nodes, currentUserNodeId);
+  const { pairs, choruses } = useResonance(demo.on, nodes, currentUserNodeId);
   const [rIdx, setRIdx] = useState(0);
+  // the line under the brain rotates through resonant pairs and choruses
+  const captions = useMemo(() => [...pairs.map((p) => ({ pair: p, chorus: null as null | (typeof choruses)[number] })), ...choruses.map((ch) => ({ pair: null as null | (typeof pairs)[number], chorus: ch }))], [pairs, choruses]);
   useEffect(() => {
-    if (pairs.length < 2) return;
+    if (captions.length < 2) return;
     const id = window.setInterval(() => setRIdx((i) => i + 1), 10000);
     return () => window.clearInterval(id);
-  }, [pairs.length]);
-  const shownPair = pairs.length ? pairs[rIdx % pairs.length] : null;
+  }, [captions.length]);
+  const shown = captions.length ? captions[rIdx % captions.length] : null;
   const pairList = useMemo(() => pairs.map((p) => [p.a, p.b] as [number, number]), [pairs]);
+  const chorusList = useMemo(() => choruses.map((ch) => ch.members), [choruses]);
+  // cell skins: the server value in live mode, a simulated set (plus your own pick) in the demo
+  const demoSkin = useDemoSkin();
+  const skinNodes = useMemo(() => (demo.on ? withDemoSkins(nodes, currentUserNodeId, demoSkin) : nodes), [demo.on, nodes, currentUserNodeId, demoSkin]);
   const { id: petId } = usePet();
   const { unlocked } = useAch();
   const chosenPet = petId ? PET_BY_ID.get(petId) : undefined;
@@ -82,6 +89,20 @@ export default function BrainStage() {
       });
     }
   }, [pairs, currentUserNodeId, demo.on]);
+  // ...and being part of a chorus
+  useEffect(() => {
+    if (currentUserNodeId == null) return;
+    for (const ch of choruses) {
+      if (!ch.members.includes(currentUserNodeId)) continue;
+      achActions.unlock("in-chorus");
+      notifyActions.push({
+        kind: "resonance",
+        key: `chorus-${ch.members.join("-")}-${ch.word}`,
+        en: `Your cell is in a chorus of ${ch.members.length}: “${ch.word}”${demo.on ? " (simulated)" : ""}`,
+        ru: `Твоя клетка в хоре из ${ch.members.length}: «${ch.word}»${demo.on ? " (симуляция)" : ""}`,
+      });
+    }
+  }, [choruses, currentUserNodeId, demo.on]);
   // ...and a thought that grew from your cell
   const lastThoughtNote = useRef(0);
   useEffect(() => {
@@ -217,7 +238,7 @@ export default function BrainStage() {
       </div>
       <div className="relative aspect-square w-full lg:aspect-auto lg:h-full">
       <BrainCanvasClient
-        nodes={tl.tlNodes ?? nodes}
+        nodes={tl.tlNodes ?? skinNodes}
         selectedId={selectedId}
         currentUserNodeId={currentUserNodeId}
         ownName={me?.name ?? null}
@@ -230,6 +251,7 @@ export default function BrainStage() {
         ping={ping}
         dreaming={dreaming && !tl.active}
         resonance={tl.active ? undefined : pairList}
+        chorus={tl.active ? undefined : chorusList}
         glowHalfLifeMin={tl.active ? 0.06 : undefined}
         pet={petSprite}
       />
@@ -273,11 +295,13 @@ export default function BrainStage() {
 
       {!tl.active && !consoleOpen && (
         <ul className="pointer-events-none space-y-1 px-3 pb-2 pt-1 lg:absolute lg:bottom-3 lg:left-4 lg:p-0 text-[16px] text-[var(--muted)]">
-          {shownPair && (
-            <li key={rIdx} className="fade-in-up mb-2 flex items-center gap-1.5 text-[#ffd166]" data-resonance-caption data-help-id="resonance">
-              <span>✦</span>
+          {shown && (
+            <li key={rIdx} className={`fade-in-up mb-2 flex items-center gap-1.5 ${shown.chorus ? "text-[#ff9be0]" : "text-[#ffd166]"}`} data-resonance-caption data-help-id="resonance">
+              <span>{shown.chorus ? "♫" : "✦"}</span>
               <span>
-                {String(shownPair.a).padStart(2, "0")} ↔ {String(shownPair.b).padStart(2, "0")} · {shownPair.words.map((w) => `“${w}”`).join(", ")}
+                {shown.pair
+                  ? `${String(shown.pair.a).padStart(2, "0")} ↔ ${String(shown.pair.b).padStart(2, "0")} · ${shown.pair.words.map((w) => `“${w}”`).join(", ")}`
+                  : `chorus of ${shown.chorus!.members.length} · “${shown.chorus!.word}”`}
                 {demo.on ? " (sim)" : ""}
               </span>
             </li>

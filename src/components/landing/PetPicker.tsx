@@ -7,6 +7,7 @@ import { questActions } from "@/lib/questStore";
 import { useHelp } from "@/lib/help";
 import { PETS, petPalette, usePet, type Pet } from "@/lib/pets";
 import { BOND_STAGES, nextStageAt, useBond } from "@/lib/petBond";
+import SkinPicker from "./SkinPicker";
 import { sfx } from "@/lib/sfx";
 
 function Sprite({ pet, size = 28, locked = false }: { pet: Pet; size?: number; locked?: boolean }) {
@@ -134,6 +135,7 @@ export default function PetPicker({ hasCell }: { hasCell: boolean }) {
               </p>
             )}
           </div>
+          <SkinPicker hasCell={hasCell} />
           <div className="mt-2 flex items-center justify-between gap-2">
             <p className="text-[14px] leading-snug text-[var(--muted)]">{T("Locked ones are earned through achievements.", "Закрытых можно добиться достижениями.")}</p>
             {cur && (

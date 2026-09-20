@@ -6,6 +6,7 @@ import { CONSTITUTION, getLlm } from "./llm";
 import { checkScenarioText } from "./guards";
 import { checkClaimEligibility } from "./token";
 import { stageVoice } from "./stage";
+import { deriveMood, sampleMood } from "./mood";
 
 const ACTIVE_WINDOW_MIN = 10;
 const SCENARIOS_PER_NODE_PER_DAY = 10;
@@ -21,7 +22,7 @@ export async function listNodes() {
     .set({ status: "memory" })
     .where(and(eq(nodes.status, "active"), sql`${nodes.lastActiveAt} < now() - make_interval(mins => ${ACTIVE_WINDOW_MIN})`));
   return db
-    .select({ id: nodes.id, status: nodes.status, label: nodes.label, ownerName: users.username, ownerUserId: nodes.ownerUserId, lastActiveAt: nodes.lastActiveAt })
+    .select({ id: nodes.id, status: nodes.status, label: nodes.label, ownerName: users.username, ownerUserId: nodes.ownerUserId, lastActiveAt: nodes.lastActiveAt, skin: nodes.skin })
     .from(nodes)
     .leftJoin(users, eq(users.id, nodes.ownerUserId))
     .orderBy(nodes.id);
@@ -137,6 +138,7 @@ export async function submitScenario(userId: number, nodeId: number, rawText: un
     publish({ type: "output.created", data: { id: out.id, nodeId, text: out.text, trigger: "scenario" } });
     publish({ type: "node.updated", data: { id: nodeId, status: "active" } });
     void maybeRefreshSummary().catch((e) => console.error("[summary]", e));
+    void sampleMood().catch(() => {});
     return { ok: true, scenarioId: scenario.id, llm: "ok", output: { id: out.id, text: out.text } };
   } catch (e) {
     console.error(`[scenario] LLM call failed (${llm.label}):`, e);
@@ -185,5 +187,7 @@ export async function generateAutonomousThought() {
 export async function getCharacter() {
   const db = await getDb();
   const [mem] = await db.select().from(memoryState).limit(1);
-  return { ...INITIAL_CHARACTER, ...(mem?.characterStateJson as object | null) };
+  // the mood is derived from what is really happening, not stored
+  const mood = await sampleMood().catch(() => deriveMood().catch(() => INITIAL_CHARACTER.mood));
+  return { ...INITIAL_CHARACTER, ...(mem?.characterStateJson as object | null), mood };
 }

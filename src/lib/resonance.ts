@@ -57,3 +57,34 @@ export function demoResonance(takenIds: number[], mine: number | null = null): R
   }
   return out;
 }
+
+// A chorus: three or more cells that lately spoke of the same thing (one distinctive word in
+// common). The brain shows them as one group. Only the shared word is ever shown.
+export interface Chorus {
+  members: number[];
+  word: string;
+}
+
+export function findChorus(byNode: Map<number, string[]>, max = 2): Chorus[] {
+  const sets = [...byNode.entries()].map(([id, texts]) => ({ id, w: wordsOf(texts.join(" ")) }));
+  const holders = new Map<string, number[]>();
+  for (const s of sets) for (const w of s.w) if (w.length >= 5) holders.set(w, [...(holders.get(w) ?? []), s.id]);
+  const cap = Math.max(3, Math.floor(sets.length * 0.5)); // a word everybody uses is not a chorus
+  const cands = [...holders.entries()].filter(([, ids]) => ids.length >= 3 && ids.length <= cap).sort((a, b) => b[1].length - a[1].length || b[0].length - a[0].length || a[0].localeCompare(b[0]));
+  const out: Chorus[] = [];
+  for (const [word, ids] of cands) {
+    if (out.some((o) => o.members.filter((m) => ids.includes(m)).length > 1)) continue;
+    out.push({ word, members: ids.slice(0, 8).sort((a, b) => a - b) });
+    if (out.length >= max) break;
+  }
+  return out;
+}
+
+export function demoChorus(takenIds: number[], mine: number | null = null): Chorus[] {
+  const ids = [...takenIds].sort((x, y) => x - y);
+  if (ids.length < 10) return [];
+  const pick = (k: number) => ids[(k * 13 + 3) % ids.length];
+  const members = [...new Set([pick(1), pick(2), pick(3), pick(4)])];
+  if (mine != null && ids.includes(mine) && !members.includes(mine)) members[0] = mine;
+  return members.length >= 3 ? [{ members: members.sort((a, b) => a - b), word: "rain" }] : [];
+}

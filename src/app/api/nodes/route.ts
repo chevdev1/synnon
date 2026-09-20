@@ -11,7 +11,7 @@ export async function GET() {
     else stats.active++; // active + featured
   }
   return json({
-    nodes: rows.map((n) => ({ id: n.id, status: n.status, label: n.label, ownerName: n.ownerName, lastActiveAt: n.lastActiveAt?.getTime() ?? null })),
+    nodes: rows.map((n) => ({ id: n.id, status: n.status, label: n.label, ownerName: n.ownerName, lastActiveAt: n.lastActiveAt?.getTime() ?? null, skin: n.skin ?? null })),
     stats,
   });
 }

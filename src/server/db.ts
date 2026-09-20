@@ -32,6 +32,10 @@ CREATE TABLE IF NOT EXISTS thoughts (
   id serial PRIMARY KEY, text text NOT NULL, source_output_ids integer[] NOT NULL DEFAULT '{}',
   created_at timestamptz NOT NULL DEFAULT now());
 CREATE UNIQUE INDEX IF NOT EXISTS users_wallet_uidx ON users (wallet_address);
+ALTER TABLE nodes ADD COLUMN IF NOT EXISTS skin text;
+CREATE TABLE IF NOT EXISTS mood_log (
+  id serial PRIMARY KEY, ts timestamptz NOT NULL DEFAULT now(), mood text NOT NULL);
+CREATE INDEX IF NOT EXISTS mood_log_ts_idx ON mood_log (ts);
 CREATE TABLE IF NOT EXISTS wallet_nonces (
   nonce text PRIMARY KEY, chain text NOT NULL, address text NOT NULL, origin text NOT NULL,
   issued_at timestamptz NOT NULL DEFAULT now(), expires_at timestamptz NOT NULL, used_at timestamptz);

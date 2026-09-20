@@ -2,21 +2,24 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { BrainNode } from "@/lib/brain/types";
-import { demoResonance, type Resonance } from "@/lib/resonance";
+import { demoChorus, demoResonance, type Chorus, type Resonance } from "@/lib/resonance";
 
-// Resonant pairs: simulated in the demo, from the server (every 2 minutes) in live mode.
-export function useResonance(demo: boolean, nodes: BrainNode[], mine: number | null = null): Resonance[] {
-  const [live, setLive] = useState<Resonance[]>([]);
+// Resonant pairs and choruses: simulated in the demo, from the server (every 2 minutes) in live mode.
+export function useResonance(demo: boolean, nodes: BrainNode[], mine: number | null = null): { pairs: Resonance[]; choruses: Chorus[] } {
+  const [live, setLive] = useState<{ pairs: Resonance[]; choruses: Chorus[] }>({ pairs: [], choruses: [] });
   const takenKey = nodes.filter((n) => n.status !== "available").map((n) => n.id).join(",");
-  const simulated = useMemo(() => demoResonance(takenKey ? takenKey.split(",").map(Number) : [], mine), [takenKey, mine]);
+  const simulated = useMemo(() => {
+    const ids = takenKey ? takenKey.split(",").map(Number) : [];
+    return { pairs: demoResonance(ids, mine), choruses: demoChorus(ids, mine) };
+  }, [takenKey, mine]);
 
   useEffect(() => {
     if (demo) return;
     let cancelled = false;
     const load = () =>
       fetch("/api/resonance", { cache: "no-store" })
-        .then((r) => (r.ok ? r.json() : { pairs: [] }))
-        .then((d) => !cancelled && setLive(d.pairs ?? []))
+        .then((r) => (r.ok ? r.json() : { pairs: [], choruses: [] }))
+        .then((d) => !cancelled && setLive({ pairs: d.pairs ?? [], choruses: d.choruses ?? [] }))
         .catch(() => {});
     const first = window.setTimeout(load, 0);
     const id = window.setInterval(load, 120_000);

@@ -8,6 +8,7 @@ export interface BrainNode {
   label?: string;
   ownerName?: string;
   lastActiveAt?: number; // ms; drives how brightly a cell still glows
+  skin?: string | null; // cosmetic style chosen by the owner (see lib/skins.ts)
 }
 
 export interface PulseEvent {

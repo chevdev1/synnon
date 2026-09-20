@@ -7,6 +7,7 @@ import Atmosphere from "@/components/landing/Atmosphere";
 import DemoToggle from "@/components/landing/DemoToggle";
 import { useSceneOpts } from "@/components/landing/LiveDayScene";
 import DayScene from "@/components/ui/DayScene";
+import MoodWeek from "@/components/mind/MoodWeek";
 import { HexIcon } from "@/components/ui/PixelIcon";
 import { useHelp } from "@/lib/help";
 import { LiveRoot } from "@/lib/live/LiveRoot";
@@ -91,6 +92,10 @@ function Body() {
               {T("Question of the week", "Вопрос недели")}
             </Link>
           </div>
+        </section>
+
+        <section>
+          <MoodWeek />
         </section>
 
         <section data-mind-stages>

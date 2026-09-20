@@ -19,6 +19,13 @@ export const nodes = pgTable("nodes", {
   lastActiveAt: timestamp("last_active_at", { withTimezone: true }),
   gridRow: integer("grid_row").notNull(),
   gridCol: integer("grid_col").notNull(),
+  skin: text("skin"), // cosmetic style of the cell (see lib/skins.ts)
+});
+
+export const moodLog = pgTable("mood_log", {
+  id: serial("id").primaryKey(),
+  ts: timestamp("ts", { withTimezone: true }).notNull().defaultNow(),
+  mood: text("mood").notNull(),
 });
 
 export const scenarios = pgTable("scenarios", {
