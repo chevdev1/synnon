@@ -1,7 +1,6 @@
 {
   "crons": [
-    { "path": "/api/cron/thoughts", "schedule": "0 */3 * * *" },
-    { "path": "/api/cron/diary", "schedule": "55 23 * * *" },
-    { "path": "/api/cron/question", "schedule": "5 0 * * 1" }
+    { "path": "/api/cron/daily", "schedule": "5 0 * * *" },
+    { "path": "/api/cron/thoughts", "schedule": "0 12 * * *" }
   ]
 }
