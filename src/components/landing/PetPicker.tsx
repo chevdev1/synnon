@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { ACH_BY_ID } from "@/lib/achievements";
 import { achActions, useAch } from "@/lib/achStore";
 import { questActions } from "@/lib/questStore";
@@ -67,7 +68,8 @@ export default function PetPicker({ hasCell }: { hasCell: boolean }) {
         {cur ? <Sprite pet={cur} size={14} /> : <span className="text-[9px]">+</span>}
         {cur ? cur.name[lang] : T("Pet", "Питомец")}
       </button>
-      {open && (
+      {open &&
+        createPortal(
         <div
           style={{ left: pos.left, top: pos.top, width: "min(280px, calc(100vw - 16px))", maxHeight: "calc(100dvh - 16px)" }}
           onMouseLeave={() => setFocus(null)}
@@ -144,8 +146,9 @@ export default function PetPicker({ hasCell }: { hasCell: boolean }) {
               </button>
             )}
           </div>
-        </div>
-      )}
+        </div>,
+          document.body,
+        )}
     </div>
   );
 }

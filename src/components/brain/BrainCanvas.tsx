@@ -697,35 +697,57 @@ export default function BrainCanvas({
           const y = c.y * SCALE;
           const R = c.R * SCALE;
           const wob = Math.sin(t / 900 + n.id);
+          const hue = Math.round(130 + 190 * (0.5 + 0.5 * Math.sin(t / 2600 + n.id)));
+          // base colour of the skin as [r, g, b]
+          const rgb: [number, number, number] = n.skin === "ice" ? [155, 227, 255] : n.skin === "ember" ? [255, 138, 76] : n.skin === "gold" ? [255, 209, 102] : n.skin === "void" ? [185, 166, 245] : [127, 255, 196];
+          const col = (a: number) => (n.skin === "aurora" ? `hsla(${hue},90%,68%,${a.toFixed(3)})` : `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a.toFixed(3)})`);
+          const flick = n.skin === "ember" ? 0.7 + 0.3 * Math.sin(t / 130 + n.id * 1.7) : 1;
           if (n.skin === "void") {
-            ctx.fillStyle = "rgba(8,5,26,0.5)";
+            ctx.fillStyle = "rgba(6,3,20,0.72)";
             ctx.beginPath();
-            addHex(ctx, x, y, R * 0.98);
+            addHex(ctx, x, y, R * 1.0);
             ctx.fill();
           }
           ctx.globalCompositeOperation = "lighter";
-          ctx.lineWidth = 2;
-          if (n.skin === "ice") ctx.strokeStyle = `rgba(155,227,255,${(0.55 + 0.2 * wob).toFixed(3)})`;
-          else if (n.skin === "ember") ctx.strokeStyle = `rgba(255,138,76,${(0.5 + 0.3 * Math.sin(t / 210 + n.id * 1.7)).toFixed(3)})`;
-          else if (n.skin === "aurora") ctx.strokeStyle = `hsla(${Math.round(130 + 190 * (0.5 + 0.5 * Math.sin(t / 2600 + n.id)))},90%,68%,0.75)`;
-          else if (n.skin === "gold") ctx.strokeStyle = "rgba(255,209,102,0.85)";
-          else ctx.strokeStyle = "rgba(185,166,245,0.8)";
+          // an aura around the cell, so the style is seen from across the brain
+          const aura = ctx.createRadialGradient(x, y, R * 0.4, x, y, R * 2.6);
+          aura.addColorStop(0, col((n.skin === "void" ? 0.28 : 0.42) * flick * (0.85 + 0.15 * wob)));
+          aura.addColorStop(1, col(0));
+          ctx.fillStyle = aura;
+          ctx.fillRect(x - R * 2.7, y - R * 2.7, R * 5.4, R * 5.4);
+          if (n.skin !== "void") {
+            // painted over the cell (not added to it), so the skin colour wins even on your green cell
+            ctx.globalCompositeOperation = "source-over";
+            ctx.fillStyle = col(0.62 * flick);
+            ctx.beginPath();
+            addHex(ctx, x, y, R * 0.95);
+            ctx.fill();
+            ctx.globalCompositeOperation = "lighter";
+          }
+          // a thick rim
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = col((0.75 + 0.25 * wob) * flick);
           ctx.beginPath();
-          addHex(ctx, x, y, R * 1.1);
+          addHex(ctx, x, y, R * 1.12);
           ctx.stroke();
-          // a little life on top of the rim
-          const ph = ((t / 1500 + (n.id % 7) * 0.31) % 1);
-          if (n.skin === "ice" || n.skin === "gold" || n.skin === "void") {
+          // life on top: glints (frost, gold, void), rising sparks (ember), a slow shimmer (aurora)
+          for (let k = 0; k < 3; k++) {
+            const ph = (t / 1400 + (n.id % 7) * 0.31 + k / 3) % 1;
             const a = Math.sin(Math.PI * ph);
-            const ang = (n.id * 2.4 + Math.floor(t / 1500 + (n.id % 7) * 0.31) * 1.9) % (Math.PI * 2);
-            ctx.fillStyle = n.skin === "ice" ? `rgba(225,247,255,${a.toFixed(3)})` : n.skin === "gold" ? `rgba(255,232,150,${a.toFixed(3)})` : `rgba(240,235,255,${a.toFixed(3)})`;
-            const sx = Math.round(x + Math.cos(ang) * R * 0.8);
-            const sy = Math.round(y + Math.sin(ang) * R * 0.7);
-            ctx.fillRect(sx - 1, sy - 3, 2, 6);
-            ctx.fillRect(sx - 3, sy - 1, 6, 2);
-          } else if (n.skin === "ember") {
-            ctx.fillStyle = `rgba(255,190,110,${(1 - ph).toFixed(3)})`;
-            ctx.fillRect(Math.round(x + Math.sin(n.id * 3) * R * 0.5), Math.round(y - R * 0.4 - ph * R * 0.9), 2, 3);
+            const seed = n.id * 2.4 + k * 2.1 + Math.floor(t / 1400 + (n.id % 7) * 0.31 + k / 3) * 1.9;
+            if (n.skin === "ember") {
+              ctx.fillStyle = `rgba(255,${Math.round(160 + 60 * ph)},90,${(1 - ph).toFixed(3)})`;
+              ctx.fillRect(Math.round(x + Math.sin(seed) * R * 0.7), Math.round(y - R * 0.2 - ph * R * 1.5), 3, 4);
+            } else if (n.skin === "aurora") {
+              ctx.fillStyle = `hsla(${(hue + k * 60) % 360},95%,75%,${(0.8 * a).toFixed(3)})`;
+              ctx.fillRect(Math.round(x + Math.cos(seed) * R * 0.8) - 1, Math.round(y + Math.sin(seed) * R * 0.7) - 1, 3, 3);
+            } else {
+              ctx.fillStyle = n.skin === "gold" ? `rgba(255,236,160,${a.toFixed(3)})` : n.skin === "ice" ? `rgba(230,248,255,${a.toFixed(3)})` : `rgba(245,240,255,${a.toFixed(3)})`;
+              const sx = Math.round(x + Math.cos(seed) * R * 0.85);
+              const sy = Math.round(y + Math.sin(seed) * R * 0.75);
+              ctx.fillRect(sx - 1, sy - 4, 2, 8);
+              ctx.fillRect(sx - 4, sy - 1, 8, 2);
+            }
           }
           ctx.globalCompositeOperation = "source-over";
         }
