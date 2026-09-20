@@ -633,6 +633,22 @@ Claim a cell, answer this week's question, and help the mind grow.
 {LINK}
 ```
 
+## Daily quests and streak (English + русский)
+
+**EN**
+```
+Three small quests every day on SYNNOD: find a cell with the search box, watch a timelapse, say something to the mind...
+
+Finish one and the day counts. Keep the streak for 7 days and a new companion, the Ember, joins you. Its glow grows with your streak.
+```
+
+**RU**
+```
+Каждый день на SYNNOD три небольших задания: найти клетку через поиск, посмотреть таймлапс, сказать что-то разуму...
+
+Выполни одно, и день засчитан. Держи серию 7 дней, и к тебе присоединится новый спутник Уголёк. Его свет растёт вместе с серией.
+```
+
 ## Companions (English + русский)
 
 **EN**

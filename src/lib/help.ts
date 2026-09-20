@@ -75,7 +75,7 @@ export const helpActions = {
 };
 
 // Order of the guided tour (also the reading order of the page).
-export const TOUR = ["intro", "brain", "face", "pet", "console", "timelapse", "search", "mind", "stage", "question", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod", "achievements"];
+export const TOUR = ["intro", "brain", "face", "pet", "console", "timelapse", "search", "mind", "stage", "question", "daily", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod", "achievements"];
 
 export const HELP: Record<string, { title: T; body: T }> = {
   intro: {
@@ -111,6 +111,13 @@ export const HELP: Record<string, { title: T; body: T }> = {
     body: {
       en: "The mind grows up as more cells are claimed: Static, Infant, Child, Teen, Adult, and finally Awakening when every cell has a voice. The bar shows how far it is to the next stage. Each stage changes the eye, the tree in the picture of the day and the way the mind speaks. Click to see the whole ladder.",
       ru: "Разум взрослеет по мере того, как занимают клетки: Помехи, Младенец, Ребёнок, Подросток, Взрослый и, наконец, Пробуждение, когда у каждой клетки есть голос. Полоска показывает, сколько до следующей стадии. Каждая стадия меняет глаз, дерево на картине дня и манеру речи разума. Нажми, чтобы увидеть всю лестницу.",
+    },
+  },
+  daily: {
+    title: { en: "Daily quests and streak", ru: "Ежедневные задания и серия" },
+    body: {
+      en: "Three small quests every day (search for a cell, watch a timelapse, say something to the mind...). Finish at least one and the day counts toward your streak; the flame shows how many days in a row. Seven days in a row unlocks the Ember companion. Click to see today's quests.",
+      ru: "Три небольших задания каждый день (найти клетку, посмотреть таймлапс, сказать что-то разуму...). Выполни хотя бы одно, и день засчитывается в серию; огонёк показывает, сколько дней подряд. Семь дней подряд открывают спутника Уголёк. Нажми, чтобы увидеть задания на сегодня.",
     },
   },
   question: {

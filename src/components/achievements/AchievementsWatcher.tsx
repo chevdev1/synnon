@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ACH_BY_ID, derive, isDone } from "@/lib/achievements";
 import { achActions, useAch } from "@/lib/achStore";
+import { questActions } from "@/lib/questStore";
 import { useHelp } from "@/lib/help";
 import { useLive } from "@/lib/live/context";
 import { useMind } from "@/lib/mind";
@@ -26,6 +27,7 @@ export default function AchievementsWatcher() {
   // Demo and live keep separate achievement books.
   useEffect(() => {
     achActions.setMode(mode === "demo" ? "demo" : "live");
+    questActions.setMode(mode === "demo" ? "demo" : "live");
   }, [mode]);
 
   // First light + night owl, once the visitor is past the intro screen.

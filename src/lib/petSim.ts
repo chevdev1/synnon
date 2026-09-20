@@ -18,6 +18,7 @@ export interface PetEnv {
   pointer: { x: number; y: number } | null; // canvas px
   poke: number; // counter that ticks on every keystroke in the chat
   dancing: boolean; // the /dance command
+  streak: number; // days in a row (the Ember's flame)
   font: string;
   width: number;
   height: number;
@@ -127,6 +128,18 @@ export class PetSim {
       g.addColorStop(1, "rgba(196,242,96,0)");
       ctx.fillStyle = g;
       ctx.fillRect(mine.x - mine.R * 4, mine.y - mine.R * 4, mine.R * 8, mine.R * 8);
+      ctx.globalCompositeOperation = "source-over";
+    }
+
+    // Ember: the flame around it grows with your daily streak (up to 30 days)
+    if (this.id === "ember") {
+      const r = 14 + Math.min(env.streak, 30) * 0.9 + Math.sin(t / 180) * 1.2;
+      ctx.globalCompositeOperation = "lighter";
+      const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r);
+      g.addColorStop(0, "rgba(255,150,70,0.4)");
+      g.addColorStop(1, "rgba(255,150,70,0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(this.x - r, this.y - r, r * 2, r * 2);
       ctx.globalCompositeOperation = "source-over";
     }
 

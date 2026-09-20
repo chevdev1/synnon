@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { ACH_BY_ID, TIER_COLOR, TIER_LABEL } from "@/lib/achievements";
+import { QUEST_BY_ID } from "@/lib/quests";
 import { achActions, useToastQueue } from "@/lib/achStore";
 import { useHelp } from "@/lib/help";
 import AchIcon from "./AchIcon";
@@ -16,15 +17,18 @@ export default function AchievementToaster() {
   const { lang } = useHelp();
   const cur = queue[0];
   const ach = cur && "id" in cur ? ACH_BY_ID.get(cur.id) : undefined;
-  const tier = ach?.tier ?? "silver";
+  const quest = cur && "quest" in cur ? cur : null;
+  const qdef = quest && quest.quest !== "*" ? QUEST_BY_ID.get(quest.quest) : undefined;
+  const questAll = !!quest?.all;
+  const tier = quest ? (questAll ? "gold" : "silver") : (ach?.tier ?? "silver");
 
   useEffect(() => {
     if (!cur) return;
     if (ach) achActions.playFor(ach.tier);
-    const t = window.setTimeout(() => achActions.shift(), ach ? SHOW_MS[ach.tier] : 4200);
+    const t = window.setTimeout(() => achActions.shift(), ach ? SHOW_MS[ach.tier] : questAll ? 5600 : 4200);
     return () => window.clearTimeout(t);
     // key on the toast itself: a new queue head restarts the timer
-  }, [cur, ach]);
+  }, [cur, ach, questAll]);
 
   if (!cur) return null;
   const color = TIER_COLOR[tier];
@@ -34,13 +38,26 @@ export default function AchievementToaster() {
     <div className="pointer-events-none fixed inset-x-3 bottom-3 z-[70] flex justify-center sm:inset-x-auto sm:right-4 sm:bottom-4 sm:justify-end" aria-live="polite" role="status" data-ach-toast>
       <button
         type="button"
-        key={"id" in cur ? cur.id : "restored"}
+        key={"id" in cur ? cur.id : "quest" in cur ? "q-" + cur.quest : "restored"}
         onClick={() => achActions.shift()}
         className="ach-in pointer-events-auto relative flex w-full max-w-[380px] items-center gap-3 overflow-hidden border-2 bg-[#080a20] p-3 text-left"
         style={{ borderColor: color, boxShadow: `4px 4px 0 ${color}55, 0 0 22px ${color}33` }}
       >
         <span className="ach-shine pointer-events-none absolute inset-0" style={{ ["--c" as string]: color }} />
-        {"id" in cur && ach ? (
+        {quest ? (
+          <>
+            <span className="relative flex h-14 w-14 shrink-0 items-center justify-center border-2 bg-[#0b0a1f]" style={{ borderColor: color }}>
+              <AchIcon icon={quest.all ? "trophy" : "flame"} color={color} size={40} />
+            </span>
+            <span className="relative min-w-0">
+              <span className="font-head block text-[7px] uppercase" style={{ color }}>
+                {quest.all ? (lang === "ru" ? "??? ??????? ??? ?????????" : "Daily quests complete") : lang === "ru" ? "??????? ?????????" : "Quest complete"}
+              </span>
+              <span className="font-head mt-1.5 block text-[10px] uppercase leading-snug text-[var(--text)]">{quest.all ? (lang === "ru" ? "????????? ????" : "Perfect day") : qdef?.name[lang]}</span>
+              <span className="mt-1 block text-[17px] leading-snug text-[var(--text-2)]">{quest.all ? (lang === "ru" ? "??? ?? ????. ??????? ??????, ????? ???????? ?????." : "Three out of three. Come back tomorrow to keep the streak going.") : qdef?.desc[lang]}</span>
+            </span>
+          </>
+        ) : "id" in cur && ach ? (
           <>
             <span className="relative flex h-14 w-14 shrink-0 items-center justify-center border-2 bg-[#0b0a1f]" style={{ borderColor: color }}>
               <AchIcon icon={ach.icon} color={color} size={40} />

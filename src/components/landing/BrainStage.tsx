@@ -13,6 +13,7 @@ import { useTimelapse } from "./useTimelapse";
 import PixelFace from "@/components/ui/PixelFace";
 import { skyActions } from "@/lib/sky";
 import { achActions, useAch } from "@/lib/achStore";
+import { questActions } from "@/lib/questStore";
 import { PET_BY_ID, usePet } from "@/lib/pets";
 import { useStage } from "@/lib/useStage";
 import PetPicker from "./PetPicker";
@@ -80,8 +81,10 @@ export default function BrainStage() {
   function openCell(id: number) {
     setSelectedId(id);
     const taken = nodes.find((n) => n.id === id)?.status;
-    if (taken && taken !== "available") openNode(id);
-    else openClaim();
+    if (taken && taken !== "available") {
+      openNode(id);
+      questActions.event("visit");
+    } else openClaim();
   }
 
   return (

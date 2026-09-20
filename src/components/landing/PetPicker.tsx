@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ACH_BY_ID } from "@/lib/achievements";
 import { achActions, useAch } from "@/lib/achStore";
+import { questActions } from "@/lib/questStore";
 import { useHelp } from "@/lib/help";
 import { PETS, petPalette, usePet, type Pet } from "@/lib/pets";
 import { sfx } from "@/lib/sfx";
@@ -91,6 +92,7 @@ export default function PetPicker({ hasCell }: { hasCell: boolean }) {
                     choose(p.id);
                     sfx.found();
                     achActions.unlock("adopted");
+                    questActions.event("pet");
                     setOpen(false);
                   }}
                   aria-disabled={locked}

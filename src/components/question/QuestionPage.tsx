@@ -6,6 +6,7 @@ import Atmosphere from "@/components/landing/Atmosphere";
 import DemoToggle from "@/components/landing/DemoToggle";
 import { HexIcon } from "@/components/ui/PixelIcon";
 import { achActions } from "@/lib/achStore";
+import { questActions } from "@/lib/questStore";
 import { useHelp } from "@/lib/help";
 import { LiveRoot } from "@/lib/live/LiveRoot";
 import { useLive } from "@/lib/live/context";
@@ -89,6 +90,7 @@ function Body() {
     setBusy(false);
     setNote(r);
     if (r.ok) {
+      questActions.event("question");
       setDraft("");
       sfx.found();
       if (currentUserNodeId != null) setPicked(currentUserNodeId);

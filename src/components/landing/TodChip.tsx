@@ -1,6 +1,7 @@
 "use client";
 
 import { useTod } from "@/lib/tod";
+import { questActions } from "@/lib/questStore";
 
 const COLOR = { dawn: "#ff9b7a", day: "#7fd6ff", dusk: "#e58bd8", night: "#b9a6f5" } as const;
 
@@ -11,7 +12,10 @@ export default function TodChip() {
   return (
     <button
       type="button"
-      onClick={cycle}
+      onClick={() => {
+        cycle();
+        questActions.event("tod");
+      }}
       data-help-id="tod"
       aria-label={`Time of day: ${phase}${mode === "auto" ? " (automatic)" : ""}. Click to change.`}
       className="pixel-btn font-head flex h-11 items-center gap-2 border-2 px-3 text-[8px] uppercase sm:h-9"

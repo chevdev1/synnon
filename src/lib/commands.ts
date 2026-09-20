@@ -9,6 +9,7 @@ import { fxActions, type Fx } from "@/lib/fx";
 import { soundWanted } from "@/lib/lofi";
 import { sfx } from "@/lib/sfx";
 import { STAGES } from "@/lib/stages";
+import { questActions } from "@/lib/questStore";
 import { stageActions } from "@/lib/useStage";
 
 // The brain console: local commands that poke the interface so you can see how the
@@ -120,6 +121,7 @@ export const COMMANDS: Cmd[] = [
       const v = (a[0] ?? "").toLowerCase();
       if (!["dawn", "day", "dusk", "night", "auto"].includes(v)) return env.say(L(env, "Use: /tod dawn | day | dusk | night | auto", "Используй: /tod dawn | day | dusk | night | auto"), "err");
       todActions.set(v as TodMode);
+      questActions.event("tod");
       env.say(L(env, `Time of day: ${v}.`, `Время суток: ${v}.`), "ok");
     },
   },
@@ -169,6 +171,7 @@ export const COMMANDS: Cmd[] = [
       if (p.needs && !env.unlocked[p.needs]) return env.say(L(env, `${p.name.en} is locked: ${p.hint?.en}.`, `${p.name.ru} закрыт: ${p.hint?.ru}.`), "err");
       env.setPet(p.id);
       achActions.unlock("adopted");
+      questActions.event("pet");
       env.say(L(env, `${p.name.en} is with you now. Perk: ${p.perk.name.en}.`, `${p.name.ru} теперь с тобой. Перк: ${p.perk.name.ru}.`), "ok");
     },
   },
@@ -359,6 +362,7 @@ export function runCommand(line: string, env: CmdEnv): boolean {
   const [head, ...args] = text.replace(/^\//, "").split(/\s+/);
   const cmd = COMMANDS.find((c) => c.name === head.toLowerCase());
   achActions.unlock("command-line");
+  questActions.event("console");
   if (!cmd) {
     env.say(L(env, `Unknown command "${head}". Type /help.`, `Неизвестная команда «${head}». Набери /help.`), "err");
     return true;

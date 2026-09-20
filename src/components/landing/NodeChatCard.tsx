@@ -9,6 +9,7 @@ import { openClaim } from "./ClaimDialog";
 import GlitchText from "@/components/ui/GlitchText";
 import { mindActions } from "@/lib/mind";
 import { skyActions } from "@/lib/sky";
+import { questActions } from "@/lib/questStore";
 
 interface Msg {
   role: "user" | "synnod" | "system";
@@ -47,6 +48,7 @@ export default function NodeChatCard() {
     if (r.ok) {
       setMessages((prev) => [...prev, { role: "synnod", text: r.reply, fresh: true }]);
       triggerPulse(currentUserNodeId);
+      questActions.event("speak");
     } else {
       setMessages((prev) => [...prev, { role: "system", text: r.error }]);
     }

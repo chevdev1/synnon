@@ -5,7 +5,7 @@ import type { NodeProfile } from "@/lib/nodeProfile";
 //    so they can never be faked and survive clearing the browser;
 //  - "visitor": things you DO on the site (search, timelapse, ...), remembered in this browser.
 export type Tier = "bronze" | "silver" | "gold" | "legend";
-export type IconKey = "hex" | "eye" | "wallet" | "star" | "bolt" | "moon" | "sun" | "compass" | "clock" | "book" | "brain" | "ghost" | "tv" | "trophy";
+export type IconKey = "flame" | "hex" | "eye" | "wallet" | "star" | "bolt" | "moon" | "sun" | "compass" | "clock" | "book" | "brain" | "ghost" | "tv" | "trophy";
 type T = { en: string; ru: string };
 
 export interface Ach {
@@ -39,6 +39,9 @@ export const ACHIEVEMENTS: Ach[] = [
   a("secret-handshake", "silver", "ghost", { en: "Secret Handshake", ru: "Тайное рукопожатие" }, { en: "You found a secret console command.", ru: "Ты нашёл секретную команду консоли." }, { hidden: true }),
   a("growing-up", "silver", "star", { en: "Growing Up", ru: "Взросление" }, { en: "You saw the mind reach a new stage of growth.", ru: "Ты увидел, как разум перешёл на новую стадию роста." }),
   a("answered-mind", "bronze", "book", { en: "Answered the Mind", ru: "Ответил разуму" }, { en: "You answered the question of the week.", ru: "Ты ответил на вопрос недели." }),
+  a("daily-trio", "bronze", "flame", { en: "Perfect Day", ru: "Идеальный день" }, { en: "You finished all three daily quests in one day.", ru: "Ты выполнил все три задания дня за один день." }),
+  a("streak-week", "silver", "flame", { en: "Weekly Ritual", ru: "Недельный ритуал" }, { en: "You kept a 7-day streak. A companion joins you.", ru: "Ты продержал серию 7 дней. К тебе присоединяется спутник." }, { max: 7 }),
+  a("streak-month", "gold", "flame", { en: "Devoted", ru: "Верность" }, { en: "You kept a 30-day streak.", ru: "Ты продержал серию 30 дней." }, { max: 30 }),
   a("night-owl", "bronze", "moon", { en: "Night Owl", ru: "Сова" }, { en: "You visited between 2 and 5 a.m.", ru: "Ты заглянул между 2 и 5 утра." }),
   a("diarist", "bronze", "book", { en: "Between the Lines", ru: "Между строк" }, { en: "You read a page of the mind's diary.", ru: "Ты прочитал страницу дневника разума." }),
   a("first-words", "bronze", "book", { en: "First Words", ru: "Первые слова" }, { en: "Your cell spoke and the mind answered.", ru: "Твоя клетка заговорила, и разум ответил." }, { derived: true }),

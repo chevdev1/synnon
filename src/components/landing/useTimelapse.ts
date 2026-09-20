@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { BrainNode, PulseEvent } from "@/lib/brain/types";
 import { useLive } from "@/lib/live/context";
 import { demoTimelapse, MIN_EVENTS, type Timelapse } from "@/lib/timelapse";
+import { questActions } from "@/lib/questStore";
 
 const DURATION_MS = 22_000; // the whole range plays in about this long at 1x
 
@@ -116,6 +117,7 @@ export function useTimelapse(warp = false) {
         return;
       }
       begin(data);
+      questActions.event("timelapse");
     } catch {
       setView({ ...IDLE, phase: "error" });
     }

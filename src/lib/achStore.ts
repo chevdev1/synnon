@@ -19,7 +19,7 @@ interface Saved {
   prog: Record<string, number>; // id -> progress counter
   tods: string[]; // times of day seen (sun-chaser)
 }
-export type Toast = { id: string; preview?: boolean } | { text: string };
+export type Toast = { id: string; preview?: boolean } | { text: string } | { quest: string; all?: boolean };
 
 const EMPTY: Saved = { unlocked: {}, prog: {}, tods: [] };
 let state: Saved = EMPTY;
@@ -127,6 +127,11 @@ export const achActions = {
   // Many at once (e.g. a fresh browser for an old account): one summary instead of a wall of pop-ups.
   restored(n: number) {
     queue = [...queue, { text: `${n}` }];
+    emit();
+  },
+  // A daily quest was completed (shown in the same pop-up stack).
+  pushQuestToast(t: { quest: string; all?: boolean }) {
+    queue = [...queue, t];
     emit();
   },
   // A preview jumps the queue so you see it right away.

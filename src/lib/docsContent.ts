@@ -1,6 +1,7 @@
 import type { Lang } from "@/lib/help";
 import { ACHIEVEMENTS } from "@/lib/achievements";
 import { STAGES } from "@/lib/stages";
+import { STREAK_REWARDS } from "@/lib/quests";
 
 type T = Record<Lang, string>;
 
@@ -306,6 +307,25 @@ export const DOCS: DocSection[] = [
           t("Only a cell can answer, once per week, in up to 140 characters, with no names, links or contacts. Answers are reviewed before they become public and are shown without any name, only the cell number.", "Отвечать может только клетка, раз в неделю, до 140 символов, без имён, ссылок и контактов. Ответы проверяются до публикации и показываются без имён, только с номером клетки."),
           t("Every approved answer lights its cell in a mosaic shaped like the brain. Tap a lit cell to read it. When enough answers are in, the mind writes a short note in its own words about what it heard: themes only, nothing quoted, nobody named.", "Каждый одобренный ответ зажигает свою клетку в мозаике в форме мозга. Нажми на светящуюся клетку, чтобы прочитать. Когда ответов достаточно, разум пишет короткую заметку своими словами о том, что услышал: только темы, без цитат и имён."),
         ],
+      },
+    ],
+  },
+  {
+    id: "daily",
+    title: t("Daily quests and streak", "Ежедневные задания и серия"),
+    blocks: [
+      {
+        kind: "p",
+        text: t(
+          "Every day there are three small quests, the same for everyone that day (for example: find a cell with the search box, watch a timelapse, run three console commands, say something to the mind, answer the weekly question). Finishing a quest pops up a notice; finishing all three is a Perfect Day. A day counts toward your streak once you finish at least one quest, and the flame in the header shows how many days in a row you have. Miss a whole day and the streak starts over.",
+          "Каждый день есть три небольших задания, одинаковые для всех в этот день (например: найти клетку через поиск, посмотреть таймлапс, выполнить три команды консоли, сказать что-то разуму, ответить на вопрос недели). Выполненное задание показывает уведомление, а все три это «Идеальный день». День засчитывается в серию, когда выполнено хотя бы одно задание, а огонёк в шапке показывает, сколько дней подряд. Пропустишь день целиком, и серия начнётся заново.",
+        ),
+      },
+      { kind: "table", head: [t("Streak", "Серия"), t("Reward", "Награда")], rows: STREAK_REWARDS.map((r) => [t(`${r.days} days`, `${r.days} дней`), r.text]) },
+      {
+        kind: "note",
+        tone: "info",
+        text: t("Quests and the streak are remembered in this browser (demo and live are kept separate). They are about showing up, not about spending anything.", "Задания и серия запоминаются в этом браузере (демо и live отдельно). Они про то, чтобы приходить, а не про траты."),
       },
     ],
   },

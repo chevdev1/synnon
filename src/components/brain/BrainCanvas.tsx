@@ -7,6 +7,7 @@ import { buildBrainLayers, pointInHexFace, SCALE, tintLayers } from "@/lib/brain
 import { TOD_FILTER, useTod } from "@/lib/tod";
 import { PetSim } from "@/lib/petSim";
 import { sky } from "@/lib/sky";
+import { currentStreak } from "@/lib/questStore";
 import { FAM } from "@/lib/brain/palette";
 import type { BrainNode, PulseEvent } from "@/lib/brain/types";
 
@@ -608,6 +609,7 @@ export default function BrainCanvas({
           pointer: pointerRef.current,
           poke: sky.poke,
           dancing: performance.now() < sky.danceUntil,
+          streak: currentStreak(),
           font: fontRef.current,
           width,
           height,

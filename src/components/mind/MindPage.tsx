@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { questActions } from "@/lib/questStore";
 import Atmosphere from "@/components/landing/Atmosphere";
 import DemoToggle from "@/components/landing/DemoToggle";
 import { useSceneOpts } from "@/components/landing/LiveDayScene";
@@ -25,6 +26,9 @@ function Body() {
   const scene = useSceneOpts();
   const wrap = useRef<HTMLDivElement>(null);
   const [saved, setSaved] = useState(false);
+  useEffect(() => {
+    questActions.event("mind");
+  }, []);
   const T = (en: string, ru: string) => (lang === "ru" ? ru : en);
   const day = new Date().toLocaleDateString(lang === "ru" ? "ru-RU" : "en-US", { year: "numeric", month: "long", day: "numeric" });
 
