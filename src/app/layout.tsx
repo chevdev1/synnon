@@ -6,6 +6,7 @@ import TodSync from "@/components/ui/TodSync";
 import AchievementToaster from "@/components/achievements/AchievementToaster";
 import GoalSync from "@/components/goal/GoalSync";
 import NotifyGlobal from "@/components/notify/NotifyGlobal";
+import LiveWatch from "@/components/landing/LiveWatch";
 import WeatherFx from "@/components/ui/WeatherFx";
 // 8-bit look: Press Start 2P for headings/labels, VT323 (a crisp 1px-grid
 // terminal face, readable at small sizes) for running text.
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <AchievementToaster />
         <GoalSync />
         <NotifyGlobal />
+        <LiveWatch />
         <WeatherFx />
         <CursorFx />
       </body>

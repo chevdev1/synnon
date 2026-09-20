@@ -4,6 +4,7 @@ import { LegendHex } from "@/components/ui/PixelIcon";
 import { StatusDot } from "@/components/ui/Card";
 import ActivityLine from "./ActivityLine";
 import GoalBar from "@/components/goal/GoalBar";
+import LiveInvite from "./LiveInvite";
 import { useLive } from "@/lib/live/context";
 import { formatAgo } from "@/lib/live/format";
 import { openClaim } from "./ClaimDialog";
@@ -38,6 +39,7 @@ export default function HeroLeft() {
           {me?.nodeId ? `Node ${String(me.nodeId).padStart(2, "0")}` : "Claim node"} <span aria-hidden>→</span>
         </button>
         <GoalBar />
+        <LiveInvite />
       </div>
 
       <div className="shrink-0 border-t border-[var(--divider)] pt-3">
