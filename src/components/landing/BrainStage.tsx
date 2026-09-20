@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import BrainCanvasClient from "@/components/brain/BrainCanvasClient";
 import { StatusDot } from "@/components/ui/Card";
 import { useLive } from "@/lib/live/context";
@@ -51,6 +51,7 @@ export default function BrainStage() {
     return () => window.clearInterval(id);
   }, [pairs.length]);
   const shownPair = pairs.length ? pairs[rIdx % pairs.length] : null;
+  const pairList = useMemo(() => pairs.map((p) => [p.a, p.b] as [number, number]), [pairs]);
   const { id: petId } = usePet();
   const { unlocked } = useAch();
   const chosenPet = petId ? PET_BY_ID.get(petId) : undefined;
@@ -199,7 +200,7 @@ export default function BrainStage() {
         pulseEvent={tl.active ? tl.tlPulse : pulseEvent}
         ping={ping}
         dreaming={dreaming && !tl.active}
-        resonance={tl.active ? undefined : pairs.map((p) => [p.a, p.b] as [number, number])}
+        resonance={tl.active ? undefined : pairList}
         glowHalfLifeMin={tl.active ? 0.06 : undefined}
         pet={petSprite}
       />

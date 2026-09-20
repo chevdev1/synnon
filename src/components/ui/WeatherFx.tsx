@@ -166,9 +166,11 @@ export default function WeatherFx() {
       }
       if (wx === "clear" || wAmt < 0.01) return;
       const snow = wx === "snow";
-      const want2 = Math.round((snow ? 190 : 260) * wAmt);
+      const want2 = Math.round((snow ? 140 : 180) * wAmt);
       while (drops.length < want2) drops.push({ x: Math.random() * (W + 20), y: Math.random() * H, vx: snow ? 0 : -0.7, vy: snow ? 0.5 + Math.random() * 0.6 : 3 + Math.random() * 1.6, big: snow && Math.random() < 0.4 });
       ctx.fillStyle = snow ? "#f2f6ff" : "#9ec8ff";
+      ctx.globalAlpha = snow ? 0.85 : 0.5;
+      ctx.beginPath(); // every drop in one path and one fill
       for (let i = drops.length - 1; i >= 0; i--) {
         const d = drops[i];
         d.y += d.vy;
@@ -181,10 +183,10 @@ export default function WeatherFx() {
           d.y = -2;
           d.x = Math.random() * (W + 20);
         }
-        ctx.globalAlpha = snow ? 0.85 : 0.5;
-        if (snow) ctx.fillRect(Math.floor(d.x), Math.floor(d.y), d.big ? 2 : 1, d.big ? 2 : 1);
-        else ctx.fillRect(Math.floor(d.x), Math.floor(d.y), 1, 3);
+        if (snow) ctx.rect(Math.floor(d.x), Math.floor(d.y), d.big ? 2 : 1, d.big ? 2 : 1);
+        else ctx.rect(Math.floor(d.x), Math.floor(d.y), 1, 3);
       }
+      ctx.fill();
       ctx.globalAlpha = 1;
       if (wx === "storm") {
         if (!bolt && t > nextBolt && wAmt > 0.6) {

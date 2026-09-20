@@ -286,17 +286,24 @@ export interface BrainLayers {
 // Time-of-day tint, baked into the cached layers once per phase change (a CSS
 // filter on the live canvas would be re-applied every frame). Browsers without
 // canvas `filter` support get the untinted layers; the page glow still changes.
+// Cached layers are shared between builds, so each is tinted once per phase, not on every rebuild.
+const tintCache = new WeakMap<HTMLCanvasElement, Map<string, HTMLCanvasElement>>();
 export function tintLayers(layers: BrainLayers, filter: string): BrainLayers {
   if (filter === "none") return layers;
   const probe = document.createElement("canvas").getContext("2d");
   if (!probe || !("filter" in probe)) return layers;
   const tint = (src: HTMLCanvasElement): HTMLCanvasElement => {
+    let per = tintCache.get(src);
+    if (!per) tintCache.set(src, (per = new Map()));
+    const hit = per.get(filter);
+    if (hit) return hit;
     const c = document.createElement("canvas");
     c.width = src.width;
     c.height = src.height;
     const x = c.getContext("2d")!;
     x.filter = filter;
     x.drawImage(src, 0, 0);
+    per.set(filter, c);
     return c;
   };
   return {
@@ -387,6 +394,118 @@ export function buildBrainLayers(
     sparkLayers,
   };
 }
+
+// ---- Non-blocking rebuild -------------------------------------------------------------
+// The synchronous build above freezes the page for a few hundred ms on every real status
+// change (you feel it as the story stopping for a moment). This twin does the same work in
+// small slices, giving the browser a chance to paint and answer input between them; the old
+// layers stay on screen until the new ones are ready.
+class Cancelled extends Error {}
+const yieldToUi = () => new Promise<void>((r) => setTimeout(r, 0));
+class Slicer {
+  private start = performance.now();
+  constructor(private isCancelled: () => boolean, private budgetMs = 5) {}
+  async tick(force = false) {
+    if (force || performance.now() - this.start > this.budgetMs) {
+      await yieldToUi();
+      if (this.isCancelled()) throw new Cancelled();
+      this.start = performance.now();
+    }
+  }
+}
+
+async function renderBaseBufferAsync(model: BrainModel, statusMap: Map<number, NodeStatus>, userId: number | null, sl: Slicer): Promise<PixelBuffer> {
+  const buf = makeBuffer(NW, NH);
+  for (const g of model.ghosts) {
+    const m = hexMask(g.x, g.y, R0);
+    for (const q of m) {
+      const [x, y] = parseKey(q);
+      if (x >= 0 && x < NW && y >= 0 && y < NH && isEdge(m, x, y)) setPx(buf, x, y, 26, 26, 66, 255);
+    }
+    await sl.tick();
+  }
+  for (const cell of sortedByDrawOrder(model.cells)) {
+    const vis = resolveCellVisual(cell, statusMap, userId);
+    const f = vis.lit ? vis.f * 0.7 : vis.f;
+    const rr = new RNG(cellSeed(cell));
+    const crack = rr.random() < 0.22;
+    const stars = rr.choice([0, 1, 1, 2]);
+    drawPrism(buf, cell.x, cell.y, cell.R, vis.fam, { f, depth: cell.depth, rng: rr, lit: vis.lit, crack, stars });
+    if (vis.isUser) drawNodeFace(buf, cell);
+    await sl.tick();
+  }
+  return buf;
+}
+
+async function renderLitBufferAsync(model: BrainModel, statusMap: Map<number, NodeStatus>, userId: number | null, sl: Slicer, group?: number): Promise<PixelBuffer> {
+  const buf = makeBuffer(NW, NH);
+  for (const cell of model.cells) {
+    const vis = resolveCellVisual(cell, statusMap, userId);
+    if (!vis.lit || (group !== undefined && vis.group !== group)) continue;
+    drawPrism(buf, cell.x, cell.y, cell.R, vis.fam, { f: group === undefined ? 0.8 : 1.0, rng: new RNG(cellSeed(cell)), lit: true, faceOnly: true, ...(group === undefined ? {} : { stars: 2 }) });
+    await sl.tick();
+  }
+  return buf;
+}
+
+async function cachedBlurAsync(model: BrainModel, key: string, sl: Slicer, build: () => Promise<HTMLCanvasElement>): Promise<HTMLCanvasElement> {
+  let m = blurCache.get(model);
+  if (!m) blurCache.set(model, (m = new Map()));
+  const hit = m.get(key);
+  if (hit) return hit;
+  const made = await build();
+  m.set(key, made);
+  if (m.size > 24) m.delete(m.keys().next().value as string);
+  return made;
+}
+
+// Resolves with the layers, or rejects with Cancelled if `isCancelled()` became true.
+export async function buildBrainLayersAsync(
+  model: BrainModel,
+  statusMap: Map<number, NodeStatus>,
+  userId: number | null,
+  isCancelled: () => boolean
+): Promise<BrainLayers> {
+  const sl = new Slicer(isCancelled);
+  const ind = independentCache.get(model);
+  if (!ind) {
+    // first build only; normally the initial synchronous build has already filled this
+    return buildBrainLayers(model, statusMap, userId);
+  }
+  const litGlow = await cachedBlurAsync(model, `lit|${litSignature(model, statusMap, userId)}`, sl, async () => {
+    const buf = await renderLitBufferAsync(model, statusMap, userId, sl);
+    await sl.tick(true);
+    return applyGlow(upscale(bufferToCanvas(buf), SCALE), 12, 0.55, false);
+  });
+  await sl.tick(true);
+  const baseBuf = await renderBaseBufferAsync(model, statusMap, userId, sl);
+  await sl.tick(true);
+  const b = upscale(bufferToCanvas(baseBuf), SCALE);
+  const staticLayer = document.createElement("canvas");
+  staticLayer.width = b.width;
+  staticLayer.height = b.height;
+  const sctx = staticLayer.getContext("2d")!;
+  sctx.drawImage(ind.haze, 0, 0);
+  sctx.drawImage(litGlow, 0, 0);
+  sctx.drawImage(b, 0, 0);
+  await sl.tick(true);
+  const glowGroups: HTMLCanvasElement[] = [];
+  for (let g = 0; g < 4; g++) {
+    glowGroups.push(
+      await cachedBlurAsync(model, `g${g}|${litSignature(model, statusMap, userId, g)}`, sl, async () => {
+        const buf = await renderLitBufferAsync(model, statusMap, userId, sl, g);
+        await sl.tick(true);
+        return applyGlow(upscale(bufferToCanvas(buf), SCALE), 12, 1.4, true);
+      })
+    );
+    await sl.tick(true);
+  }
+  const ndBuf = renderNodeRingBuffer(model, userId);
+  const nodeLayer = ndBuf ? cachedBlur(model, `node|${userId}`, () => applyGlow(upscale(bufferToCanvas(ndBuf), SCALE), 7, 1.8, true)) : null;
+  return { width: staticLayer.width, height: staticLayer.height, staticLayer, glowGroups, waveLayer: ind.wave, nodeLayer, sparkLayers: ind.sparks };
+}
+
+export const isCancelledError = (e: unknown) => e instanceof Cancelled;
 
 // Analytic point-in-hex-face test (continuous coords) for pointer hit-testing,
 // mirroring hexMask's geometry without rasterizing a full pixel set.

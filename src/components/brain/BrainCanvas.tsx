@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useMotion } from "@/lib/motion";
 import { generateBrain, NW, NH, R0, SPACING, type Cell } from "@/lib/brain/generate";
-import { buildBrainLayers, pointInHexFace, SCALE, tintLayers } from "@/lib/brain/layers";
+import { buildBrainLayers, buildBrainLayersAsync, isCancelledError, pointInHexFace, SCALE, tintLayers, type BrainLayers } from "@/lib/brain/layers";
 import { TOD_FILTER, useTod } from "@/lib/tod";
 import { PetSim } from "@/lib/petSim";
 import { sky } from "@/lib/sky";
@@ -200,15 +200,30 @@ export default function BrainCanvas({
   // rather than every frame. Runs client-only (this component is loaded
   // with ssr:false) since it touches document.createElement("canvas").
   const { phase } = useTod();
-  const baseLayers = useMemo(
-    () => buildBrainLayers(model, statusMap, currentUserNodeId),
-    [model, statusMap, currentUserNodeId]
-  );
+  // The first build is synchronous (nothing to show without it); every later change is built
+  // in small slices so the page never freezes, and the old layers stay up until the new are ready.
+  const [baseLayers, setBaseLayers] = useState<BrainLayers>(() => buildBrainLayers(model, statusMap, currentUserNodeId));
+  const firstBuild = useRef(true);
+  useEffect(() => {
+    if (firstBuild.current) {
+      firstBuild.current = false;
+      return;
+    }
+    let stale = false;
+    buildBrainLayersAsync(model, statusMap, currentUserNodeId, () => stale)
+      .then((l) => !stale && setBaseLayers(l))
+      .catch((e) => {
+        if (!isCancelledError(e)) console.error("[brain layers]", e);
+      });
+    return () => {
+      stale = true;
+    };
+  }, [model, statusMap, currentUserNodeId]);
   const layers = useMemo(() => tintLayers(baseLayers, TOD_FILTER[phase]), [baseLayers, phase]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (canvas) {
+    if (canvas && (canvas.width !== layers.width || canvas.height !== layers.height)) {
       canvas.width = layers.width;
       canvas.height = layers.height;
     }
@@ -518,9 +533,12 @@ export default function BrainCanvas({
             const c = claimable[Math.floor(Math.random() * claimable.length)];
             Wx.drops.push({ x: c.x * SCALE + (Math.random() - 0.5) * c.R * SCALE, y: c.y * SCALE + (Math.random() - 0.5) * c.R * SCALE * 0.6, start: t, snow: snowing });
           }
-          Wx.drops = Wx.drops.filter((d) => {
+          let keep = 0;
+          for (let di = 0; di < Wx.drops.length; di++) {
+            const d = Wx.drops[di];
             const p = (t - d.start) / (d.snow ? 1500 : 950);
-            if (p >= 1) return false;
+            if (p >= 1) continue;
+            Wx.drops[keep++] = d;
             if (d.snow) {
               ctx.fillStyle = `rgba(240,247,255,${(0.85 * Math.sin(Math.PI * p)).toFixed(3)})`;
               ctx.fillRect(Math.round(d.x) - 1, Math.round(d.y) - 3, 3, 7);
@@ -532,17 +550,17 @@ export default function BrainCanvas({
               ctx.ellipse(d.x, d.y, 3 + p * 20, (3 + p * 20) * 0.5, 0, 0, Math.PI * 2);
               ctx.stroke();
             }
-            return true;
-          });
+          }
+          Wx.drops.length = keep;
           if (snowing) {
             // a light dusting on top of every third cell
             ctx.fillStyle = `rgba(235,245,255,${(0.09 * Wx.amt).toFixed(3)})`;
+            ctx.beginPath(); // one path, one fill for all of them
             for (const c of claimable) {
               if (c.claimId % 3 !== 0) continue;
-              ctx.beginPath();
               addHex(ctx, c.x * SCALE, c.y * SCALE - 2, c.R * SCALE * 0.78);
-              ctx.fill();
             }
+            ctx.fill();
           }
           // thunder in the sky: a bolt strikes one of the cells and the whole brain flashes
           if (Wx.seq !== sky.boltSeq) {
@@ -760,7 +778,7 @@ export default function BrainCanvas({
         }
       }
 
-      raf = requestAnimationFrame(frame);
+      raf = requestAnimationFrame(loop);
     }
 
     function drawHexPath(c: CanvasRenderingContext2D, cx: number, cy: number, R: number) {
@@ -768,11 +786,14 @@ export default function BrainCanvas({
       addHex(c, cx, cy, R);
     }
 
+    // ~30 fps is plenty for pixel art and halves the cost of redrawing the big canvas
+    let lastDraw = -1000;
     function loop(t: number) {
-      if (document.hidden) {
+      if (document.hidden || t - lastDraw < 30) {
         raf = requestAnimationFrame(loop);
         return;
       }
+      lastDraw = t;
       frame(t);
     }
 
