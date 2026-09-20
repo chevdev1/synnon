@@ -33,6 +33,9 @@ export default function Header() {
         <a href="#mind" className={navLink}>
           About
         </a>
+        <Link href="/question" className={navLink}>
+          Question
+        </Link>
         <Link href="/diary" className={navLink}>
           Diary
         </Link>

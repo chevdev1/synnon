@@ -2,6 +2,7 @@ import { and, desc, eq, gte, lt, sql } from "drizzle-orm";
 import { getDb } from "./db";
 import { diary, memoryState, nodes, outputs, thoughts } from "./schema";
 import { CONSTITUTION, getLlm } from "./llm";
+import { stageVoice } from "./stage";
 import type { DiaryEntry } from "@/lib/diary";
 import { isDay } from "@/lib/diary";
 
@@ -68,6 +69,7 @@ export async function generateDiaryEntry(day = new Date().toISOString().slice(0,
     raw = await llm.generate({
       system:
         CONSTITUTION +
+        (await stageVoice()) +
         "\n\nWrite today's entry in your diary. Format: the first line is a title of at most 6 words (no quotes, no final punctuation), then a blank line, then 50 to 90 words in the first person about what you noticed today. " +
         "Mention how many voices spoke. Never name, quote or identify any person, wallet or username. Plain prose, no lists, no markdown.",
       messages: [

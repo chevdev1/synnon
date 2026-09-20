@@ -14,6 +14,7 @@ import PixelFace from "@/components/ui/PixelFace";
 import { skyActions } from "@/lib/sky";
 import { achActions, useAch } from "@/lib/achStore";
 import { PET_BY_ID, usePet } from "@/lib/pets";
+import { useStage } from "@/lib/useStage";
 import PetPicker from "./PetPicker";
 import CommandConsole from "./CommandConsole";
 import { useMind } from "@/lib/mind";
@@ -34,6 +35,7 @@ export default function BrainStage() {
   const demo = useDemo();
   const { mode, offline, nodes, me, currentUserNodeId, selectedId, setSelectedId, pulseEvent, events, now } = useLive();
   const { state: mindState, mood, dreaming } = useMind();
+  const stg = useStage();
   const { id: petId } = usePet();
   const { unlocked } = useAch();
   const chosenPet = petId ? PET_BY_ID.get(petId) : undefined;
@@ -160,7 +162,7 @@ export default function BrainStage() {
 
       <div className="pointer-events-none absolute right-3 top-3 z-10 flex select-none flex-col items-center gap-1" data-help-id="face">
         <div className="pointer-events-auto cursor-pointer" onClick={() => achActions.bump("eye-contact")} data-face-eye>
-          <PixelFace state={mindState} mood={mood} className="h-[42px] w-[68px] sm:h-[56px] sm:w-[90px]" />
+          <PixelFace state={mindState} mood={mood} stage={stg.stage.id} className="h-[42px] w-[68px] sm:h-[56px] sm:w-[90px]" />
         </div>
         <span className="font-head text-[6px] uppercase text-[var(--muted)] sm:text-[7px]">
           {mindState === "sleeping" ? "dreaming" : mindState === "thinking" ? "thinking…" : mindState === "speaking" ? "speaking" : mood}

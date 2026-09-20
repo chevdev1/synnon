@@ -8,6 +8,8 @@ import { generateBrain } from "@/lib/brain/generate";
 import { fxActions, type Fx } from "@/lib/fx";
 import { soundWanted } from "@/lib/lofi";
 import { sfx } from "@/lib/sfx";
+import { STAGES } from "@/lib/stages";
+import { stageActions } from "@/lib/useStage";
 
 // The brain console: local commands that poke the interface so you can see how the
 // brain reacts. Effects are visual and only on YOUR screen; nothing is sent to the
@@ -134,6 +136,22 @@ export const COMMANDS: Cmd[] = [
       if (!(MOODS as readonly string[]).includes(v)) return env.say(L(env, `Moods: ${MOODS.join(", ")}, auto`, `Настроения: ${MOODS.join(", ")}, auto`), "err");
       mindActions.force({ mood: v });
       env.say(L(env, `The eye is ${v} now (a minute).`, `Глаз теперь: ${v} (на минуту).`), "ok");
+    },
+  },
+  {
+    name: "stage",
+    usage: "<0-5|auto>",
+    help: { en: "preview a growth stage (eye, picture, banner)", ru: "посмотреть стадию роста (глаз, картинка, баннер)" },
+    run: (a, env) => {
+      const v = (a[0] ?? "").toLowerCase();
+      if (v === "auto") {
+        stageActions.force(null);
+        return env.say(L(env, "Stage back to the real one.", "Стадия вернулась к настоящей."), "ok");
+      }
+      const n = Number(v);
+      if (!Number.isInteger(n) || n < 0 || n > 5) return env.say(L(env, "Use: /stage 0-5 or /stage auto", "Используй: /stage 0-5 или /stage auto"), "err");
+      stageActions.force(n);
+      env.say(L(env, `Previewing stage ${n} (${STAGES[n].name.en}) for 45 seconds. Only on your screen.`, `Смотрим стадию ${n} (${STAGES[n].name.ru}) 45 секунд. Только на твоём экране.`), "ok");
     },
   },
   {

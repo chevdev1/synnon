@@ -67,6 +67,27 @@ export const diary = pgTable("diary", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+// The weekly question the mind asks everyone, and the (moderated) answers cells give.
+export const questions = pgTable("questions", {
+  id: serial("id").primaryKey(),
+  week: text("week").notNull().unique(), // ISO week, e.g. 2026-W38
+  text: text("text").notNull(),
+  source: text("source").notNull().default("pool"), // mind | pool
+  synthesis: text("synthesis").notNull().default(""), // what the mind heard, in its own words
+  synthesisCount: integer("synthesis_count").notNull().default(0), // answers it had when it wrote that
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const answers = pgTable("answers", {
+  id: serial("id").primaryKey(),
+  questionId: integer("question_id").notNull().references(() => questions.id),
+  nodeId: integer("node_id").notNull().references(() => nodes.id),
+  userId: integer("user_id").notNull().references(() => users.id),
+  text: text("text").notNull(),
+  moderationStatus: text("moderation_status").notNull().default("pending"), // pending|approved|rejected
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const sessions = pgTable("sessions", {
   id: text("id").primaryKey(), // sha256 of the cookie value
   userId: integer("user_id").notNull().references(() => users.id),

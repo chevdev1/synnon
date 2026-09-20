@@ -11,6 +11,7 @@ import Atmosphere from "@/components/landing/Atmosphere";
 import ClaimDialog from "@/components/landing/ClaimDialog";
 import NodeSheet from "@/components/landing/NodeSheet";
 import AchievementsWatcher from "@/components/achievements/AchievementsWatcher";
+import StageBanner from "@/components/landing/StageBanner";
 import IntroGate from "@/components/landing/IntroGate";
 import HelpLayer from "@/components/landing/HelpLayer";
 import { LiveRoot } from "@/lib/live/LiveRoot";
@@ -36,6 +37,7 @@ export default function Home() {
         <ClaimDialog />
         <NodeSheet />
         <AchievementsWatcher />
+        <StageBanner />
         <HelpLayer />
         <IntroGate />
       </div>

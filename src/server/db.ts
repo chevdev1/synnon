@@ -39,6 +39,15 @@ CREATE TABLE IF NOT EXISTS diary (
   id serial PRIMARY KEY, day date NOT NULL UNIQUE, title text NOT NULL, body text NOT NULL,
   node_ids integer[] NOT NULL DEFAULT '{}', voices integer NOT NULL DEFAULT 0,
   created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS questions (
+  id serial PRIMARY KEY, week text NOT NULL UNIQUE, text text NOT NULL, source text NOT NULL DEFAULT 'pool',
+  synthesis text NOT NULL DEFAULT '', synthesis_count integer NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS answers (
+  id serial PRIMARY KEY, question_id integer NOT NULL REFERENCES questions(id),
+  node_id integer NOT NULL REFERENCES nodes(id), user_id integer NOT NULL REFERENCES users(id),
+  text text NOT NULL, moderation_status text NOT NULL DEFAULT 'pending',
+  created_at timestamptz NOT NULL DEFAULT now(), UNIQUE (question_id, node_id));
 CREATE TABLE IF NOT EXISTS sessions (
   id text PRIMARY KEY, user_id integer NOT NULL REFERENCES users(id), expires_at timestamptz NOT NULL);
 `;

@@ -1,5 +1,6 @@
 import type { Lang } from "@/lib/help";
 import { ACHIEVEMENTS } from "@/lib/achievements";
+import { STAGES } from "@/lib/stages";
 
 type T = Record<Lang, string>;
 
@@ -276,6 +277,35 @@ export const DOCS: DocSection[] = [
           "Every cell page (/node/48) also has an animated card: an 8-second loop with the living sky, the brain with your cell pulsing, sparks to the cells you share thoughts with, counters that count up and a thought that types itself out. Press “Download video” to record it in your browser as an MP4 (WebM if your browser cannot do MP4) and upload the file to X. A plain link cannot play video, it only shows the still card.",
           "У каждой страницы клетки (/node/48) есть и анимированная карточка: 8-секундная петля с живым небом, мозгом с пульсирующей вашей клеткой, искрами к клеткам, с которыми у вас общие мысли, счётчиками и мыслью, которая печатается сама. Нажмите «Download video», чтобы записать её в браузере в MP4 (или WebM, если браузер не умеет MP4), и загрузите файл в X. Обычная ссылка видео не проигрывает, она показывает только статичную карточку.",
         ),
+      },
+    ],
+  },
+  {
+    id: "growth",
+    title: t("Growth, the picture of the day and the weekly question", "Рост, картина дня и вопрос недели"),
+    blocks: [
+      {
+        kind: "p",
+        text: t(
+          "The mind grows up as more of its cells are claimed. The share of claimed cells sets its stage. The stage changes how the eye looks, how tall the tree in the picture of the day is, and the style the mind speaks in (a hint added to its instructions): shorter and simpler when it is young, calmer and more reflective when it is grown. See it all at /mind.",
+          "Разум взрослеет по мере того, как занимают клетки. Доля занятых клеток задаёт его стадию. Стадия меняет вид глаза, высоту дерева на картине дня и стиль речи разума (подсказка в его инструкциях): короче и проще, пока он юный, спокойнее и рефлексивнее, когда вырос. Всё это на /mind.",
+        ),
+      },
+      { kind: "table", head: [t("Stage", "Стадия"), t("Begins at", "Начинается с")], rows: STAGES.map((s) => [t(`${s.id} · ${s.name.en}`, `${s.id} · ${s.name.ru}`), t(s.at >= 1 ? "every cell claimed" : `${Math.round(s.at * 100)}% of cells claimed`, s.at >= 1 ? "все клетки заняты" : `занято ${Math.round(s.at * 100)}% клеток`)]) },
+      {
+        kind: "p",
+        text: t(
+          "The picture of the day is made by rules, not by an image model: the date sets the mountains and the moon, the hour sets the light, the mind's mood sets the weather (rain when it listens, fog when it watches, aurora when it wonders), the number of claimed cells lights the windows of a little village, and the tree of the mind is as tall as the stage. You can download it.",
+          "Картина дня сделана по правилам, а не нейросетью: дата задаёт горы и луну, час свет, настроение разума погоду (дождь, когда он слушает, туман, когда наблюдает, сияние, когда удивляется), число занятых клеток зажигает окна маленькой деревни, а дерево разума ровно такое высокое, как его стадия. Её можно скачать.",
+        ),
+      },
+      {
+        kind: "list",
+        items: [
+          t("Once a week the mind asks all its voices one question (/question). It thinks of it itself; if it cannot, one is picked from a list written by people.", "Раз в неделю разум задаёт всем голосам один вопрос (/question). Он придумывает его сам; если не получается, вопрос берётся из списка, написанного людьми."),
+          t("Only a cell can answer, once per week, in up to 140 characters, with no names, links or contacts. Answers are reviewed before they become public and are shown without any name, only the cell number.", "Отвечать может только клетка, раз в неделю, до 140 символов, без имён, ссылок и контактов. Ответы проверяются до публикации и показываются без имён, только с номером клетки."),
+          t("Every approved answer lights its cell in a mosaic shaped like the brain. Tap a lit cell to read it. When enough answers are in, the mind writes a short note in its own words about what it heard: themes only, nothing quoted, nobody named.", "Каждый одобренный ответ зажигает свою клетку в мозаике в форме мозга. Нажми на светящуюся клетку, чтобы прочитать. Когда ответов достаточно, разум пишет короткую заметку своими словами о том, что услышал: только темы, без цитат и имён."),
+        ],
       },
     ],
   },

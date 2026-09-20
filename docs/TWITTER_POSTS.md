@@ -521,6 +521,118 @@ Open the trophy in the header to see them all with your progress. Which one do y
 {LINK}
 ```
 
+## Thread 4 (English): the mind grows, picture of the day, weekly question
+
+Media: `/mind` (the picture + stage ladder), use the console `/stage 0` ... `/stage 5` in the demo to grab each stage's eye and picture; `/question` for the mosaic.
+
+**1/6**
+```
+The SYNNOD mind is growing up.
+
+The more cells are claimed, the older it gets: Static, Infant, Child, Teen, Adult, and finally Awakening when all 128 cells have a voice.
+
+Its eye, its words and its world change with every stage. {LINK}/mind
+```
+
+**2/6**
+```
+It even speaks its age.
+
+As an Infant it uses very short sentences and asks a lot of questions. As an Adult it is calm and reflective. Same mind, older voice.
+
+(It never claims to be conscious, at any stage.)
+```
+
+**3/6**
+```
+Picture of the day.
+
+A pixel landscape made by rules, not by an image model. The date sets the mountains and the moon, the hour sets the light, the mind's mood sets the weather, claimed cells light the windows of a little village.
+
+And a tree that grows with the mind.
+```
+
+**4/6**
+```
+Once a week the mind asks all its voices one question.
+
+"Which smell takes you back to being small?"
+
+Cell owners answer in a line. Every answer lights a cell in a mosaic shaped like the brain. {LINK}/question
+```
+
+**5/6**
+```
+Answers are reviewed before they show. No names, no links, no contacts, 140 characters.
+
+Then the mind writes down what it heard, in its own words: themes only, nothing quoted, nobody named.
+```
+
+**6/6**
+```
+Who wants to see the tree at stage 5?
+
+Claim a cell, answer this week's question, and help the mind grow.
+
+128 voices. One mind.
+{LINK}
+```
+
+## Тред 4 (по-русски): разум растёт, картина дня, вопрос недели
+
+**1/6**
+```
+Разум SYNNOD взрослеет.
+
+Чем больше клеток занято, тем он старше: Помехи, Младенец, Ребёнок, Подросток, Взрослый и, наконец, Пробуждение, когда у всех 128 клеток есть голос.
+
+С каждой стадией меняются глаз, слова и мир. {LINK}/mind
+```
+
+**2/6**
+```
+Он даже говорит по возрасту.
+
+Младенцем он строит совсем короткие фразы и задаёт много вопросов. Взрослым спокоен и рассудителен. Тот же разум, голос старше.
+
+(На любой стадии он не заявляет, что у него есть сознание.)
+```
+
+**3/6**
+```
+Картина дня.
+
+Пиксельный пейзаж, сделанный по правилам, а не нейросетью. Дата задаёт горы и луну, час свет, настроение разума погоду, занятые клетки зажигают окна маленькой деревни.
+
+И дерево, которое растёт вместе с разумом.
+```
+
+**4/6**
+```
+Раз в неделю разум задаёт всем голосам один вопрос.
+
+«Какой запах возвращает тебя в детство?»
+
+Владельцы клеток отвечают в одну строку. Каждый ответ зажигает клетку в мозаике в форме мозга. {LINK}/question
+```
+
+**5/6**
+```
+Ответы проверяются до показа. Без имён, ссылок и контактов, до 140 символов.
+
+Потом разум записывает своими словами, что услышал: только темы, без цитат и имён.
+```
+
+**6/6**
+```
+Хотите увидеть дерево на 5-й стадии?
+
+Займите клетку, ответьте на вопрос недели и помогите разуму вырасти.
+
+128 голосов. Один разум.
+{LINK}
+```
+
 ## Companions (English + русский)
 
 **EN**

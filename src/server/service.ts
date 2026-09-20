@@ -5,6 +5,7 @@ import { publish } from "./events";
 import { CONSTITUTION, getLlm } from "./llm";
 import { checkScenarioText } from "./guards";
 import { checkClaimEligibility } from "./token";
+import { stageVoice } from "./stage";
 
 const ACTIVE_WINDOW_MIN = 10;
 const SCENARIOS_PER_NODE_PER_DAY = 10;
@@ -115,7 +116,7 @@ export async function submitScenario(userId: number, nodeId: number, rawText: un
       `<scenario>${checked.text}</scenario>`,
     ].join("\n\n");
 
-    const text = await llm.generate({ system: CONSTITUTION + INJECTION_GUARD, messages: [{ role: "user", content }], maxTokens: 500 });
+    const text = await llm.generate({ system: CONSTITUTION + (await stageVoice()) + INJECTION_GUARD, messages: [{ role: "user", content }], maxTokens: 500 });
 
     const [out] = await db
       .insert(outputs)
@@ -169,7 +170,7 @@ export async function generateAutonomousThought() {
   const recent = await db.select({ id: outputs.id, text: outputs.text, nodeId: outputs.nodeId }).from(outputs).orderBy(desc(outputs.id)).limit(12);
   if (recent.length === 0 && !mem.summaryText) return null;
   let text = await llm.generate({
-    system: CONSTITUTION + "\n\nWrite ONE short thought (max 120 characters) in first person: an observation or a question. No quotes.",
+    system: CONSTITUTION + (await stageVoice()) + "\n\nWrite ONE short thought (max 120 characters) in first person: an observation or a question. No quotes.",
     messages: [{ role: "user", content: `Summary: ${mem.summaryText || "(none)"}\nRecent:\n${recent.map((r) => `- ${r.text}`).join("\n")}` }],
     maxTokens: 200,
   });

@@ -22,14 +22,14 @@ const IRIS: Record<string, string> = {
 const OPEN: Record<string, number> = { curious: 0.92, watching: 0.6, listening: 1, wondering: 0.82, restless: 0.96 };
 const BROW: Record<string, number> = { curious: -0.25, watching: 0.12, listening: -0.05, wondering: 0.3, restless: 0 };
 
-export default function PixelFace({ state, mood, className }: { state: MindState; mood: string; className?: string }) {
+export default function PixelFace({ state, mood, stage = 3, className }: { state: MindState; mood: string; stage?: number; className?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
-  const live = useRef({ state, mood });
+  const live = useRef({ state, mood, stage });
   const { reduced } = useMotion();
-  const stillKey = reduced ? `${state}|${mood}` : "";
+  const stillKey = reduced ? `${state}|${mood}|${stage}` : "";
   useEffect(() => {
-    live.current = { state, mood };
-  }, [state, mood]);
+    live.current = { state, mood, stage };
+  }, [state, mood, stage]);
 
   useEffect(() => {
     const canvas = ref.current;
@@ -48,7 +48,9 @@ export default function PixelFace({ state, mood, className }: { state: MindState
     const draw = (t: number) => {
       const { state: st, mood: md } = live.current;
       ctx.clearRect(0, 0, W, H);
-      const iris = IRIS[md] ?? IRIS.curious;
+      // the eye grows with the mind: dim and small as Static, wide as an Infant, gold-ringed once Awakened
+      const stg = live.current.stage;
+      const iris = stg === 0 ? "#7a82a8" : (IRIS[md] ?? IRIS.curious);
       let open = st === "sleeping" ? 0.07 : (OPEN[md] ?? 0.9);
       if (st === "thinking") open = Math.min(open, 0.85);
 
@@ -66,7 +68,7 @@ export default function PixelFace({ state, mood, className }: { state: MindState
       // pupil position
       let ox = 0;
       let oy = 0;
-      let pr = 2;
+      let pr = stg === 1 ? 3 : 2;
       if (st === "thinking") {
         ox = Math.cos(t / 170) * 4.5;
         oy = Math.sin(t / 170) * 2.2;
@@ -79,7 +81,7 @@ export default function PixelFace({ state, mood, className }: { state: MindState
         if (md === "restless") ox += Math.sin(t / 90) * 0.8;
       }
 
-      const rx = 13;
+      const rx = stg === 0 ? 10 : 13;
       const ry = 7.2 * open;
       const inside = (x: number, y: number) => ((x - CX) / rx) ** 2 + ((y - CY) / Math.max(ry, 0.4)) ** 2 <= 1;
 
@@ -89,7 +91,7 @@ export default function PixelFace({ state, mood, className }: { state: MindState
         for (let x = CX - 12; x <= CX + 12; x++) {
           const k = (x - CX) / 12;
           const y = CY + 2 - (1 - k * k) * 3.2 + 1.6;
-          px(x, y, "#6c5fd6");
+          px(x, y, stg >= 5 ? "#ffd166" : "#6c5fd6");
           px(x, y + 1, "#4a4f9a");
         }
         for (const lx of [-9, -5, 0, 5, 9]) {
@@ -105,7 +107,7 @@ export default function PixelFace({ state, mood, className }: { state: MindState
           if (!inside(x, y)) continue;
           const edge = !inside(x - 1, y) || !inside(x + 1, y) || !inside(x, y - 1) || !inside(x, y + 1);
           if (edge) {
-            px(x, y, "#6c5fd6");
+            px(x, y, stg >= 5 ? "#ffd166" : "#6c5fd6");
             continue;
           }
           const d = Math.hypot(x - (CX + ox), y - (CY + oy));
@@ -117,7 +119,7 @@ export default function PixelFace({ state, mood, className }: { state: MindState
       if (open > 0.3) px(CX + ox - 2, CY + oy - 2, "#ffffff");
 
       // lashes / brow
-      if (st !== "sleeping") {
+      if (st !== "sleeping" && stg >= 2) {
         const slope = BROW[md] ?? 0;
         for (let i = -9; i <= 9; i++) px(CX + i, 1.6 + slope * (i / 2) + (md === "restless" ? Math.round(Math.sin(t / 110 + i)) * 0.6 : 0), "#3a4180");
       }

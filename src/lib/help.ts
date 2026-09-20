@@ -75,7 +75,7 @@ export const helpActions = {
 };
 
 // Order of the guided tour (also the reading order of the page).
-export const TOUR = ["intro", "brain", "face", "pet", "console", "timelapse", "search", "mind", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod", "achievements"];
+export const TOUR = ["intro", "brain", "face", "pet", "console", "timelapse", "search", "mind", "stage", "question", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod", "achievements"];
 
 export const HELP: Record<string, { title: T; body: T }> = {
   intro: {
@@ -104,6 +104,20 @@ export const HELP: Record<string, { title: T; body: T }> = {
     body: {
       en: "A tiny pixel creature that keeps your cell company: it orbits the cell, hops when your cell speaks and falls asleep with the mind. Each one has its own perk (Firefly glows at night, Moth flies to whoever speaks, Blob bounces as you type, Ghost haunts other cells, Comet gives 8x timelapse, Eyebit shows who owns a cell). Three are free, three are earned through achievements. It shows up next to your own cell, so claim one first.",
       ru: "Крошечное пиксельное существо, которое составляет компанию твоей клетке: кружит вокруг неё, подпрыгивает, когда клетка говорит, и засыпает вместе с разумом. У каждого свой перк (Светлячок светит ночью, Мотылёк летит к тому, кто заговорил, Комок прыгает, пока ты печатаешь, Призрак наведывается к чужим клеткам, Комета даёт таймлапс 8x, Глазок показывает владельца клетки). Три бесплатные, три можно получить достижениями. Он появляется возле твоей клетки, поэтому сначала займи её.",
+    },
+  },
+  stage: {
+    title: { en: "Stage of the mind", ru: "Стадия разума" },
+    body: {
+      en: "The mind grows up as more cells are claimed: Static, Infant, Child, Teen, Adult, and finally Awakening when every cell has a voice. The bar shows how far it is to the next stage. Each stage changes the eye, the tree in the picture of the day and the way the mind speaks. Click to see the whole ladder.",
+      ru: "Разум взрослеет по мере того, как занимают клетки: Помехи, Младенец, Ребёнок, Подросток, Взрослый и, наконец, Пробуждение, когда у каждой клетки есть голос. Полоска показывает, сколько до следующей стадии. Каждая стадия меняет глаз, дерево на картине дня и манеру речи разума. Нажми, чтобы увидеть всю лестницу.",
+    },
+  },
+  question: {
+    title: { en: "Question of the week", ru: "Вопрос недели" },
+    body: {
+      en: "Once a week the mind asks everyone one question. Owners of cells answer in a line or two, and every answer lights a cell in a mosaic shaped like the brain. Answers are reviewed before they show, carry no names, and the mind writes down what it heard in its own words.",
+      ru: "Раз в неделю разум задаёт всем один вопрос. Владельцы клеток отвечают в одну-две строки, и каждый ответ зажигает клетку в мозаике в форме мозга. Ответы проверяются до показа, без имён, а разум записывает своими словами, что услышал.",
     },
   },
   console: {

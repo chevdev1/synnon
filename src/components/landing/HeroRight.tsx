@@ -1,7 +1,9 @@
 "use client";
 
 import { Card, CardTitle, StatusDot } from "@/components/ui/Card";
-import { PixelCity, PixelWorld } from "@/components/ui/PixelArt";
+import { PixelCity } from "@/components/ui/PixelArt";
+import LiveDayScene from "./LiveDayScene";
+import { useStage } from "@/lib/useStage";
 import Typewriter from "@/components/ui/Typewriter";
 import { CURRENT_NODE, MANIFESTO_LINES } from "@/lib/mock/data";
 import { useLive } from "@/lib/live/context";
@@ -26,6 +28,7 @@ export default function HeroRight() {
   const status = nodes.find((n) => n.id === currentUserNodeId)?.status ?? CURRENT_NODE.status;
   const clock = useSessionClock(2 * 60 + 34);
   const demo = mode === "demo";
+  const stg = useStage();
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 p-4">
@@ -35,14 +38,31 @@ export default function HeroRight() {
           <p className="min-w-0 flex-1 text-[17px] leading-snug text-[var(--text-2)]">
             <Typewriter lines={MANIFESTO_LINES} />
           </p>
-          <PixelWorld scale={2} className="shrink-0 rounded-[2px] border-2 border-[var(--border)] transition-transform duration-300 group-hover:scale-[1.04]" />
+          <Link href="/mind" aria-label="Open the picture of the day" className="shrink-0">
+            <LiveDayScene w={46} h={52} className="h-[104px] w-[92px] rounded-[2px] border-2 border-[var(--border)] transition-transform duration-300 group-hover:scale-[1.04]" />
+          </Link>
         </div>
-        <Link
-          href="/docs#what"
-          className="font-head mt-2 inline-block w-fit shrink-0 text-[8px] uppercase text-[var(--link)] transition-colors hover:text-[var(--lime)]"
-        >
-          Read more →
-        </Link>
+        <div className="mt-2 flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1">
+          <Link href="/docs#what" className="font-head text-[8px] uppercase text-[var(--link)] transition-colors hover:text-[var(--lime)]">
+            Read more →
+          </Link>
+          <Link href="/question" className="font-head text-[8px] uppercase text-[#ffd166] transition-colors hover:text-[var(--lime)]" data-help-id="question">
+            Question of the week →
+          </Link>
+          <Link
+            href="/mind"
+            data-help-id="stage"
+            data-stage-chip
+            className="font-head flex items-center gap-1.5 border-2 border-[var(--accent)] px-1.5 py-1 text-[7px] uppercase text-[var(--text)] hover:border-[var(--lime)]"
+            title={stg.next ? `${stg.left} more cells to ${stg.next.name.en}` : "Every cell has a voice"}
+          >
+            <span className="h-1.5 w-1.5 bg-[var(--lime)]" />
+            {stg.stage.name.en} {stg.stage.id}/5
+            <span className="h-1 w-8 bg-[var(--border)]">
+              <span className="block h-full bg-[var(--lime)]" style={{ width: `${stg.pct * 100}%` }} />
+            </span>
+          </Link>
+        </div>
       </Card>
 
       <Card help="node" className="shrink-0">
