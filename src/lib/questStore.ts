@@ -68,6 +68,11 @@ export const useQuestBook = () =>
 export function streakOf(s: Saved, today = dayKey()): number {
   return s.streak.last === today || s.streak.last === yesterdayKey() ? s.streak.count : 0;
 }
+// has a quest already counted for today
+export function streakCountedToday(): boolean {
+  load();
+  return state.streak.last === dayKey();
+}
 export function currentStreak(): number {
   load();
   return streakOf(state);

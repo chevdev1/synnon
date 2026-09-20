@@ -45,6 +45,9 @@ export class PetSim {
   lastPoke = -1;
   nextEvent = 6000; // ghost visits / comet whooshes
   pal: Record<string, string>;
+  stage = 0; // evolution: 0 hatchling, 1 grown, 2 elder, 3 legend (see petBond.ts)
+  burstAt = -1e15; // when it last evolved (a ring of light)
+  burstPending = false; // evolved just now: stamp the time on the next frame
 
   constructor(
     public id: string,
@@ -52,6 +55,12 @@ export class PetSim {
     public color: string
   ) {
     this.pal = petPalette(color);
+  }
+
+  // The bond grew: a bigger, fancier companion, announced with a burst of light.
+  setStage(n: number) {
+    if (n > this.stage && this.placed) this.burstPending = true;
+    this.stage = n;
   }
 
   hop(t: number) {
@@ -144,7 +153,8 @@ export class PetSim {
     }
 
     // ---- trail ----
-    const trailLen = this.id === "comet" ? 12 : 5;
+    const trailLen = (this.id === "comet" ? 12 : 5) + this.stage * 2;
+    const S = this.stage >= 2 ? 3 : 2; // sprite pixel size: elders and legends are bigger
     this.trail.push([this.x, this.y]);
     if (this.trail.length > trailLen + 1) this.trail.shift();
     if (!asleep && !env.reduced) {
@@ -161,7 +171,7 @@ export class PetSim {
     const px = Math.round(this.x);
     const py = Math.round(this.y);
     ctx.globalCompositeOperation = "lighter";
-    const glow = ctx.createRadialGradient(px, py, 0, px, py, 12 + hop * 6 + (this.id === "comet" ? 4 : 0));
+    const glow = ctx.createRadialGradient(px, py, 0, px, py, 12 + this.stage * 3 + hop * 6 + (this.id === "comet" ? 4 : 0));
     glow.addColorStop(0, `${this.color}55`);
     glow.addColorStop(1, `${this.color}00`);
     ctx.fillStyle = glow;
@@ -186,13 +196,60 @@ export class PetSim {
         if (ch === "x" && this.id === "eyebit") c = this.pal["o"]; // pupil is drawn shifted below
         if (blink && ch === "x") c = this.pal["#"];
         ctx.fillStyle = c;
-        ctx.fillRect(px + (rx - 3) * 2, py + (ry - 3) * 2, 2, 2);
+        ctx.fillRect(px + (rx - 3) * S, py + (ry - 3) * S, S, S);
       })
     );
     ctx.globalAlpha = 1;
     if (this.id === "eyebit") {
       ctx.fillStyle = blink ? this.pal["#"] : this.pal["x"];
-      for (const rx of [2, 3, 4]) ctx.fillRect(px + (rx + ex - 3) * 2, py + (3 + ey - 3) * 2, 2, 2);
+      for (const rx of [2, 3, 4]) ctx.fillRect(px + (rx + ex - 3) * S, py + (3 + ey - 3) * S, S, S);
+    }
+
+    // ---- evolution: sparkles (grown), a crown (elder), a rainbow halo with orbiting sparks (legend) ----
+    if (this.stage >= 1 && !asleep) {
+      ctx.fillStyle = this.pal["o"];
+      for (let k = 0; k < 2; k++) {
+        const ph = ((t / 1400 + k * 0.5) % 1);
+        ctx.globalAlpha = Math.sin(Math.PI * ph);
+        const a = k * 2.4 + Math.floor(t / 1400 + k * 0.5) * 1.3;
+        ctx.fillRect(Math.round(px + Math.cos(a) * (8 * S / 2 + 4)), Math.round(py + Math.sin(a) * (8 * S / 2 + 4) - 2), 2, 2);
+      }
+      ctx.globalAlpha = 1;
+    }
+    if (this.stage >= 2) {
+      const top = py - 4 * S - 3;
+      ctx.fillStyle = "#ffd166";
+      for (const dx of [-4, 0, 4]) ctx.fillRect(px + dx - 1, top - 2, 2, 2);
+      ctx.fillRect(px - 5, top, 11, 2);
+    }
+    if (this.stage >= 3 && !asleep) {
+      const hue = Math.round((t / 18) % 360);
+      ctx.globalCompositeOperation = "lighter";
+      ctx.strokeStyle = `hsla(${hue},90%,65%,0.55)`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.ellipse(px, py, 15, 11, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      for (let k = 0; k < 3; k++) {
+        const a = t / 700 + (k * Math.PI * 2) / 3;
+        ctx.fillStyle = `hsla(${(hue + k * 90) % 360},95%,72%,0.9)`;
+        ctx.fillRect(Math.round(px + Math.cos(a) * 15), Math.round(py + Math.sin(a) * 11), 2, 2);
+      }
+      ctx.globalCompositeOperation = "source-over";
+    }
+    if (this.burstPending) {
+      this.burstPending = false;
+      this.burstAt = t;
+    }
+    if (t - this.burstAt >= 0 && t - this.burstAt < 1300) {
+      const p = (t - this.burstAt) / 1300;
+      ctx.globalCompositeOperation = "lighter";
+      ctx.strokeStyle = `rgba(255,235,170,${(0.8 * (1 - p)).toFixed(3)})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(px, py, 6 + p * 34, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalCompositeOperation = "source-over";
     }
 
     // ghost label: whose voice it is haunting

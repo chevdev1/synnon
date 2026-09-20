@@ -6,6 +6,7 @@ import { useDemo } from "@/lib/demo";
 import { demoGoal, GOAL_TIERS } from "@/lib/goal";
 import { goalActions, useGoal } from "@/lib/goalStore";
 import { useHelp } from "@/lib/help";
+import { notifyActions } from "@/lib/notify";
 import { sfx } from "@/lib/sfx";
 import { sky, skyActions } from "@/lib/sky";
 
@@ -50,12 +51,19 @@ export default function GoalSync() {
   }, [tier]);
 
   const has = goal != null;
+  const week = goal?.week;
   useEffect(() => {
     if (!has) return; // the first load of the goal is not a "new tier"
-    if (prev.current != null && tier > prev.current) setBanner({ tier, preview: forced });
+    if (prev.current != null && tier > prev.current) {
+      setBanner({ tier, preview: forced });
+      if (!forced) {
+        const t = GOAL_TIERS[tier - 1];
+        notifyActions.push({ kind: "goal", key: `goal-${week}-${tier}`, en: `Community goal ${tier}/3: ${t.name.en}`, ru: `Цель сообщества ${tier}/3: ${t.name.ru}`, href: "/goal" });
+      }
+    }
     if (tier >= 3 && !forced) achActions.unlock("goal-gold");
     prev.current = tier;
-  }, [tier, forced, has]);
+  }, [tier, forced, has, week]);
 
   useEffect(() => {
     if (!banner) return;

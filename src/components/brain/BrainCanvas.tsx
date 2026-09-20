@@ -22,7 +22,7 @@ export interface BrainCanvasProps {
   resonance?: [number, number][]; // pairs of cells whose words echo each other: a slow golden thread between them
   dreaming?: boolean; // the mind is asleep: slow breath, random memories flicker
   glowHalfLifeMin?: number; // how fast a spoken-through cell cools (timelapse plays it in seconds)
-  pet?: { id: string; rows: string[]; color: string } | null; // companion that keeps the visitor's own cell company
+  pet?: { id: string; rows: string[]; color: string; stage?: number } | null; // companion that keeps the visitor's own cell company
   className?: string;
 }
 
@@ -184,12 +184,16 @@ export default function BrainCanvas({
   const petId = pet?.id ?? null;
   const petRows = pet?.rows;
   const petColor = pet?.color;
+  const petStage = pet?.stage ?? 0;
   useEffect(() => {
     petIdRef.current = petId;
     petSimRef.current = petId && petRows && petColor ? new PetSim(petId, petRows, petColor) : null;
     const fam = getComputedStyle(document.documentElement).getPropertyValue("--font-pixel-head").trim();
     if (fam) fontRef.current = fam;
   }, [petId, petRows, petColor]);
+  useEffect(() => {
+    petSimRef.current?.setStage(petStage);
+  }, [petStage, petId, petRows, petColor]);
 
   // Cached raster layers only depend on node statuses and the current
   // user's node, not on animation state, so they're built once per change

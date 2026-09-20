@@ -41,7 +41,7 @@ export function findResonance(byNode: Map<number, string[]>, max = 6): Resonance
 }
 
 // Simulated pairs for the demo (labelled as such in the interface).
-export function demoResonance(takenIds: number[]): Resonance[] {
+export function demoResonance(takenIds: number[], mine: number | null = null): Resonance[] {
   const ids = [...takenIds].sort((x, y) => x - y);
   const WORDS = [["bridge", "color"], ["rain", "window"], ["kitchen", "light"], ["train", "night"]];
   const out: Resonance[] = [];
@@ -49,6 +49,11 @@ export function demoResonance(takenIds: number[]): Resonance[] {
     const a = ids[(k * 7 + 1) % ids.length];
     const b = ids[(k * 11 + 5) % ids.length];
     if (a !== b && !out.some((o) => o.a === a || o.b === a || o.a === b || o.b === b)) out.push({ a, b, words: WORDS[k] });
+  }
+  // one simulated pair involves your own cell, so the demo can show a resonance notification
+  if (mine != null && ids.includes(mine) && out.length > 0 && !out.some((o) => o.a === mine || o.b === mine)) {
+    const other = ids.find((i) => i !== mine && !out.some((o) => o.a === i || o.b === i));
+    if (other != null) out[0] = { a: Math.min(mine, other), b: Math.max(mine, other), words: out[0].words };
   }
   return out;
 }

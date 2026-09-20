@@ -749,6 +749,32 @@ Every diary day shows the dream, and what the sky did that day.
 {LINK}/diary
 ```
 
+## Post: companion evolution
+
+```
+Your SYNNOD companion grows up with you.
+
+3 days together: sparkles.
+10 days: an Elder with a crown.
+30 days: a Legend with a rainbow halo.
+
+Every companion remembers its own days. Come back tomorrow.
+
+{LINK}
+```
+
+## Post: notifications
+
+```
+SYNNOD has a bell now.
+
+It tells you what really happened to you: a resonance with your cell, a thought that grew from your words, the new question of the week, your companion evolving.
+
+No email. No account. It lives in your browser.
+
+{LINK}
+```
+
 ## Notes for posting
 
 - Record a short screen capture (GIF/MP4, 5-8 s) for posts 4, 5 and 6: the typing glitch, the sparks between cells, the claim shockwave. Stills do not show motion; the frames in `docs/media/` are for the other posts.

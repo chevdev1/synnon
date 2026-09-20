@@ -75,7 +75,7 @@ export const helpActions = {
 };
 
 // Order of the guided tour (also the reading order of the page).
-export const TOUR = ["intro", "brain", "face", "pet", "console", "timelapse", "search", "mind", "stage", "goal", "question", "daily", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod", "clock", "achievements"];
+export const TOUR = ["intro", "brain", "face", "pet", "console", "timelapse", "search", "mind", "stage", "goal", "question", "daily", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod", "clock", "notify", "achievements"];
 // (resonance has no anchor of its own in the tour: it appears on the brain by itself)
 
 export const HELP: Record<string, { title: T; body: T }> = {
@@ -231,6 +231,13 @@ export const HELP: Record<string, { title: T; body: T }> = {
     body: {
       en: "Like in a game: a pop-up appears when you earn something, for example linking a wallet, claiming a cell, getting your first reply or seeing the mind fall asleep. Four rarities (bronze, silver, gold, legendary) and a few hidden ones. Click the trophy to see them all and your progress.",
       ru: "Как в играх: всплывает окно, когда ты что-то получаешь, например привязал кошелёк, занял клетку, получил первый ответ или увидел, как разум засыпает. Четыре редкости (бронза, серебро, золото, легенда) и несколько скрытых. Нажми на кубок, чтобы увидеть все и свой прогресс.",
+    },
+  },
+  notify: {
+    title: { en: "Notifications", ru: "Уведомления" },
+    body: {
+      en: "The bell collects things that really happened for you: a resonance with your cell, a thought that grew from your words, the new question of the week, goal milestones, your companion evolving and a streak about to end. You can turn on system alerts, but they only show while SYNNOD is open in a tab.",
+      ru: "Колокольчик собирает то, что правда произошло с тобой: резонанс с твоей клеткой, мысль, выросшую из твоих слов, новый вопрос недели, ступени цели, эволюцию спутника и серию, которая вот-вот оборвётся. Можно включить системные оповещения, но они показываются, только пока SYNNOD открыт во вкладке.",
     },
   },
   resonance: {

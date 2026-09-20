@@ -6,6 +6,7 @@ import { achActions, useAch } from "@/lib/achStore";
 import { questActions } from "@/lib/questStore";
 import { useHelp } from "@/lib/help";
 import { PETS, petPalette, usePet, type Pet } from "@/lib/pets";
+import { BOND_STAGES, nextStageAt, useBond } from "@/lib/petBond";
 import { sfx } from "@/lib/sfx";
 
 function Sprite({ pet, size = 28, locked = false }: { pet: Pet; size?: number; locked?: boolean }) {
@@ -43,6 +44,8 @@ export default function PetPicker({ hasCell }: { hasCell: boolean }) {
   }
   const cur = PETS.find((p) => p.id === id && (!p.needs || unlocked[p.needs]));
   const shown = PETS.find((p) => p.id === focus) ?? cur ?? PETS[0];
+  const bond = useBond(shown.id);
+  const nextAt = nextStageAt(bond.stage);
 
   useEffect(() => {
     if (!open) return;
@@ -113,6 +116,18 @@ export default function PetPicker({ hasCell }: { hasCell: boolean }) {
               {T("Perk", "Перк")}: {shown.perk.name[lang]}
             </div>
             <p className="mt-1 text-[15px] leading-snug text-[var(--text-2)]">{shown.perk.desc[lang]}</p>
+            <div className="mt-2 border-t-2 border-[var(--divider)] pt-2" data-pet-bond>
+              <div className="font-head text-[7px] uppercase" style={{ color: shown.color }}>
+                {T("Bond", "Связь")}: {bond.days > 0 ? BOND_STAGES[bond.stage].name[lang] : T("not met yet", "вы ещё не знакомы")}
+              </div>
+              <div className="mt-1 h-2 w-full bg-[var(--border)]">
+                <div className="h-full" style={{ width: `${Math.min(100, nextAt ? (bond.days / nextAt) * 100 : 100)}%`, background: shown.color }} />
+              </div>
+              <p className="mt-1 text-[14px] leading-snug text-[var(--muted)]">
+                {bond.days > 0 ? T(`${bond.days} days together`, `Дней вместе: ${bond.days}`) : T("Choose it and come back every day.", "Выбери его и возвращайся каждый день.")}
+                {nextAt ? " · " + T(`${nextAt - bond.days} more for ${BOND_STAGES[bond.stage + 1].name.en}`, `ещё ${nextAt - bond.days} до «${BOND_STAGES[bond.stage + 1].name.ru}»`) : " · " + T("fully grown", "вырос полностью")}
+              </p>
+            </div>
             {shown.needs && !unlocked[shown.needs] && (
               <p className="mt-1 text-[14px] leading-snug text-[#ffd166]">
                 {T("Locked", "Закрыт")}: {shown.hint?.[lang]} ({ACH_BY_ID.get(shown.needs)?.name[lang]})

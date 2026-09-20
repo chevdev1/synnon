@@ -11,6 +11,9 @@ import NodeSearch from "./NodeSearch";
 import TimelapseBar from "./TimelapseBar";
 import ClockChip from "./ClockChip";
 import { useResonance } from "@/lib/useResonance";
+import NotifyBell from "@/components/notify/NotifyBell";
+import { notifyActions } from "@/lib/notify";
+import { bondActions, useBond } from "@/lib/petBond";
 import { useTimelapse } from "./useTimelapse";
 import PixelFace from "@/components/ui/PixelFace";
 import { skyActions } from "@/lib/sky";
@@ -40,7 +43,7 @@ export default function BrainStage() {
   const { state: mindState, mood, dreaming } = useMind();
   const stg = useStage();
   const parallaxBusy = useRef(false);
-  const pairs = useResonance(demo.on, nodes);
+  const pairs = useResonance(demo.on, nodes, currentUserNodeId);
   const [rIdx, setRIdx] = useState(0);
   useEffect(() => {
     if (pairs.length < 2) return;
@@ -54,7 +57,38 @@ export default function BrainStage() {
   const warp = chosenPet?.id === "comet" && !!unlocked[chosenPet.needs ?? ""]; // the Comet's perk: 8x timelapse
   const tl = useTimelapse(warp);
   const chosen = chosenPet;
-  const petSprite = chosen && (!chosen.needs || unlocked[chosen.needs]) ? { id: chosen.id, rows: chosen.rows, color: chosen.color } : null;
+  const petActive = chosen && (!chosen.needs || unlocked[chosen.needs]) ? chosen : null;
+  const bond = useBond(petActive?.id ?? null);
+  const petSprite = petActive ? { id: petActive.id, rows: petActive.rows, color: petActive.color, stage: bond.stage } : null;
+  const petActiveId = petActive?.id ?? null;
+  useEffect(() => {
+    if (petActiveId) bondActions.touch(petActiveId); // one more day together, once a day
+  }, [petActiveId]);
+
+  // Notifications from things this browser really saw: a resonance with your cell...
+  useEffect(() => {
+    if (currentUserNodeId == null) return;
+    for (const p of pairs) {
+      if (p.a !== currentUserNodeId && p.b !== currentUserNodeId) continue;
+      const other = p.a === currentUserNodeId ? p.b : p.a;
+      const w = p.words.map((x) => `“${x}”`).join(", ");
+      notifyActions.push({
+        kind: "resonance",
+        key: `res-${Math.min(p.a, p.b)}-${Math.max(p.a, p.b)}`,
+        en: `Your cell resonates with cell ${other}: ${w}${demo.on ? " (simulated)" : ""}`,
+        ru: `Твоя клетка резонирует с клеткой ${other}: ${w}${demo.on ? " (симуляция)" : ""}`,
+      });
+    }
+  }, [pairs, currentUserNodeId, demo.on]);
+  // ...and a thought that grew from your cell
+  const lastThoughtNote = useRef(0);
+  useEffect(() => {
+    if (!pulseEvent || pulseEvent.type !== "thought" || currentUserNodeId == null) return;
+    if (pulseEvent.nodeId !== currentUserNodeId && !pulseEvent.links?.includes(currentUserNodeId)) return;
+    if (Date.now() - lastThoughtNote.current < 60_000) return;
+    lastThoughtNote.current = Date.now();
+    notifyActions.push({ kind: "thought", en: `The mind had a thought that grew from your cell${demo.on ? " (simulated)" : ""}.`, ru: `У разума появилась мысль, выросшая из твоей клетки${demo.on ? " (симуляция)" : ""}.` });
+  }, [pulseEvent, currentUserNodeId, demo.on]);
 
   useEffect(() => {
     if (tl.view.phase === "done") achActions.unlock("time-traveler");
@@ -206,7 +240,8 @@ export default function BrainStage() {
       >
         {tl.active ? "■ Live" : "▶ Timelapse"}
       </button>
-      <div className="absolute right-3 top-[110px] z-10 sm:top-[126px]">
+      <div className="absolute right-3 top-[110px] z-10 flex items-center gap-1.5 sm:top-[126px]">
+        <NotifyBell />
         <ClockChip compact />
       </div>
       {tl.active ? (
