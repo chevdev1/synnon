@@ -5,7 +5,7 @@ import { isDay } from "@/lib/diary";
 
 export async function generateMetadata(props: PageProps<"/diary/[day]">): Promise<Metadata> {
   const { day } = await props.params;
-  return { title: `Diary ${day} — SYNNOD`, description: "One day in the diary of the SYNNOD mind." };
+  return { title: `Diary ${day} | SYNNOD`, description: "One day in the diary of the SYNNOD mind." };
 }
 
 export default async function Page(props: PageProps<"/diary/[day]">) {

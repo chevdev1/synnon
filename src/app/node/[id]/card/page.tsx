@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import CardPage from "@/components/card/CardPage";
 
-export const metadata: Metadata = { title: "Animated card — SYNNOD", robots: { index: false } };
+export const metadata: Metadata = { title: "Animated card | SYNNOD", robots: { index: false } };
 
 // Bare full-width animated card (used for recording clips). ?record=1 records straight away.
 export default async function Page(props: PageProps<"/node/[id]/card">) {

@@ -7,6 +7,7 @@ import AchievementToaster from "@/components/achievements/AchievementToaster";
 import GoalSync from "@/components/goal/GoalSync";
 import NotifyGlobal from "@/components/notify/NotifyGlobal";
 import LiveWatch from "@/components/landing/LiveWatch";
+import TabLife from "@/components/ui/TabLife";
 import WeatherFx from "@/components/ui/WeatherFx";
 // 8-bit look: Press Start 2P for headings/labels, VT323 (a crisp 1px-grid
 // terminal face, readable at small sizes) for running text.
@@ -26,7 +27,7 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? (process.env.VERCEL_PROJECT_PRO
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
-  title: "SYNNOD — 128 voices. One mind.",
+  title: "SYNNOD | 128 voices. One mind.",
   description:
     "SYNNOD is a shared digital character with no single author. Claim a cell, speak, and watch one mind grow from everyone who talks to it.",
 };
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <GoalSync />
         <NotifyGlobal />
         <LiveWatch />
+        <TabLife />
         <WeatherFx />
         <CursorFx />
       </body>

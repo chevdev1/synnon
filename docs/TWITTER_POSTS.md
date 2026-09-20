@@ -775,6 +775,18 @@ No email. No account. It lives in your browser.
 {LINK}
 ```
 
+## Post: the tab
+
+```
+Look at the SYNNOD tab.
+
+The icon is a pixel eye. It looks around, blinks, closes when the mind sleeps, and flashes when lightning strikes.
+
+Switch to another tab and the title starts whispering: what the sky is doing, how many voices there are.
+
+{LINK}
+```
+
 ## Notes for posting
 
 - Record a short screen capture (GIF/MP4, 5-8 s) for posts 4, 5 and 6: the typing glitch, the sparks between cells, the claim shockwave. Stills do not show motion; the frames in `docs/media/` are for the other posts.

@@ -4,7 +4,7 @@ import NodePage from "@/components/node/NodePage";
 
 export async function generateMetadata(props: PageProps<"/node/[id]">): Promise<Metadata> {
   const { id } = await props.params;
-  return { title: `Node ${id} — SYNNOD`, description: "One voice of the SYNNOD mind: who holds this cell and how its words shaped the shared memory." };
+  return { title: `Node ${id} | SYNNOD`, description: "One voice of the SYNNOD mind: who holds this cell and how its words shaped the shared memory." };
 }
 
 export default async function Page(props: PageProps<"/node/[id]">) {
