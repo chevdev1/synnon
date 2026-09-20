@@ -9,6 +9,7 @@ import { openClaim } from "./ClaimDialog";
 import { openNode } from "./NodeSheet";
 import NodeSearch from "./NodeSearch";
 import TimelapseBar from "./TimelapseBar";
+import ClockChip from "./ClockChip";
 import { useTimelapse } from "./useTimelapse";
 import PixelFace from "@/components/ui/PixelFace";
 import { skyActions } from "@/lib/sky";
@@ -188,6 +189,9 @@ export default function BrainStage() {
       >
         {tl.active ? "■ Live" : "▶ Timelapse"}
       </button>
+      <div className="absolute right-3 top-[110px] z-10 sm:top-[126px]">
+        <ClockChip compact />
+      </div>
       {tl.active ? (
         <TimelapseBar view={tl.view} onToggle={tl.togglePause} onSpeed={tl.cycleSpeed} onClose={tl.stop} />
       ) : consoleOpen ? null : (

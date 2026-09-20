@@ -5,6 +5,7 @@ import CursorFx from "@/components/ui/CursorFx";
 import TodSync from "@/components/ui/TodSync";
 import AchievementToaster from "@/components/achievements/AchievementToaster";
 import GoalSync from "@/components/goal/GoalSync";
+import WeatherFx from "@/components/ui/WeatherFx";
 // 8-bit look: Press Start 2P for headings/labels, VT323 (a crisp 1px-grid
 // terminal face, readable at small sizes) for running text.
 const pixelHead = Press_Start_2P({
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <TodSync />
         <AchievementToaster />
         <GoalSync />
+        <WeatherFx />
         <CursorFx />
       </body>
     </html>

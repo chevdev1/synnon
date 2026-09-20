@@ -86,7 +86,7 @@ function Moon({ phase, size = 44 }: { phase: number; size?: number }) {
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-export default function ClockChip() {
+export default function ClockChip({ compact = false }: { compact?: boolean }) {
   const { phase } = useTod();
   const { lang } = useHelp();
   const [now, setNow] = useState<Date | null>(null);
@@ -229,7 +229,7 @@ export default function ClockChip() {
         data-clock-btn
         aria-expanded={open}
         aria-label={T("Clock and calendar", "Часы и календарь")}
-        className="pixel-btn flex h-11 items-center gap-2 border-2 px-3 sm:h-9"
+        className={`pixel-btn flex items-center gap-2 border-2 ${compact ? "h-7 bg-[#080a20]/85 px-2" : "h-11 px-3 sm:h-9"}`}
         style={{ borderColor: c }}
       >
         <PixelText text={hm} px={2} color={c} blink />
