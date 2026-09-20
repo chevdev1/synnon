@@ -702,6 +702,20 @@ For everyone, on every page, until Monday resets it.
 Your move: {LINK}/goal
 ```
 
+## Post: weather
+
+```
+The sky behind SYNNOD has weather now.
+
+Rain. Snow. Sometimes a thunderstorm with lightning.
+It comes and goes on its own, like a game world.
+
+Want one right now? Open the brain console:
+/weather storm
+
+{LINK}
+```
+
 ## Notes for posting
 
 - Record a short screen capture (GIF/MP4, 5-8 s) for posts 4, 5 and 6: the typing glitch, the sparks between cells, the claim shockwave. Stills do not show motion; the frames in `docs/media/` are for the other posts.

@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { COSMOS_H, COSMOS_PALETTE, COSMOS_W, drawCosmos } from "@/lib/cosmos";
 import { useMotion } from "@/lib/motion";
-import { sky } from "@/lib/sky";
+import { sky, type Weather } from "@/lib/sky";
 import { useTod } from "@/lib/tod";
 
 // The living pixel sky behind the whole interface (every page): three star layers
@@ -45,12 +45,103 @@ export default function CosmosBg() {
       py = (e.clientY / window.innerHeight - 0.5) * 2;
     };
     window.addEventListener("pointermove", onMove, { passive: true });
+    // scrolling drifts the stars: the sky slides at a different depth than the page
+    let sy = 0;
+    let lastScroll = window.scrollY;
+    const onScroll = () => {
+      sy = Math.max(-1.5, Math.min(1.5, sy + (window.scrollY - lastScroll) * 0.01));
+      lastScroll = window.scrollY;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true, capture: true });
 
     type Meteor = { x: number; y: number; vx: number; vy: number; life: number };
     const meteors: Meteor[] = [];
     const spawn = () => meteors.push({ x: W * (0.35 + Math.random() * 0.65), y: Math.random() * H * 0.35, vx: -2.6 - Math.random(), vy: 1.2 + Math.random() * 0.6, life: 1 });
     let nextMeteor = 3500;
     let nextBurst = 0;
+
+    // Game-like weather that drifts in and out on its own: rain, snow, storms with lightning.
+    type Drop = { x: number; y: number; vx: number; vy: number; big: boolean };
+    const drops: Drop[] = [];
+    let wx: Weather = "clear";
+    let wAmt = 0;
+    let wUntil = 0;
+    let wNext = 30000 + Math.random() * 30000;
+    let bolt: { pts: [number, number][]; life: number } | null = null;
+    let nextBolt = 0;
+    const makeBolt = () => {
+      const pts: [number, number][] = [];
+      let x = W * (0.15 + Math.random() * 0.7);
+      for (let y = 0; y < H * (0.55 + Math.random() * 0.3); y += 2) {
+        pts.push([Math.round(x), y]);
+        x += Math.random() < 0.5 ? 0 : Math.random() < 0.5 ? -1 : 1;
+        if (Math.random() < 0.06) x += Math.random() < 0.5 ? -3 : 3;
+      }
+      bolt = { pts, life: 1 };
+    };
+    const weather = (t: number, dz: boolean) => {
+      const req = sky.weatherReq;
+      if (req) {
+        sky.weatherReq = null;
+        wx = req.w;
+        wUntil = t + req.ms;
+        nextBolt = t + 600;
+      } else if (wx === "clear" && !dz && t > wNext) {
+        const r = Math.random();
+        wx = r < 0.4 ? "rain" : r < 0.8 ? "snow" : "storm";
+        wUntil = t + 25000 + Math.random() * 25000;
+        nextBolt = t + 2500;
+      }
+      const active = wx !== "clear" && t < wUntil && !dz;
+      wAmt += ((active ? 1 : 0) - wAmt) * 0.04;
+      if (!active && wAmt < 0.02 && wx !== "clear") {
+        wx = "clear";
+        wNext = t + 45000 + Math.random() * 60000;
+        drops.length = 0;
+      }
+      sky.weather = wx;
+      if (wx === "clear") return;
+      const snow = wx === "snow";
+      const want = Math.round((snow ? 70 : 110) * wAmt);
+      while (drops.length < want) drops.push({ x: Math.random() * (W + 20), y: -Math.random() * H, vx: snow ? 0 : -0.7, vy: snow ? 0.35 + Math.random() * 0.45 : 3 + Math.random() * 1.6, big: snow && Math.random() < 0.25 });
+      ctx.fillStyle = snow ? "#f2f6ff" : "#9ec8ff";
+      for (let i = drops.length - 1; i >= 0; i--) {
+        const d = drops[i];
+        d.y += d.vy;
+        d.x += snow ? Math.sin((d.y + i * 9) / 9) * 0.35 : d.vx;
+        if (d.y > H || d.x < -4) {
+          if (drops.length > want) {
+            drops.splice(i, 1);
+            continue;
+          }
+          d.y = -2;
+          d.x = Math.random() * (W + 20);
+        }
+        ctx.globalAlpha = snow ? 0.85 : 0.5;
+        if (snow) ctx.fillRect(Math.floor(d.x), Math.floor(d.y), d.big ? 2 : 1, d.big ? 2 : 1);
+        else ctx.fillRect(Math.floor(d.x), Math.floor(d.y), 1, 3);
+      }
+      ctx.globalAlpha = 1;
+      if (wx === "storm") {
+        if (!bolt && t > nextBolt && wAmt > 0.6) {
+          makeBolt();
+          nextBolt = t + 3000 + Math.random() * 7000;
+        }
+        if (bolt) {
+          const b = bolt as { pts: [number, number][]; life: number };
+          ctx.fillStyle = "rgba(190,205,255," + (0.22 * b.life).toFixed(3) + ")";
+          ctx.fillRect(0, 0, W, H);
+          ctx.globalAlpha = Math.min(1, b.life * 1.6);
+          ctx.fillStyle = "#cfe0ff";
+          for (const [x, y] of b.pts) ctx.fillRect(x - 1, y, 3, 2);
+          ctx.fillStyle = "#ffffff";
+          for (const [x, y] of b.pts) ctx.fillRect(x, y, 1, 2);
+          ctx.globalAlpha = 1;
+          b.life -= 0.13;
+          if (b.life <= 0) bolt = null;
+        }
+      }
+    };
     let raf = 0;
     let last = -1000;
 
@@ -58,11 +149,14 @@ export default function CosmosBg() {
       const ph = live.current.phase;
       const dz = sky.dreaming;
       cx += (px - cx) * 0.06;
-      cy += (py - cy) * 0.06;
+      sy *= 0.94;
+      cy += (py + sy - cy) * 0.06;
       ctx.clearRect(0, 0, W, H);
       const boost = animated ? Math.max(0, sky.swell * (1 - (performance.now() - sky.swellAt) / 1400)) : 0;
       const gt = sky.goalTier; // community goal: 1 more shooting stars, 2 aurora, 3 golden stars
       drawCosmos(ctx, W, H, t, { phase: ph, dreaming: dz, animated, cx, cy, boost, aurora: gt >= 2, gold: gt >= 3 });
+
+      if (animated) weather(t, dz);
 
       // the occasional shooting star, plus bursts asked for by the console (/meteor)
       if (animated) {
@@ -106,6 +200,7 @@ export default function CosmosBg() {
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("scroll", onScroll, true);
       window.removeEventListener("resize", resize);
     };
   }, [reduced, phase]);
