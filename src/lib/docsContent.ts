@@ -159,8 +159,8 @@ export const DOCS: DocSection[] = [
           [
             t("Brain console", "Консоль мозга"),
             t(
-              "The >_ button (or the ` key) opens a console where you can test how the brain reacts. Only your own screen changes and no real data is touched. Try: /dream and /wake (sleep), /thought and /pulse (sparks), /storm (14 cells fire in a row), /echo (a ripple from a cell), /sing (the brain plays a tune, with the music on), /dance (your companion), /tod and /mood, /meteor, screen effects /glitch /matrix /spin /heartbeat /rainbow, lookups /who /stats, jumps /goto /random and /roll. Tap the command chips if you do not want to type. A few commands are secret.",
-              "Кнопка >_ (или клавиша `) открывает консоль, где можно проверить, как реагирует мозг. Меняется только твой экран, настоящие данные не затрагиваются. Попробуй: /dream и /wake (сон), /thought и /pulse (искры), /storm (14 клеток вспыхивают подряд), /echo (рябь от клетки), /sing (мозг играет мелодию, если музыка включена), /dance (твой спутник), /tod и /mood, /meteor, эффекты экрана /glitch /matrix /spin /heartbeat /rainbow, справки /who /stats, переходы /goto /random и /roll. Если лень печатать, нажимай на команды-кнопки. Несколько команд секретные.",
+              "The >_ button (or the ` key) opens a console where you can test how the brain reacts. Only your own screen changes and no real data is touched. Try: /dream and /wake (sleep), /goal 40 (preview the community goal at a percentage, or /goal auto), /thought and /pulse (sparks), /storm (14 cells fire in a row), /echo (a ripple from a cell), /sing (the brain plays a tune, with the music on), /dance (your companion), /tod and /mood, /meteor, screen effects /glitch /matrix /spin /heartbeat /rainbow, lookups /who /stats, jumps /goto /random and /roll. Tap the command chips if you do not want to type. A few commands are secret.",
+              "Кнопка >_ (или клавиша `) открывает консоль, где можно проверить, как реагирует мозг. Меняется только твой экран, настоящие данные не затрагиваются. Попробуй: /dream и /wake (сон), /goal 40 (посмотреть цель сообщества при нужном проценте, или /goal auto), /thought и /pulse (искры), /storm (14 клеток вспыхивают подряд), /echo (рябь от клетки), /sing (мозг играет мелодию, если музыка включена), /dance (твой спутник), /tod и /mood, /meteor, эффекты экрана /glitch /matrix /spin /heartbeat /rainbow, справки /who /stats, переходы /goto /random и /roll. Если лень печатать, нажимай на команды-кнопки. Несколько команд секретные.",
             ),
           ],
           [
@@ -259,8 +259,8 @@ export const DOCS: DocSection[] = [
       {
         kind: "p",
         text: t(
-          "Once a day the mind writes an entry in its diary: a short title and 50–90 words in the first person about what it noticed. The diary is at /diary, and every day has its own page (for example /diary/2026-09-19) with a share card.",
-          "Раз в сутки разум пишет запись в свой дневник: короткий заголовок и 50–90 слов от первого лица о том, что он заметил. Дневник лежит на /diary, а у каждого дня своя страница (например /diary/2026-09-19) с карточкой для шаринга.",
+          "Once a day the mind writes an entry in its diary: a short title and 50–90 words in the first person about what it noticed. The diary is at /diary, and every day has its own page (for example /diary/2026-09-19) with a share card. If nobody has triggered it yet, yesterday's entry is written the first time somebody opens the diary, and the mind also thinks on its own when it has been quiet for a few hours and someone is looking.",
+          "Раз в сутки разум пишет запись в свой дневник: короткий заголовок и 50–90 слов от первого лица о том, что он заметил. Дневник лежит на /diary, а у каждого дня своя страница (например /diary/2026-09-19) с карточкой для шаринга. Если запись за вчера ещё никто не запустил, она пишется, когда кто-то впервые открывает дневник, а ещё разум сам думает, если давно молчал и на сайт кто-то смотрит.",
         ),
       },
       {
@@ -483,6 +483,13 @@ export const DOCS: DocSection[] = [
           [t("LIVE DATA", "LIVE DATA"), t("Only real data from the server: real cells, real memories, real replies. If nothing has happened yet, it says so.", "Только настоящие данные с сервера: реальные клетки, воспоминания и ответы. Если ничего ещё не произошло, так и написано.")],
         ],
       },
+      {
+        kind: "p",
+        text: t(
+          "Which one you start in: while the real brain has fewer than 8 voices, a newcomer who has never chosen starts in the labelled demo, so the site is not an empty room; once there are 8 or more real voices, newcomers start in Live. Your own choice with the toggle always wins and is remembered. Under the goal bar a line shows how many real voices there are (\"Live: 3/128\"), with a button to go live, or, in a quiet Live, a button to invite friends.",
+          "С какого режима ты начинаешь: пока в настоящем мозге меньше 8 голосов, новичок, который ещё ничего не выбирал, начинает в подписанном демо, чтобы сайт не был пустой комнатой; когда настоящих голосов 8 и больше, новички начинают в Live. Твой собственный выбор переключателем всегда главнее и запоминается. Под полоской цели есть строка с числом настоящих голосов («Live: 3/128») и кнопкой перейти в live, а в тихом live кнопкой позвать друзей.",
+        ),
+      },
     ],
   },
   {
@@ -561,8 +568,8 @@ export const DOCS: DocSection[] = [
         kind: "table",
         head: [t("Stage", "Этап"), t("What", "Что")],
         rows: [
-          [t("Done", "Готово"), t("Pixel brain, chat, memory archive and thoughts; wallet sign-in; claim with a test token on Robinhood Chain Testnet; help mode and this documentation.", "Пиксельный мозг, чат, архив памяти и мысли; вход кошельком; занятие клетки с тестовым токеном в Robinhood Chain Testnet; режим помощи и эта документация.")],
-          [t("Next", "Дальше"), t("A page for every cell with the history of its influence; the character's voice; an admin and moderation panel; swapping in the real launchpad token.", "Страница у каждой клетки с историей её влияния; голос персонажа; админка и модерация; замена на настоящий токен с лаунчпада.")],
+          [t("Done", "Готово"), t("Pixel brain, chat, memory archive and thoughts; wallet sign-in; claim with a test token on Robinhood Chain Testnet; help mode and this documentation; a page and a share card for every cell; diary with dreams; achievements, companions that evolve, daily quests and streak; weekly question and community goal; resonance between cells; a living sky with weather and seasons; clock and calendar; notifications; the brain console.", "Пиксельный мозг, чат, архив памяти и мысли; вход кошельком; занятие клетки с тестовым токеном в Robinhood Chain Testnet; режим помощи и эта документация; страница и карточка для шаринга у каждой клетки; дневник со снами; ачивки, спутники с эволюцией, ежедневные задания и серия; вопрос недели и цель сообщества; резонанс между клетками; живое небо с погодой и сезонами; часы и календарь; уведомления; консоль мозга.")],
+          [t("Next", "Дальше"), t("An admin and moderation panel; a fully Russian interface; slots and the real role of the token; swapping in the real launchpad token.", "Админка и модерация; полностью русский интерфейс; слоты и настоящая роль токена; замена на настоящий токен с лаунчпада.")],
           [t("Open questions", "Открытые вопросы"), t("How the token is used (hold, burn or rent a cell); whether idle cells are released; final daily limits; which messages are public.", "Как используется токен (держать, сжигать или арендовать клетку); освобождаются ли простаивающие клетки; итоговые дневные лимиты; какие сообщения публичны.")],
         ],
       },
