@@ -2,13 +2,9 @@
 // asleep, something just happened); the sky reads it every frame, so any page
 // can show the sky without needing the live data provider.
 export type Weather = "clear" | "rain" | "snow" | "storm";
-export const sky = { dreaming: false, swell: 0, swellAt: 0, poke: 0, meteors: 0, danceUntil: 0, goalTier: 0, weather: "clear" as Weather, weatherReq: null as { w: Weather; ms: number } | null };
+export const sky = { dreaming: false, swell: 0, swellAt: 0, poke: 0, meteors: 0, danceUntil: 0, goalTier: 0, weather: "clear" as Weather };
 
 export const skyActions = {
-  // ask the sky for a certain weather for a while (the /weather command)
-  setWeather(w: Weather, ms = 40000) {
-    sky.weatherReq = { w, ms };
-  },
   setDreaming(v: boolean) {
     sky.dreaming = v;
   },

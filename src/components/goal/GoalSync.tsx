@@ -49,11 +49,13 @@ export default function GoalSync() {
     };
   }, [tier]);
 
+  const has = goal != null;
   useEffect(() => {
+    if (!has) return; // the first load of the goal is not a "new tier"
     if (prev.current != null && tier > prev.current) setBanner({ tier, preview: forced });
     if (tier >= 3 && !forced) achActions.unlock("goal-gold");
     prev.current = tier;
-  }, [tier, forced]);
+  }, [tier, forced, has]);
 
   useEffect(() => {
     if (!banner) return;

@@ -2,7 +2,7 @@ import type { BrainNode, PulseEvent } from "@/lib/brain/types";
 import { achActions } from "@/lib/achStore";
 import { MOODS, mindActions } from "@/lib/mind";
 import { PETS } from "@/lib/pets";
-import { sky, skyActions, type Weather } from "@/lib/sky";
+import { skyActions } from "@/lib/sky";
 import { todActions, type TodMode } from "@/lib/tod";
 import { generateBrain } from "@/lib/brain/generate";
 import { fxActions, type Fx } from "@/lib/fx";
@@ -198,19 +198,6 @@ export const COMMANDS: Cmd[] = [
     run: (_a, env) => {
       skyActions.meteorShower(12);
       env.say(L(env, "Look at the sky.", "Смотри на небо."), "ok");
-    },
-  },
-  {
-    name: "weather",
-    usage: "<rain|snow|storm|clear>",
-    help: { en: "call the weather (it also changes on its own)", ru: "вызвать погоду (она и сама меняется)" },
-    run: (a, env) => {
-      const w = (a[0] ?? "").toLowerCase();
-      const map: Record<string, Weather> = { rain: "rain", дождь: "rain", snow: "snow", снег: "snow", storm: "storm", гроза: "storm", clear: "clear", ясно: "clear" };
-      if (!map[w]) return env.say(L(env, `Now: ${sky.weather}. Use: /weather rain|snow|storm|clear`, `Сейчас: ${sky.weather}. Используй: /weather rain|snow|storm|clear`), "err");
-      if (map[w] === "clear") skyActions.setWeather("clear", 0);
-      else skyActions.setWeather(map[w], 45000);
-      env.say(L(env, "The sky changes its mind.", "Небо передумало."), "ok");
     },
   },
   {

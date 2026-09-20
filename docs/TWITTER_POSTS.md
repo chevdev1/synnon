@@ -708,10 +708,10 @@ Your move: {LINK}/goal
 The sky behind SYNNOD has weather now.
 
 Rain. Snow. Sometimes a thunderstorm with lightning.
-It comes and goes on its own, like a game world.
+It follows the seasons, and it is the same sky for everyone.
+Nobody can call it. You just have to be there.
 
-Want one right now? Open the brain console:
-/weather storm
+Some nights of the year are special.
 
 {LINK}
 ```

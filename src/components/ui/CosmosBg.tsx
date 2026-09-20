@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { COSMOS_H, COSMOS_PALETTE, COSMOS_W, drawCosmos } from "@/lib/cosmos";
 import { useMotion } from "@/lib/motion";
 import { sky, type Weather } from "@/lib/sky";
+import { calendarSky } from "@/lib/weather";
 import { useTod } from "@/lib/tod";
 
 // The living pixel sky behind the whole interface (every page): three star layers
@@ -60,15 +61,27 @@ export default function CosmosBg() {
     let nextMeteor = 3500;
     let nextBurst = 0;
 
-    // Game-like weather that drifts in and out on its own: rain, snow, storms with lightning.
+    // The sky follows the calendar and the clock, the same for everybody (see lib/weather):
+    // weather slots biased by the season, the season's own visitors (leaves, petals,
+    // fireflies), real meteor-shower nights and New Year fireworks. Nothing is summoned.
+    const test = process.env.NODE_ENV !== "production" ? new URLSearchParams(window.location.search).get("skytest") : null;
     type Drop = { x: number; y: number; vx: number; vy: number; big: boolean };
     const drops: Drop[] = [];
     let wx: Weather = "clear";
     let wAmt = 0;
-    let wUntil = 0;
-    let wNext = 30000 + Math.random() * 30000;
     let bolt: { pts: [number, number][]; life: number } | null = null;
     let nextBolt = 0;
+    type Fly = { x: number; y: number; vx: number; vy: number; ph: number; c: string };
+    const flies: Fly[] = [];
+    let flyKind: string | null = null;
+    type Boom = { x: number; y: number; born: number; c: string };
+    const booms: Boom[] = [];
+    let nextBoom = 0;
+    let cal = calendarSky(new Date(), test);
+    let calAt = 0;
+    const LEAF = ["#e0862e", "#c4502a", "#d9b13a"];
+    const PETAL = ["#ffc2e0", "#ffdff0", "#f7a8d0"];
+    const BOOM = ["#ffd166", "#ff8ab8", "#7fe3ff", "#c4f260"];
     const makeBolt = () => {
       const pts: [number, number][] = [];
       let x = W * (0.15 + Math.random() * 0.7);
@@ -80,37 +93,94 @@ export default function CosmosBg() {
       bolt = { pts, life: 1 };
     };
     const weather = (t: number, dz: boolean) => {
-      const req = sky.weatherReq;
-      if (req) {
-        sky.weatherReq = null;
-        wx = req.w;
-        wUntil = t + req.ms;
-        nextBolt = t + 600;
-      } else if (wx === "clear" && !dz && t > wNext) {
-        const r = Math.random();
-        wx = r < 0.4 ? "rain" : r < 0.8 ? "snow" : "storm";
-        wUntil = t + 25000 + Math.random() * 25000;
-        nextBolt = t + 2500;
+      if (t - calAt > 5000) {
+        cal = calendarSky(new Date(), test);
+        calAt = t;
       }
-      const active = wx !== "clear" && t < wUntil && !dz;
-      wAmt += ((active ? 1 : 0) - wAmt) * 0.04;
-      if (!active && wAmt < 0.02 && wx !== "clear") {
-        wx = "clear";
-        wNext = t + 45000 + Math.random() * 60000;
-        drops.length = 0;
+      const want: Weather = dz ? "clear" : cal.weather;
+      let target = 1;
+      if (want !== wx) {
+        if (wAmt > 0.04) target = 0;
+        else {
+          wx = want;
+          drops.length = 0;
+          nextBolt = t + 2500;
+        }
       }
+      if (wx === "clear") target = 0;
+      wAmt += (target - wAmt) * 0.04;
       sky.weather = wx;
-      if (wx === "clear") return;
+      // the season's ambient visitors
+      const kind = dz ? null : cal.visitor;
+      if (kind !== flyKind) {
+        flyKind = kind;
+        flies.length = 0;
+      }
+      if (kind && (kind !== "firefly" || live.current.phase !== "day")) {
+        const n = kind === "leaf" ? 14 : kind === "petal" ? 16 : 12;
+        while (flies.length < n) flies.push({ x: Math.random() * W, y: Math.random() * H, vx: 0, vy: 0.2 + Math.random() * 0.3, ph: Math.random() * 6.3, c: kind === "leaf" ? LEAF[flies.length % 3] : kind === "petal" ? PETAL[flies.length % 3] : "#d8ff7a" });
+        for (const f of flies) {
+          if (kind === "firefly") {
+            f.vx += (Math.random() - 0.5) * 0.06;
+            f.vy += (Math.random() - 0.5) * 0.06;
+            f.vx = Math.max(-0.3, Math.min(0.3, f.vx));
+            f.vy = Math.max(-0.3, Math.min(0.3, f.vy));
+            f.x = (f.x + f.vx + W) % W;
+            f.y = (f.y + f.vy + H) % H;
+            const a = 0.5 + 0.5 * Math.sin(t / 420 + f.ph);
+            ctx.globalAlpha = 0.14 * a;
+            ctx.fillStyle = f.c;
+            ctx.fillRect(Math.floor(f.x) - 1, Math.floor(f.y) - 1, 3, 3);
+            ctx.globalAlpha = 0.35 + 0.65 * a;
+            ctx.fillRect(Math.floor(f.x), Math.floor(f.y), 1, 1);
+          } else {
+            f.y += f.vy;
+            f.x += kind === "leaf" ? Math.sin(t / 700 + f.ph) * 0.4 : 0.25 + Math.sin(t / 900 + f.ph) * 0.25;
+            if (f.y > H + 2 || f.x > W + 3 || f.x < -3) {
+              f.y = -2;
+              f.x = Math.random() * W;
+            }
+            ctx.globalAlpha = 0.9;
+            ctx.fillStyle = f.c;
+            ctx.fillRect(Math.floor(f.x), Math.floor(f.y), 2, kind === "leaf" ? 1 : 2 - (Math.floor(f.ph) % 2));
+          }
+        }
+        ctx.globalAlpha = 1;
+      }
+      // New Year fireworks
+      if (cal.newYear && !dz) {
+        if (t > nextBoom) {
+          booms.push({ x: W * (0.12 + Math.random() * 0.76), y: H * (0.12 + Math.random() * 0.4), born: t, c: BOOM[Math.floor(Math.random() * BOOM.length)] });
+          nextBoom = t + 1400 + Math.random() * 2200;
+        }
+        for (let i = booms.length - 1; i >= 0; i--) {
+          const bm = booms[i];
+          const age = (t - bm.born) / 1300;
+          if (age >= 1) {
+            booms.splice(i, 1);
+            continue;
+          }
+          ctx.fillStyle = bm.c;
+          ctx.globalAlpha = 1 - age;
+          const r = 3 + age * 16;
+          for (let k = 0; k < 20; k++) {
+            const an = (k / 20) * Math.PI * 2;
+            ctx.fillRect(Math.round(bm.x + Math.cos(an) * r), Math.round(bm.y + Math.sin(an) * r + age * age * 7), 2, 2);
+          }
+          ctx.globalAlpha = 1;
+        }
+      }
+      if (wx === "clear" || wAmt < 0.01) return;
       const snow = wx === "snow";
-      const want = Math.round((snow ? 70 : 110) * wAmt);
-      while (drops.length < want) drops.push({ x: Math.random() * (W + 20), y: -Math.random() * H, vx: snow ? 0 : -0.7, vy: snow ? 0.35 + Math.random() * 0.45 : 3 + Math.random() * 1.6, big: snow && Math.random() < 0.25 });
+      const want2 = Math.round((snow ? 70 : 110) * wAmt);
+      while (drops.length < want2) drops.push({ x: Math.random() * (W + 20), y: -Math.random() * H, vx: snow ? 0 : -0.7, vy: snow ? 0.35 + Math.random() * 0.45 : 3 + Math.random() * 1.6, big: snow && Math.random() < 0.25 });
       ctx.fillStyle = snow ? "#f2f6ff" : "#9ec8ff";
       for (let i = drops.length - 1; i >= 0; i--) {
         const d = drops[i];
         d.y += d.vy;
         d.x += snow ? Math.sin((d.y + i * 9) / 9) * 0.35 : d.vx;
         if (d.y > H || d.x < -4) {
-          if (drops.length > want) {
+          if (drops.length > want2) {
             drops.splice(i, 1);
             continue;
           }
@@ -142,6 +212,7 @@ export default function CosmosBg() {
         }
       }
     };
+
     let raf = 0;
     let last = -1000;
 
@@ -160,9 +231,10 @@ export default function CosmosBg() {
 
       // the occasional shooting star, plus bursts asked for by the console (/meteor)
       if (animated) {
-        if (!dz && meteors.length < (sky.goalTier >= 1 ? 3 : 1) && t > nextMeteor) {
+        const rich = sky.goalTier >= 1 || cal.shower;
+        if (!dz && meteors.length < (rich ? 3 : 1) && t > nextMeteor) {
           spawn();
-          nextMeteor = t + (6000 + Math.random() * 9000) / (sky.goalTier >= 1 ? 3.5 : 1);
+          nextMeteor = t + (6000 + Math.random() * 9000) / (rich ? 3.5 : 1);
         }
         if (sky.meteors > 0 && t > nextBurst) {
           spawn();
