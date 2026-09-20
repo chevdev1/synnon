@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { achActions, useAch } from "@/lib/achStore";
 import { useMotion } from "@/lib/motion";
 import { sky, type Weather } from "@/lib/sky";
 import { useTod } from "@/lib/tod";
@@ -14,6 +15,11 @@ export default function WeatherFx() {
   const { reduced } = useMotion();
   const { phase } = useTod();
   const live = useRef({ phase });
+  const { unlocked } = useAch();
+  const sawAll = !!(unlocked["sky-rain"] && unlocked["sky-snow"] && unlocked["sky-storm"]);
+  useEffect(() => {
+    if (sawAll) achActions.unlock("sky-collector");
+  }, [sawAll]);
 
   useEffect(() => {
     live.current = { phase };
@@ -63,7 +69,16 @@ export default function WeatherFx() {
       }
       bolt = { pts, life: 1 };
     };
+    // watching a phenomenon for a while earns its achievement
+    const dwell: Record<string, number> = {};
+    let lastT = 0;
+    const watch = (key: string, ach: string, dt: number) => {
+      dwell[key] = (dwell[key] ?? 0) + dt;
+      if (dwell[key] > 20000) achActions.unlock(ach);
+    };
     const weather = (t: number, dz: boolean) => {
+      const dt = lastT ? Math.min(200, t - lastT) : 0;
+      lastT = t;
       if (t - calAt > 5000) {
         cal = calendarSky(new Date(), test);
         calAt = t;
@@ -81,6 +96,13 @@ export default function WeatherFx() {
       if (wx === "clear") target = 0;
       wAmt += (target - wAmt) * 0.06;
       sky.weather = wx;
+      if (!document.hidden && wAmt > 0.6) {
+        if (wx === "rain") watch("rain", "sky-rain", dt);
+        else if (wx === "snow") watch("snow", "sky-snow", dt);
+        else if (wx === "storm") watch("storm", "sky-storm", dt);
+      }
+      if (!document.hidden && !dz && cal.shower) watch("shower", "sky-shower", dt);
+      if (!document.hidden && !dz && cal.newYear) watch("newyear", "sky-fireworks", dt);
       // the season's ambient visitors
       const kind = dz ? null : cal.visitor;
       if (kind !== flyKind) {

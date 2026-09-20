@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { demoDream, type Dream } from "@/lib/dream";
+import { skyEventsForDay } from "@/lib/weather";
 import Atmosphere from "@/components/landing/Atmosphere";
 import DemoToggle from "@/components/landing/DemoToggle";
 import { HexIcon } from "@/components/ui/PixelIcon";
@@ -81,7 +83,63 @@ function ShareRow({ e }: { e: DiaryEntry }) {
   );
 }
 
-function Entry({ e, single }: { e: DiaryEntry; single?: boolean }) {
+const SKY_COLOR = { rain: "#7fb8ff", snow: "#e8f0ff", storm: "#c9b8ff" } as const;
+const SKY_LABEL = { rain: "rain", snow: "snow", storm: "thunderstorm" } as const;
+
+// What the sky did that day, from the schedule the whole site follows (in your local time).
+function SkyLine({ day, demo }: { day: string; demo: boolean }) {
+  const events = useMemo(() => skyEventsForDay(day, demo), [day, demo]);
+  if (events.length === 0) return null;
+  const hm = (ms: number) => new Date(ms).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-t-2 border-[var(--divider)] pt-3" data-sky-line>
+      <span className="font-head text-[7px] uppercase text-[var(--muted)]">Sky that day</span>
+      {events.map((s) => (
+        <span key={s.from} className="flex items-center gap-1.5 text-[17px] text-[var(--text-2)]">
+          <span className="h-2 w-2" style={{ background: SKY_COLOR[s.w] }} />
+          {SKY_LABEL[s.w]} {hm(s.from)}–{hm(s.to)}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// The dream of the night before: real pieces of old memories, cut and shuffled by the date.
+function DreamBlock({ day, demo }: { day: string; demo: boolean }) {
+  const [dream, setDream] = useState<Dream | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    const t = setTimeout(() => {
+      if (demo) return setDream(demoDream(day));
+      fetch(`/api/dream/${day}`, { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => !cancelled && setDream(d))
+        .catch(() => {});
+    }, 0);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [day, demo]);
+  if (!dream || dream.fragments.length === 0) return null;
+  return (
+    <div className="mt-3 border-2 border-dashed border-[#b9a6f5]/60 p-3" data-dream>
+      <div className="font-head text-[7px] uppercase text-[#b9a6f5]">Dream of the night{demo ? " · simulated" : ""}</div>
+      <ul className="mt-2 space-y-1.5">
+        {dream.fragments.map((f, i) => (
+          <li key={i} className="text-[19px] leading-snug text-[var(--text-2)]" style={{ marginLeft: (i % 3) * 14, opacity: 1 - i * 0.12 }}>
+            <span className="text-[#b9a6f5]">~ </span>
+            {f.text}
+            {f.nodeId != null && <span className="font-head ml-2 text-[7px] text-[var(--muted)]">#{String(f.nodeId).padStart(2, "0")}</span>}
+          </li>
+        ))}
+      </ul>
+      <p className="mt-2 text-[14px] leading-snug text-[var(--muted)]">Pieces of things the mind really said, cut and shuffled while it slept. Nothing here is new.</p>
+    </div>
+  );
+}
+
+function Entry({ e, single, demo }: { e: DiaryEntry; single?: boolean; demo: boolean }) {
   return (
     <article className="fade-in-up rounded-[3px] border-2 border-[var(--border)] bg-[color-mix(in_srgb,var(--panel)_76%,transparent)] p-4 md:p-6">
       <div className="font-head text-[8px] uppercase text-[var(--muted)]">{formatDay(e.day)}</div>
@@ -97,6 +155,8 @@ function Entry({ e, single }: { e: DiaryEntry; single?: boolean }) {
           </Link>
         ))}
       </div>
+      <SkyLine day={e.day} demo={demo} />
+      <DreamBlock day={e.day} demo={demo} />
       <ShareRow e={e} />
     </article>
   );
@@ -151,7 +211,7 @@ export default function DiaryView({ day }: { day?: string }) {
               {day ? "There is no entry for that day." : "Nothing written yet. The first entry appears after a day in which someone spoke to the mind."}
             </p>
           ) : (
-            entries.map((e) => <Entry key={e.day} e={e} single={!!day} />)
+            entries.map((e) => <Entry key={e.day} e={e} single={!!day} demo={demo} />)
           )}
         </main>
       </div>

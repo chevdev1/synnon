@@ -1,0 +1,7 @@
+{
+  "crons": [
+    { "path": "/api/cron/thoughts", "schedule": "0 */3 * * *" },
+    { "path": "/api/cron/diary", "schedule": "55 23 * * *" },
+    { "path": "/api/cron/question", "schedule": "5 0 * * 1" }
+  ]
+}

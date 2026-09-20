@@ -17,3 +17,4 @@ export async function POST(req: Request) {
     return fail(502, "generation failed");
   }
 }
+export const GET = POST;

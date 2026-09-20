@@ -13,3 +13,4 @@ export async function POST(req: Request) {
     return fail(502, "failed");
   }
 }
+export const GET = POST;

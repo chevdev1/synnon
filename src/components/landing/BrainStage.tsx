@@ -10,6 +10,7 @@ import { openNode } from "./NodeSheet";
 import NodeSearch from "./NodeSearch";
 import TimelapseBar from "./TimelapseBar";
 import ClockChip from "./ClockChip";
+import { useResonance } from "@/lib/useResonance";
 import { useTimelapse } from "./useTimelapse";
 import PixelFace from "@/components/ui/PixelFace";
 import { skyActions } from "@/lib/sky";
@@ -38,6 +39,14 @@ export default function BrainStage() {
   const { mode, offline, nodes, me, currentUserNodeId, selectedId, setSelectedId, pulseEvent, events, now } = useLive();
   const { state: mindState, mood, dreaming } = useMind();
   const stg = useStage();
+  const pairs = useResonance(demo.on, nodes);
+  const [rIdx, setRIdx] = useState(0);
+  useEffect(() => {
+    if (pairs.length < 2) return;
+    const id = window.setInterval(() => setRIdx((i) => i + 1), 6000);
+    return () => window.clearInterval(id);
+  }, [pairs.length]);
+  const shownPair = pairs.length ? pairs[rIdx % pairs.length] : null;
   const { id: petId } = usePet();
   const { unlocked } = useAch();
   const chosenPet = petId ? PET_BY_ID.get(petId) : undefined;
@@ -149,6 +158,7 @@ export default function BrainStage() {
         pulseEvent={tl.active ? tl.tlPulse : pulseEvent}
         ping={ping}
         dreaming={dreaming && !tl.active}
+        resonance={tl.active ? undefined : pairs.map((p) => [p.a, p.b] as [number, number])}
         glowHalfLifeMin={tl.active ? 0.06 : undefined}
         pet={petSprite}
       />
@@ -234,6 +244,12 @@ export default function BrainStage() {
         it breathes. it watches.
       </div>
 
+      {!tl.active && !consoleOpen && shownPair && (
+        <div key={rIdx} className="fade-in-up pointer-events-none absolute bottom-[92px] left-4 max-w-[60%] text-[16px] text-[#ffd166]" data-resonance-caption>
+          ✦ {String(shownPair.a).padStart(2, "0")} ↔ {String(shownPair.b).padStart(2, "0")} resonate: {shownPair.words.map((w) => `“${w}”`).join(", ")}
+          {demo.on ? " (simulated)" : ""}
+        </div>
+      )}
       {!tl.active && !consoleOpen && (
         <ul className="pointer-events-none absolute bottom-3 left-4 space-y-1 text-[16px] text-[var(--muted)]">
           {events.map((e, i) => (

@@ -19,12 +19,14 @@ export interface BrainCanvasProps {
   onSelect?: (id: number) => void;
   pulseEvent?: PulseEvent | null;
   ping?: { id: number; n: number } | null; // search result: pulses a cell so it is easy to spot
+  resonance?: [number, number][]; // pairs of cells whose words echo each other: a slow golden thread between them
   dreaming?: boolean; // the mind is asleep: slow breath, random memories flicker
   glowHalfLifeMin?: number; // how fast a spoken-through cell cools (timelapse plays it in seconds)
   pet?: { id: string; rows: string[]; color: string } | null; // companion that keeps the visitor's own cell company
   className?: string;
 }
 
+const NO_PAIRS: [number, number][] = [];
 const GROUP_PERIODS_MS = [4200, 5600, 3800, 6400];
 const WAVE_PERIOD_MS = 6000;
 const SCAN_PERIOD_MS = 6000;
@@ -116,6 +118,7 @@ export default function BrainCanvas({
   pulseEvent = null,
   ping = null,
   dreaming = false,
+  resonance = NO_PAIRS,
   glowHalfLifeMin = GLOW_HALF_LIFE_MIN,
   pet = null,
   className,
@@ -159,6 +162,7 @@ export default function BrainCanvas({
   const introRef = useRef<{ start: number | null; done: boolean }>({ start: null, done: false });
   const nodesRef = useRef(nodes);
   const dreamingRef = useRef(dreaming);
+  const resonanceRef = useRef(resonance);
   const halfLifeRef = useRef(glowHalfLifeMin);
   const petSimRef = useRef<PetSim | null>(null);
   const petIdRef = useRef<string | null>(null);
@@ -170,9 +174,10 @@ export default function BrainCanvas({
   useEffect(() => {
     nodesRef.current = nodes;
     dreamingRef.current = dreaming;
+    resonanceRef.current = resonance;
     halfLifeRef.current = glowHalfLifeMin;
     mineRef.current = currentUserNodeId;
-  }, [nodes, dreaming, glowHalfLifeMin, currentUserNodeId]);
+  }, [nodes, dreaming, resonance, glowHalfLifeMin, currentUserNodeId]);
 
   // A new companion (or none) gets a fresh simulation; the font is the site's pixel font.
   const petId = pet?.id ?? null;
@@ -490,6 +495,46 @@ export default function BrainCanvas({
             }
           }
           return alive;
+        });
+        ctx.globalCompositeOperation = "source-over";
+      }
+
+      // ---- resonance: a slow golden thread between cells whose words echo each other ----
+      if (resonanceRef.current.length > 0 && !reducedMotion && !assembling) {
+        ctx.globalCompositeOperation = "lighter";
+        resonanceRef.current.forEach(([ia, ib], k) => {
+          const a = claimable.find((x) => x.claimId === ia);
+          const b = claimable.find((x) => x.claimId === ib);
+          if (!a || !b) return;
+          const ax = a.x * SCALE;
+          const ay = a.y * SCALE;
+          const bx = b.x * SCALE;
+          const by = b.y * SCALE;
+          const d = Math.hypot(bx - ax, by - ay) || 1;
+          const bend = d * 0.18 * (k % 2 ? 1 : -1);
+          const cx = (ax + bx) / 2 + (-(by - ay) / d) * bend;
+          const cy = (ay + by) / 2 + ((bx - ax) / d) * bend;
+          const breathe = 0.55 + 0.45 * Math.sin(t / 900 + k * 1.7);
+          for (let i = 0; i <= 36; i++) {
+            const u = i / 36;
+            const [x, y] = quad(ax, ay, cx, cy, bx, by, u);
+            ctx.fillStyle = `rgba(255,209,102,${(0.16 + 0.22 * breathe).toFixed(3)})`;
+            ctx.fillRect(Math.round(x / 2) * 2 - 1, Math.round(y / 2) * 2 - 1, 2, 2);
+          }
+          // a bead travelling to and fro
+          const u = 0.5 + 0.5 * Math.sin(t / 1600 + k);
+          const [px, py] = quad(ax, ay, cx, cy, bx, by, u);
+          ctx.fillStyle = "rgba(255,225,150,0.45)";
+          ctx.fillRect(Math.round(px) - 4, Math.round(py) - 4, 8, 8);
+          ctx.fillStyle = "rgba(255,255,255,0.95)";
+          ctx.fillRect(Math.round(px) - 2, Math.round(py) - 2, 4, 4);
+          for (const q of [a, b]) {
+            ctx.strokeStyle = `rgba(255,209,102,${(0.25 + 0.4 * breathe).toFixed(3)})`;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            addHex(ctx, q.x * SCALE, q.y * SCALE, (q.R + 1.5) * SCALE);
+            ctx.stroke();
+          }
         });
         ctx.globalCompositeOperation = "source-over";
       }

@@ -27,6 +27,12 @@ export const seasonOf = (d: Date): Season => {
   return m === 11 || m <= 1 ? "winter" : m <= 4 ? "spring" : m <= 7 ? "summer" : "autumn";
 };
 
+// The schedule uses the UTC season so the server, the diary and every visitor agree.
+export const seasonOfUTC = (d: Date): Season => {
+  const m = d.getUTCMonth();
+  return m === 11 || m <= 1 ? "winter" : m <= 4 ? "spring" : m <= 7 ? "summer" : "autumn";
+};
+
 export function weatherAt(ms: number, season: Season): Weather {
   const r = (h32(Math.floor(ms / SLOT_MS)) % 10000) / 10000;
   const [rain, snow, storm] = CHANCE[season];
@@ -49,7 +55,7 @@ export function calendarSky(d: Date, test: string | null = null): CalendarSky {
   let season = seasonOf(d);
   const m = d.getMonth();
   const day = d.getDate();
-  let weather = weatherAt(d.getTime(), season);
+  let weather = weatherAt(d.getTime(), seasonOfUTC(d));
   let shower = (m === 7 && day >= 10 && day <= 14) || (m === 10 && day >= 16 && day <= 18) || (m === 11 && day >= 12 && day <= 15);
   let newYear = (m === 11 && day === 31) || (m === 0 && day === 1);
   if (test) {
@@ -62,4 +68,28 @@ export function calendarSky(d: Date, test: string | null = null): CalendarSky {
   }
   const visitor: Visitor = season === "autumn" ? "leaf" : season === "spring" ? "petal" : season === "summer" ? "firefly" : null;
   return { season, weather, visitor, shower, newYear };
+}
+
+// The sky has followed this schedule since the day weather arrived; earlier days had none.
+export const WEATHER_SINCE = "2026-09-20";
+export interface SkyEvent {
+  w: Exclude<Weather, "clear">;
+  from: number; // ms
+  to: number;
+}
+
+// What the sky did on a UTC day, worked out from the schedule (nothing is stored).
+export function skyEventsForDay(day: string, ignoreSince = false): SkyEvent[] {
+  const start = Date.parse(day + "T00:00:00Z");
+  if (Number.isNaN(start) || (!ignoreSince && day < WEATHER_SINCE)) return [];
+  const season = seasonOfUTC(new Date(start));
+  const out: SkyEvent[] = [];
+  for (let t = start; t < start + 86_400_000; t += SLOT_MS) {
+    const w = weatherAt(t, season);
+    if (w === "clear") continue;
+    const last = out[out.length - 1];
+    if (last && last.w === w && last.to === t) last.to = t + SLOT_MS;
+    else out.push({ w, from: t, to: t + SLOT_MS });
+  }
+  return out;
 }
