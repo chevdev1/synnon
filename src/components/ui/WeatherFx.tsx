@@ -218,7 +218,7 @@ export default function WeatherFx() {
         const busy = wx !== "clear" || wAmt > 0.01 || flyKind !== null || booms.length > 0 || cal.newYear || bolt !== null;
         if (busy || wasBusy) ctx.clearRect(0, 0, W, H);
         wasBusy = busy;
-        weather(t, sky.dreaming);
+        weather(t, false); // the sky has its own life, awake mind or not
       }
       raf = requestAnimationFrame(loop);
     };

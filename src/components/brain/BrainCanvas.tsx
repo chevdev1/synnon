@@ -505,7 +505,7 @@ export default function BrainCanvas({
         const Wx = wxRef.current;
         const kind = sky.weather;
         if (kind !== "clear") Wx.kind = kind;
-        Wx.amt += ((kind === "clear" || dreamingRef.current ? 0 : 1) - Wx.amt) * 0.02;
+        Wx.amt += ((kind === "clear" ? 0 : 1) - Wx.amt) * 0.02;
         if (Wx.amt > 0.03 && !reducedMotion && !assembling) {
           const snowing = Wx.kind === "snow";
           ctx.globalCompositeOperation = "lighter";
