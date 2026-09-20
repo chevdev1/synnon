@@ -88,12 +88,21 @@ export default function BrainStage() {
   }
 
   return (
-    <div className="relative min-h-0 flex-1">
+    <div
+      className="relative min-h-0 flex-1"
+      onPointerMove={(e) => {
+        if (e.pointerType !== "mouse") return;
+        const r = e.currentTarget.getBoundingClientRect();
+        e.currentTarget.style.setProperty("--px", ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
+        e.currentTarget.style.setProperty("--py", ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
+      }}
+    >
       <div
         aria-hidden
+        style={{ transform: "translate(calc(var(--px, 0) * -26px), calc(var(--py, 0) * -20px))", transition: "transform 0.25s ease-out" }}
         className="stage-glow pointer-events-none absolute left-1/2 top-[46%] h-[78%] w-[78%] -translate-x-1/2 -translate-y-1/2 rounded-full"
       />
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden" style={{ transform: "translate(calc(var(--px, 0) * 34px), calc(var(--py, 0) * 26px))", transition: "transform 0.3s ease-out" }}>
         {MOTES.map((m, i) => (
           <span
             key={i}
