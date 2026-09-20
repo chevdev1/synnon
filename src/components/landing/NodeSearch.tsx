@@ -38,7 +38,7 @@ export default function NodeSearch({ onFound }: { onFound: (id: number) => void 
   }
 
   return (
-    <form onSubmit={submit} data-help-id="search" className="pointer-events-auto absolute bottom-3 right-3 z-10 flex items-center gap-1.5">
+    <form onSubmit={submit} data-help-id="search" className="pointer-events-auto flex items-center justify-end gap-1.5 px-3 pb-3 lg:absolute lg:bottom-3 lg:right-3 lg:z-10 lg:p-0">
       {miss && <span className="font-head fade-in-up text-[7px] uppercase text-[#ff8a6c]">no such voice</span>}
       <input
         value={q}
@@ -46,7 +46,7 @@ export default function NodeSearch({ onFound }: { onFound: (id: number) => void 
         placeholder="find # or name"
         aria-label="Find a node by number or name"
         maxLength={24}
-        className="h-8 w-[118px] border-2 border-[var(--border)] bg-[#080a20]/85 px-2 text-[16px] text-[var(--text)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--lime)] sm:w-[150px]"
+        className="h-8 min-w-0 flex-1 border-2 border-[var(--border)] bg-[#080a20]/85 px-2 text-[16px] text-[var(--text)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--lime)] lg:w-[150px] lg:flex-none"
       />
       <button type="submit" aria-label="Find" className="pixel-btn font-head flex h-8 w-8 items-center justify-center border-2 border-[var(--accent)] text-[9px] text-[var(--text)]">
         →

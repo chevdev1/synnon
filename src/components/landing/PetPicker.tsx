@@ -55,7 +55,7 @@ export default function PetPicker({ hasCell }: { hasCell: boolean }) {
   }, [open]);
 
   return (
-    <div className="absolute left-4 top-[88px]" data-help-id="pet">
+    <div className="lg:absolute lg:left-4 lg:top-[88px] lg:z-10" data-help-id="pet">
       <button
         type="button"
         onClick={(e) => toggle(e.currentTarget)}

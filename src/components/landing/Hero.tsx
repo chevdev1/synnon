@@ -14,7 +14,7 @@ export default function Hero() {
       <Card
         padded={false}
         help="brain"
-        className="order-1 flex aspect-[4/3] min-h-0 flex-col overflow-hidden xl:order-2 xl:aspect-auto"
+        className="order-1 flex min-h-0 flex-col overflow-hidden lg:aspect-[4/3] xl:order-2 xl:aspect-auto"
       >
         <BrainStage />
       </Card>

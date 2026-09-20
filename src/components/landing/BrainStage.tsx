@@ -136,7 +136,7 @@ export default function BrainStage() {
 
   return (
     <div
-      className="relative min-h-0 flex-1"
+      className="relative flex min-h-0 flex-1 flex-col lg:block"
       onPointerMove={(e) => {
         if (e.pointerType !== "mouse" || parallaxBusy.current) return;
         parallaxBusy.current = true; // at most once per frame
@@ -188,6 +188,34 @@ export default function BrainStage() {
           </button>
         </div>
       )}
+      {/* controls: a strip above the brain on phones and tablets, floating over it on desktop */}
+      <div className="flex flex-wrap items-center gap-1.5 px-3 pb-1 pt-3 lg:contents">
+      <PetPicker hasCell={currentUserNodeId != null} />
+      <button
+        type="button"
+        data-help-id="console"
+        data-console-btn
+        onClick={() => setConsoleOpen((o) => !o)}
+        aria-pressed={consoleOpen}
+        className={`pixel-btn font-head lg:absolute lg:left-4 lg:top-[122px] lg:z-10 flex h-7 items-center gap-1 border-2 px-2 text-[7px] uppercase ${consoleOpen ? "border-[var(--lime)] bg-[var(--lime)] text-[#06071a]" : "border-[var(--accent)] bg-[#080a20]/85 text-[var(--link)]"}`}
+      >
+        &gt;_
+      </button>
+      <button
+        type="button"
+        data-help-id="timelapse"
+        onClick={() => (tl.active ? tl.stop() : void tl.start())}
+        className="pixel-btn font-head flex lg:absolute lg:right-3 lg:top-[92px] lg:z-10 h-7 items-center gap-1 border-2 border-[var(--accent)] bg-[#080a20]/85 px-2 text-[7px] uppercase text-[var(--link)]"
+      >
+        {tl.active ? "■ Live" : "▶ Timelapse"}
+      </button>
+      <div className="flex items-center gap-1.5 lg:absolute lg:right-3 lg:top-[126px] lg:z-10">
+        <NotifyBell />
+        <WeatherToggle />
+        <ClockChip compact />
+      </div>
+      </div>
+      <div className="relative aspect-square w-full lg:aspect-auto lg:h-full">
       <BrainCanvasClient
         nodes={tl.tlNodes ?? nodes}
         selectedId={selectedId}
@@ -205,27 +233,6 @@ export default function BrainStage() {
         glowHalfLifeMin={tl.active ? 0.06 : undefined}
         pet={petSprite}
       />
-      <PetPicker hasCell={currentUserNodeId != null} />
-      <button
-        type="button"
-        data-help-id="console"
-        data-console-btn
-        onClick={() => setConsoleOpen((o) => !o)}
-        aria-pressed={consoleOpen}
-        className={`pixel-btn font-head absolute left-4 top-[122px] flex h-7 items-center gap-1 border-2 px-2 text-[7px] uppercase ${consoleOpen ? "border-[var(--lime)] bg-[var(--lime)] text-[#06071a]" : "border-[var(--accent)] bg-[#080a20]/85 text-[var(--link)]"}`}
-      >
-        &gt;_
-      </button>
-      <CommandConsole
-        open={consoleOpen && !tl.active}
-        onClose={() => setConsoleOpen(false)}
-        onGoto={(id) => {
-          setPing((p) => ({ id, n: (p?.n ?? 0) + 1 }));
-          setSelectedId(id);
-          window.setTimeout(() => openCell(id), 650);
-        }}
-      />
-
       <div className="pointer-events-none absolute right-3 top-3 z-10 flex select-none flex-col items-center gap-1" data-help-id="face">
         <div className="pointer-events-auto cursor-pointer" onClick={() => achActions.bump("eye-contact")} data-face-eye>
           <PixelFace state={mindState} mood={mood} stage={stg.stage.id} className="h-[42px] w-[68px] sm:h-[56px] sm:w-[90px]" />
@@ -234,42 +241,16 @@ export default function BrainStage() {
           {mindState === "sleeping" ? "dreaming" : mindState === "thinking" ? "thinking…" : mindState === "speaking" ? "speaking" : mood}
         </span>
       </div>
-      <button
-        type="button"
-        data-help-id="timelapse"
-        onClick={() => (tl.active ? tl.stop() : void tl.start())}
-        className="pixel-btn font-head absolute right-3 top-[76px] z-10 flex h-7 items-center gap-1 border-2 border-[var(--accent)] bg-[#080a20]/85 px-2 text-[7px] uppercase text-[var(--link)] sm:top-[92px]"
-      >
-        {tl.active ? "■ Live" : "▶ Timelapse"}
-      </button>
-      <div className="absolute right-3 top-[110px] z-10 flex items-center gap-1.5 sm:top-[126px]">
-        <NotifyBell />
-        <WeatherToggle />
-        <ClockChip compact />
-      </div>
-      {tl.active ? (
-        <TimelapseBar view={tl.view} onToggle={tl.togglePause} onSpeed={tl.cycleSpeed} onClose={tl.stop} />
-      ) : consoleOpen ? null : (
-        <NodeSearch
-          onFound={(id) => {
-            setPing((p) => ({ id, n: (p?.n ?? 0) + 1 }));
-            setSelectedId(id);
-            window.setTimeout(() => openCell(id), 650); // let the ping land first
-          }}
-        />
-      )}
-
-      <div className="pointer-events-none absolute left-4 top-4 select-none">
+      <div className="pointer-events-none absolute bottom-1 left-3 select-none lg:bottom-auto lg:left-4 lg:top-4">
         <div className="font-head text-[9px] text-[var(--muted)]">{`// NODE ${activeId == null ? "--" : String(activeId).padStart(2, "0")}`}</div>
-        <div className="font-head mt-1.5 flex items-center gap-1.5 text-[8px] uppercase text-[var(--text-2)]">
+        <div className="font-head mt-1.5 hidden items-center gap-1.5 text-[8px] uppercase text-[var(--text-2)] lg:flex">
           <StatusDot />
           <span className={justPulsed ? "text-[var(--lime)] transition-colors" : "transition-colors"}>
             {node?.status ?? "available"}
           </span>
         </div>
-        <div className="mt-1 text-[16px] text-[var(--muted)]">{activeId == null ? "pick a cell" : node?.ownerName ?? (node?.status === "available" ? "unclaimed" : "online")}</div>
+        <div className="mt-1 hidden text-[16px] text-[var(--muted)] lg:block">{activeId == null ? "pick a cell" : node?.ownerName ?? (node?.status === "available" ? "unclaimed" : "online")}</div>
       </div>
-
       <svg
         className="pointer-events-none absolute inset-0 hidden h-full w-full lg:block"
         viewBox="0 0 100 100"
@@ -288,9 +269,10 @@ export default function BrainStage() {
       <div className="pointer-events-none absolute bottom-[16%] right-[14%] hidden text-[14px] text-[var(--muted)] lg:block">
         it breathes. it watches.
       </div>
+      </div>
 
       {!tl.active && !consoleOpen && (
-        <ul className="pointer-events-none absolute bottom-3 left-4 space-y-1 text-[16px] text-[var(--muted)]">
+        <ul className="pointer-events-none space-y-1 px-3 pb-2 pt-1 lg:absolute lg:bottom-3 lg:left-4 lg:p-0 text-[16px] text-[var(--muted)]">
           {shownPair && (
             <li key={rIdx} className="fade-in-up mb-2 flex items-center gap-1.5 text-[#ffd166]" data-resonance-caption data-help-id="resonance">
               <span>✦</span>
@@ -309,6 +291,26 @@ export default function BrainStage() {
           ))}
         </ul>
       )}
+      {tl.active ? (
+        <TimelapseBar view={tl.view} onToggle={tl.togglePause} onSpeed={tl.cycleSpeed} onClose={tl.stop} />
+      ) : consoleOpen ? null : (
+        <NodeSearch
+          onFound={(id) => {
+            setPing((p) => ({ id, n: (p?.n ?? 0) + 1 }));
+            setSelectedId(id);
+            window.setTimeout(() => openCell(id), 650); // let the ping land first
+          }}
+        />
+      )}
+      <CommandConsole
+        open={consoleOpen && !tl.active}
+        onClose={() => setConsoleOpen(false)}
+        onGoto={(id) => {
+          setPing((p) => ({ id, n: (p?.n ?? 0) + 1 }));
+          setSelectedId(id);
+          window.setTimeout(() => openCell(id), 650);
+        }}
+      />
     </div>
   );
 }
