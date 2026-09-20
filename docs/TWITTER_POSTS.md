@@ -716,6 +716,17 @@ Some nights of the year are special.
 {LINK}
 ```
 
+## Post: clock and calendar
+
+```
+SYNNOD has a pixel clock in the corner now.
+
+Click it: a calendar, the season, the phase of the moon and what the sky is doing right now.
+Gold dots mark Mondays, when the community goal and the question of the week start over.
+
+{LINK}
+```
+
 ## Notes for posting
 
 - Record a short screen capture (GIF/MP4, 5-8 s) for posts 4, 5 and 6: the typing glitch, the sparks between cells, the claim shockwave. Stills do not show motion; the frames in `docs/media/` are for the other posts.

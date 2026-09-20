@@ -75,7 +75,7 @@ export const helpActions = {
 };
 
 // Order of the guided tour (also the reading order of the page).
-export const TOUR = ["intro", "brain", "face", "pet", "console", "timelapse", "search", "mind", "stage", "goal", "question", "daily", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod", "achievements"];
+export const TOUR = ["intro", "brain", "face", "pet", "console", "timelapse", "search", "mind", "stage", "goal", "question", "daily", "node", "chat", "memory", "thoughts", "character", "connect", "demo", "music", "motion", "tod", "clock", "achievements"];
 
 export const HELP: Record<string, { title: T; body: T }> = {
   intro: {
@@ -230,6 +230,13 @@ export const HELP: Record<string, { title: T; body: T }> = {
     body: {
       en: "Like in a game: a pop-up appears when you earn something, for example linking a wallet, claiming a cell, getting your first reply or seeing the mind fall asleep. Four rarities (bronze, silver, gold, legendary) and a few hidden ones. Click the trophy to see them all and your progress.",
       ru: "Как в играх: всплывает окно, когда ты что-то получаешь, например привязал кошелёк, занял клетку, получил первый ответ или увидел, как разум засыпает. Четыре редкости (бронза, серебро, золото, легенда) и несколько скрытых. Нажми на кубок, чтобы увидеть все и свой прогресс.",
+    },
+  },
+  clock: {
+    title: { en: "Clock and calendar", ru: "Часы и календарь" },
+    body: {
+      en: "Your local time in pixels. Click for a calendar with the season, the phase of the moon and what the sky is doing right now. The gold dots mark Mondays, when a new community goal and a new question of the week begin.",
+      ru: "Твоё местное время в пикселях. Нажми, чтобы открыть календарь с сезоном, фазой луны и тем, что сейчас делает небо. Золотые точки отмечают понедельники: тогда начинаются новая цель сообщества и новый вопрос недели.",
     },
   },
   tod: {

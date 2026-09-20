@@ -6,6 +6,7 @@ import MotionToggle from "./MotionToggle";
 import DemoToggle from "./DemoToggle";
 import MusicToggle from "./MusicToggle";
 import TodChip from "./TodChip";
+import ClockChip from "./ClockChip";
 import AchButton from "@/components/achievements/AchButton";
 import DailyChip from "@/components/daily/DailyChip";
 import AuthButton from "./AuthButton";
@@ -50,6 +51,7 @@ export default function Header() {
         <DemoToggle />
         <MotionToggle />
         <TodChip />
+        <ClockChip />
         <AchButton />
         <DailyChip />
         <AuthButton />

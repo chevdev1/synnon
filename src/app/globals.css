@@ -617,3 +617,9 @@ html[data-help="on"] [data-help-active] {
     cursor: not-allowed !important;
   }
 }
+/* pixel clock: blinking colon, pulsing today */
+@keyframes clock-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0.15; } }
+.clock-blink { animation: clock-blink 1s steps(1) infinite; }
+@keyframes clock-today { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); } 50% { box-shadow: 0 0 10px 1px rgba(255,255,255,0.45); } }
+.clock-today { animation: clock-today 2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .clock-blink, .clock-today { animation: none; } }
